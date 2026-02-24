@@ -183,6 +183,32 @@ public class Option {
     }
 
     // --------------------------------------------------------------
+    // Jump Validation
+
+    public static boolean JUMP_VALIDATION_ENABLED;
+    public static double MAX_JUMP_DISTANCE;
+    public static double MAX_HORIZONTAL_DISTANCE;
+    public static double MAX_VERTICAL_UP;
+    public static double MAX_VERTICAL_DOWN;
+
+    // Jump Types
+
+    public static boolean JUMP_TYPES_ENABLED;
+    public static Map<String, Boolean> JUMP_TYPE_ENABLED;
+    public static Map<String, Double> JUMP_TYPE_CHANCE;
+
+    // Memory Optimization
+
+    public static int BLOCK_CLEANUP_DISTANCE;
+    public static int CLEANUP_INTERVAL;
+
+    // Ghost Mode
+
+    public static boolean GHOST_MODE_ENABLED;
+    public static int GHOST_SHOW_TOP;
+    public static double GHOST_TRANSPARENCY;
+
+    // --------------------------------------------------------------
     // Generation
 
     public static double TYPE_NORMAL;
@@ -208,6 +234,33 @@ public class Option {
     public static int MIN_Y;
 
     private static void initGeneration() {
+        // Jump validation
+        JUMP_VALIDATION_ENABLED = Config.CONFIG.getBoolean("jump-validation.enabled");
+        MAX_JUMP_DISTANCE = Config.CONFIG.getDouble("jump-validation.max-distance");
+        MAX_HORIZONTAL_DISTANCE = Config.CONFIG.getDouble("jump-validation.max-horizontal");
+        MAX_VERTICAL_UP = Config.CONFIG.getDouble("jump-validation.max-vertical-up");
+        MAX_VERTICAL_DOWN = Config.CONFIG.getDouble("jump-validation.max-vertical-down");
+
+        // Jump types
+        JUMP_TYPES_ENABLED = Config.CONFIG.getBoolean("jump-types.enabled");
+        JUMP_TYPE_ENABLED = new HashMap<>();
+        JUMP_TYPE_CHANCE = new HashMap<>();
+
+        for (String type : Config.CONFIG.getChildren("jump-types.types", false)) {
+            String path = "jump-types.types." + type;
+            JUMP_TYPE_ENABLED.put(type, Config.CONFIG.getBoolean(path + ".enabled"));
+            JUMP_TYPE_CHANCE.put(type, Config.CONFIG.getDouble(path + ".chance"));
+        }
+
+        // Memory optimization
+        BLOCK_CLEANUP_DISTANCE = Config.CONFIG.getInt("memory.block-cleanup-distance");
+        CLEANUP_INTERVAL = Config.CONFIG.getInt("memory.cleanup-interval");
+
+        // Ghost mode
+        GHOST_MODE_ENABLED = Config.CONFIG.getBoolean("ghost-mode.enabled");
+        GHOST_SHOW_TOP = Config.CONFIG.getInt("ghost-mode.show-top");
+        GHOST_TRANSPARENCY = Config.CONFIG.getDouble("ghost-mode.transparency");
+
         TYPE_NORMAL = Config.GENERATION.getInt("generation.type.normal") / 100.0;
         TYPE_SPECIAL = Config.GENERATION.getInt("generation.type.schematic") / 100.0;
         TYPE_SCHEMATICS = Config.GENERATION.getInt("generation.type.special") / 100.0;

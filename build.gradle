@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'dev.loki'
-version = '1.1.0'
+version = '1.2.4'
 description = 'LoParkour - Advanced parkour plugin for Minecraft'
 
 java {
@@ -72,11 +72,13 @@ dependencies {
     // Spigot API
     compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
     
+    // Local vilib fork
+    implementation project(':loparkour-vilib')
+    
     // Shaded dependencies
-    implementation('com.github.Efnilite:vilib:dd786231c3') {
-        exclude group: 'com.tchristofferson', module: 'ConfigUpdater'
-    }
     implementation 'io.papermc:paperlib:1.0.7'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.bstats:bstats-bukkit:3.2.1'
     
     // Provided dependencies (plugins)
     compileOnly 'me.clip:placeholderapi:2.11.6'
@@ -99,6 +101,8 @@ shadowJar {
     // Relocate shaded dependencies
     relocate 'dev.efnilite.vilib', 'dev.loki.loparkour.lib.vilib'
     relocate 'io.papermc.lib', 'dev.loki.loparkour.lib.paperlib'
+    relocate 'com.google.gson', 'dev.loki.loparkour.lib.gson'
+    relocate 'org.bstats', 'dev.loki.loparkour.lib.bstats'
     
     // Minimize jar size
     minimize()

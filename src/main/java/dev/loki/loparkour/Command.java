@@ -12,6 +12,9 @@ import dev.loki.loparkour.mode.MultiMode;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.player.data.InventoryData;
+import dev.loki.loparkour.schematic.lpschem.LPSchematic;
+import dev.loki.loparkour.schematic.lpschem.LPSchematicBuilder;
+import dev.loki.loparkour.schematic.lpschem.SchematicConverter;
 import dev.loki.loparkour.session.Session;
 import dev.efnilite.vilib.command.ViCommand;
 import dev.efnilite.vilib.inventory.item.Item;
@@ -227,8 +230,11 @@ public class Command extends ViCommand {
                 send(player, "<red>/LoParkour schematic wand <dark_gray>- <gray>Get the schematic wand");
                 send(player, "<red>/LoParkour schematic pos1 <dark_gray>- <gray>Set the first position of your selection");
                 send(player, "<red>/LoParkour schematic pos2 <dark_gray>- <gray>Set the second position of your selection");
-                send(player, "<red>/LoParkour schematic save <dark_gray>- <gray>Save your selection to a schematic file");
-                send(player, "<red>/LoParkour schematic paste <file> <dark_gray>- <gray>Paste a schematic file");
+                send(player, "<red>/LoParkour schematic save <name> <dark_gray>- <gray>Save selection to .lpschem format");
+                send(player, "<red>/LoParkour schematic paste <name> <dark_gray>- <gray>Paste a .lpschem schematic");
+                send(player, "<red>/LoParkour schematic list <dark_gray>- <gray>List all loaded schematics");
+                send(player, "<red>/LoParkour schematic reload <dark_gray>- <gray>Reload all schematics");
+                send(player, "<red>/LoParkour schematic convert <dark_gray>- <gray>Convert old schematics to .lpschem");
                 send(player, "");
                 send(player, "<dark_gray><underlined>Have any questions or need help? Join the Discord.");
             }
@@ -510,6 +516,27 @@ public class Command extends ViCommand {
 
                         Schematic.save(LoParkour.getInFolder("schematics/parkour-%s".formatted(code)), existingSelection[0], existingSelection[1], LoParkour.getPlugin());
                     }
+                    case "list" -> {
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Loaded schematics:");
+                        LoParkour.getSchematicManager().getAllSchematics().forEach((name, schem) -> {
+                            send(player, "<gray>- <red>" + name + " <dark_gray>(" + schem.getMetadata().getDifficulty() + ")");
+                        });
+                    }
+                    case "reload" -> {
+                        if (!cooldown(sender, "LoParkour reload schematics", 2500)) {
+                            return;
+                        }
+                        LoParkour.getSchematicManager().reload();
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Reloaded all schematics.");
+                    }
+                    case "convert" -> {
+                        if (!cooldown(sender, "LoParkour convert schematics", 5000)) {
+                            return;
+                        }
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Converting old schematics to .lpschem format...");
+                        SchematicConverter.convertAll();
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Conversion complete! Check console for details.");
+                    }
                 }
             }
         }
@@ -521,22 +548,56 @@ public class Command extends ViCommand {
         }
 
         if (arg1.equalsIgnoreCase("schematic")) {
-            if (!arg2.equalsIgnoreCase("paste")) {
-                return;
-            }
-
             if (!player.hasPermission(ParkourOption.ADMIN.permission)) {
                 return;
             }
 
-            Schematic schematic = Schematics.getSchematic(LoParkour.getPlugin(), arg3);
-            if (schematic == null) {
-                send(sender, "%sCouldn't find %s".formatted(LoParkour.PREFIX, arg3));
-                return;
-            }
+            switch (arg2.toLowerCase()) {
+                case "save" -> {
+                    if (!cooldown(sender, "LoParkour save schematic", 2500)) {
+                        return;
+                    }
 
-            schematic.paste(player.getLocation());
-            send(sender, "%sPasted schematic %s".formatted(LoParkour.PREFIX, arg3));
+                    Location[] selection = selections.get(player);
+                    if (selection == null || selection[0] == null || selection[1] == null) {
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Your schematic isn't complete yet. Make sure you've set the first and second position.");
+                        return;
+                    }
+
+                    try {
+                        int width = Math.abs(selection[1].getBlockX() - selection[0].getBlockX()) + 1;
+                        int height = Math.abs(selection[1].getBlockY() - selection[0].getBlockY()) + 1;
+                        int length = Math.abs(selection[1].getBlockZ() - selection[0].getBlockZ()) + 1;
+
+                        LPSchematic schematic = new LPSchematicBuilder(arg3, player.getName(), 0.5, width, height, length)
+                                .fromWorld(player.getWorld(), selection[0], selection[1])
+                                .build();
+
+                        LoParkour.getSchematicManager().saveSchematic(schematic);
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Saved schematic as <red>" + arg3 + "<gray>!");
+                    } catch (Exception e) {
+                        send(player, "<dark_red><bold>Schematics <reset><gray>Failed to save schematic: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+                case "paste" -> {
+                    LPSchematic lpSchematic = LoParkour.getSchematicManager().getSchematic(arg3);
+                    if (lpSchematic != null) {
+                        lpSchematic.paste(player.getLocation(), player.getWorld());
+                        send(sender, "%sPasted .lpschem schematic %s".formatted(LoParkour.PREFIX, arg3));
+                        return;
+                    }
+
+                    Schematic oldSchematic = Schematics.getSchematic(LoParkour.getPlugin(), arg3);
+                    if (oldSchematic == null) {
+                        send(sender, "%sCouldn't find %s".formatted(LoParkour.PREFIX, arg3));
+                        return;
+                    }
+
+                    oldSchematic.paste(player.getLocation());
+                    send(sender, "%sPasted old schematic %s".formatted(LoParkour.PREFIX, arg3));
+                }
+            }
         }
     }
 

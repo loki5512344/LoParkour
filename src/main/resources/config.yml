@@ -227,6 +227,124 @@ styles:
     rainbow: [red_wool, blue_wool, orange_wool, magenta_wool, lime_wool, purple_wool, yellow_concrete, orange_concrete, lime_concrete, light_blue_concrete, yellow_stained_glass, white_stained_glass, magenta_stained_glass, light_blue_stained_glass]
     glow: [glowstone, jack_o_lantern, beacon, sea_lantern, crying_obsidian, shroomlight]
 
+# -= Jump validation options =-
+jump-validation:
+
+  # -= Jump validation enabled =-
+  # Validates generated jumps using Minecraft physics.
+  # Ensures all jumps are physically possible.
+  enabled: true
+
+  # -= Maximum jump distance =-
+  # Maximum 3D distance for a jump (Pythagorean theorem).
+  max-distance: 4.5
+
+  # -= Maximum horizontal distance =-
+  # Maximum horizontal distance (X and Z axes only).
+  max-horizontal: 4.1
+
+  # -= Maximum vertical up =-
+  # Maximum height a player can jump up.
+  max-vertical-up: 1.25
+
+  # -= Maximum vertical down =-
+  # Maximum height a player can jump down.
+  max-vertical-down: 3.0
+
+# -= Jump types options =-
+jump-types:
+
+  # -= Jump types enabled =-
+  # Enables special jump types (neo-jumps, fence jumps, etc.).
+  enabled: false
+
+  # -= Jump types list =-
+  # Configure which jump types are enabled and their spawn chances.
+  types:
+    neo-jump:
+      enabled: true
+      chance: 0.05
+    head-hitter:
+      enabled: true
+      chance: 0.08
+    fence-jump:
+      enabled: true
+      chance: 0.10
+    trapdoor-jump:
+      enabled: true
+      chance: 0.12
+    ladder-jump:
+      enabled: true
+      chance: 0.07
+
+# -= Memory optimization =-
+memory:
+
+  # -= Block cleanup distance =-
+  # Distance in blocks after which old parkour blocks are removed.
+  # Lower values save memory but might remove blocks too early.
+  block-cleanup-distance: 20
+
+  # -= Cleanup interval =-
+  # How often (in ticks) to check for blocks to clean up.
+  # 20 ticks = 1 second
+  cleanup-interval: 100
+
+# -= Ghost mode options =-
+ghost-mode:
+
+  # -= Ghost mode enabled =-
+  # Shows ghosts of top players running alongside you.
+  enabled: false
+
+  # -= Show top =-
+  # How many top ghosts to show (1-3).
+  show-top: 3
+
+  # -= Ghost transparency =-
+  # Transparency of ghost entities (0.0 = invisible, 1.0 = fully visible).
+  transparency: 0.5
+
+# -= Game modes options =-
+modes:
+
+  # -= Speedrun mode =-
+  speedrun:
+    # Block lifetime in seconds before disappearing
+    block-lifetime: 1.5
+    # Warning time in seconds before block disappears
+    warning-time: 0.5
+
+  # -= Gravity shift mode =-
+  gravity-shift:
+    # Interval in jumps before effect changes
+    interval: 10
+    
+    effects:
+      jump-boost:
+        enabled: true
+        amplifier: 2
+        duration: 30
+      speed:
+        enabled: true
+        amplifier: 1
+        duration: 30
+      slowness:
+        enabled: true
+        amplifier: 1
+        duration: 15
+      levitation:
+        enabled: true
+        amplifier: 1
+        duration: 5
+
+  # -= Hardcore mode =-
+  hardcore:
+    # Reset all rewards on fall
+    reset-rewards: true
+
+
+
 # -= Scoring options =-
 scoring:
 

@@ -52,49 +52,19 @@ import java.util.*;
  */
 public class ParkourGenerator {
 
-    /**
-     * The amount of blocks that trail behind the player.
-     */
     public static final int BLOCK_TRAIL = 2;
 
-    /**
-     * This generator's score
-     */
     public int score = 0;
-
-    /**
-     * The total score achieved in this Generator instance
-     */
     public int totalScore = 0;
-
-    /**
-     * The schematic cooldown
-     */
     public int schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
-
-    /**
-     * Whether this generator has been stopped
-     */
     public boolean stopped = false;
 
-    /**
-     * The zone in which the parkour can take place. (playable area)
-     */
     public Location[] zone;
-
-    /**
-     * The player
-     */
     public ParkourPlayer player;
-
-    /**
-     * The task used in checking the player's current location
-     */
     public BukkitTask task;
 
-    /**
-     * Where blocks from schematics spawn
-     */
+    private BukkitTask cleanupTask;
+
     public Location blockSpawn;
 
     /**
@@ -127,64 +97,19 @@ public class ParkourGenerator {
      */
     public final Profile profile = new Profile();
 
-    /**
-     * The island instance.
-     */
     public final Island island;
-
-    /**
-     * The chances of which distance the jump should have
-     */
     public final Map<Integer, Double> distanceChances = new HashMap<>();
-
-    /**
-     * The chances of which height the jump should have
-     */
     public final Map<Integer, Double> heightChances = new HashMap<>();
-
-    /**
-     * The chances of which type of special jump
-     */
     public final Map<BlockData, Double> specialChances = new HashMap<>();
+    public final Map<BlockGenerationType, Double> defaultChances = new HashMap<>();
 
-    /**
-     * The chances of default jump types: schematic, 'special' (ice, etc.) or normal
-     */
-    public final Map<JumpType, Double> defaultChances = new HashMap<>();
-
-    /**
-     * Whether the schematic should be deleted on the next jump.
-     */
     protected boolean deleteSchematic = false;
     protected boolean waitForSchematicCompletion = false;
-
-    /**
-     * The last location the player was found standing in
-     */
     protected Location lastStandingPlayerLocation;
-
-    /**
-     * A list of blocks from the (possibly) spawned structure
-     */
     protected List<Block> schematicBlocks = new ArrayList<>();
-
-    /**
-     * The player's current position index.
-     */
     protected int lastPositionIndexPlayer = -1;
+    protected List<Block> history = new LinkedList<>();
 
-    /**
-     * The history of generated blocks. The most recently generated block is the last item in the list.
-     */
-    protected List<Block> history = new ArrayList<>();
-
-    /**
-     * Creates a new ParkourGenerator instance
-     *
-     * @param session          The session.
-     * @param schematic        The schematic to use for the spawn island.
-     * @param generatorOptions The options.
-     */
     public ParkourGenerator(@NotNull Session session, @Nullable Schematic schematic, GeneratorOption... generatorOptions) {
         this.session = session;
         this.generatorOptions = Arrays.asList(generatorOptions);
@@ -196,30 +121,17 @@ public class ParkourGenerator {
         calculateChances();
     }
 
-    /**
-     * Creates a new ParkourGenerator instance.
-     *
-     * @param session          The session.
-     * @param generatorOptions The options.
-     */
     public ParkourGenerator(@NotNull Session session, GeneratorOption... generatorOptions) {
         this(session, Schematics.getSchematic(LoParkour.getPlugin(), "spawn-island"), generatorOptions);
     }
 
-    /**
-     * Ensures generator preferences in profile can't be overridden by the player changing settings.
-     */
     public void overrideProfile() { }
 
-    /**
-     * Calculates all chances for every variable.
-     * Modification is possible in the generator constructor or through external map changes.
-     */
     protected void calculateChances() {
         defaultChances.clear();
-        defaultChances.put(JumpType.DEFAULT, Option.TYPE_NORMAL);
-        defaultChances.put(JumpType.SCHEMATIC, Option.TYPE_SCHEMATICS);
-        defaultChances.put(JumpType.SPECIAL, Option.TYPE_SPECIAL);
+        defaultChances.put(BlockGenerationType.DEFAULT, Option.TYPE_NORMAL);
+        defaultChances.put(BlockGenerationType.SCHEMATIC, Option.TYPE_SCHEMATICS);
+        defaultChances.put(BlockGenerationType.SPECIAL, Option.TYPE_SPECIAL);
 
         heightChances.clear();
         heightChances.put(1, Option.NORMAL_HEIGHT_1);
@@ -388,6 +300,11 @@ public class ParkourGenerator {
             .repeat(1)
             .execute(this::tick)
             .run();
+
+        cleanupTask = Task.create(LoParkour.getPlugin())
+            .repeat(Option.CLEANUP_INTERVAL)
+            .execute(this::cleanupDistantBlocks)
+            .run();
     }
 
     /**
@@ -396,6 +313,9 @@ public class ParkourGenerator {
     public void tick() {
         if (stopped) {
             task.cancel();
+            if (cleanupTask != null) {
+                cleanupTask.cancel();
+            }
             return;
         }
 
@@ -462,13 +382,14 @@ public class ParkourGenerator {
         lastPositionIndexPlayer = currentIndex;
 
         for (int i = currentIndex - BLOCK_TRAIL - 1; i >= currentIndex - 4 * BLOCK_TRAIL; i--) {
-            // avoid setting beginning block to air
             if (i <= 0) {
                 continue;
             }
 
             history.get(i).setType(Material.AIR);
         }
+
+        cleanupDistantBlocks();
 
         deleteSchematic();
 
@@ -597,19 +518,19 @@ public class ParkourGenerator {
             return;
         }
 
-        Map<JumpType, Double> chances = new HashMap<>(defaultChances);
+        Map<BlockGenerationType, Double> chances = new HashMap<>(defaultChances);
         if (schematicCooldown > 0 || generatorOptions.contains(GeneratorOption.DISABLE_SCHEMATICS) || profile.get("schematicDifficulty").asDouble() == 0.0 || !schematicBlocks.isEmpty()) {
-            chances.remove(JumpType.SCHEMATIC);
+            chances.remove(BlockGenerationType.SCHEMATIC);
         }
         if (!profile.get("useSpecialBlocks").asBoolean()) {
-            chances.remove(JumpType.SPECIAL);
+            chances.remove(BlockGenerationType.SPECIAL);
         }
         if (chances.isEmpty()) {
-            chances.put(JumpType.DEFAULT, 1.0);
+            chances.put(BlockGenerationType.DEFAULT, 1.0);
         }
 
-        JumpType jump = Probs.random(chances);
-        if (jump == JumpType.SCHEMATIC) {
+        BlockGenerationType jump = Probs.random(chances);
+        if (jump == BlockGenerationType.SCHEMATIC) {
             LoParkour.log("Generating schematic jump at index %s".formatted(history.size() + 1));
 
             double difficulty = profile.get("schematicDifficulty").asDouble();
@@ -647,7 +568,7 @@ public class ParkourGenerator {
 
         List<Block> movedBlocks = new ArrayList<>();
         for (Block block : blocks) {
-            BlockData data = (jump == JumpType.SPECIAL && !generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL)) ? Probs.random(specialChances) : selectBlockData();
+            BlockData data = (jump == BlockGenerationType.SPECIAL && !generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL)) ? Probs.random(specialChances) : selectBlockData();
 
             if (data instanceof Fence) {
                 block = block.getLocation().subtract(0, 1, 0).getBlock();
@@ -729,6 +650,33 @@ public class ParkourGenerator {
 
     protected Block getLatest() {
         return history.get(history.size() - 1);
+    }
+
+    // Очистка блоков на большом расстоянии от игрока для экономии памяти
+    protected void cleanupDistantBlocks() {
+        if (history.size() < Option.BLOCK_CLEANUP_DISTANCE * 2) {
+            return;
+        }
+
+        Location playerLoc = player.getLocation();
+        int removed = 0;
+
+        Iterator<Block> iterator = history.iterator();
+        while (iterator.hasNext()) {
+            Block block = iterator.next();
+            
+            if (block.getLocation().distance(playerLoc) > Option.BLOCK_CLEANUP_DISTANCE) {
+                block.setType(Material.AIR, false);
+                iterator.remove();
+                removed++;
+            } else {
+                break;
+            }
+        }
+
+        if (removed > 0) {
+            lastPositionIndexPlayer = Math.max(0, lastPositionIndexPlayer - removed);
+        }
     }
 
     private double getDifficulty(String fileName) {
@@ -837,7 +785,7 @@ public class ParkourGenerator {
         return session.getSpectators();
     }
 
-    public enum JumpType {
+    public enum BlockGenerationType {
         DEFAULT, SCHEMATIC, SPECIAL
     }
 }
