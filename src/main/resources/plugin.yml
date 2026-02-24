@@ -1,0 +1,12 @@
+name: 'LoParkour'
+description: 'Advanced infinitely generating parkour plugin.'
+author: loki
+version: 1.1.0
+api-version: 1.16
+main: dev.loki.loparkour.LoParkour
+softdepend: [floodgate, Vault, PlaceholderAPI, Multiverse-Core, VoidGen]
+commands:
+    loparkour:
+        aliases: [parkour, lp]
+        usage: /<command> [arguments]
+        description: Main command for LoParkour

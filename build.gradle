@@ -1,0 +1,134 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'dev.loki'
+version = '1.1.0'
+description = 'LoParkour - Advanced parkour plugin for Minecraft'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+    
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    
+    maven {
+        name = 'spigot-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
+    
+    maven {
+        name = 'maven-central'
+        url = 'https://oss.sonatype.org/content/groups/public'
+    }
+    
+    maven {
+        name = 'placeholderapi'
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    
+    maven {
+        name = 'mv-repo'
+        url = 'https://repo.onarandombox.com/content/groups/public/'
+    }
+    
+    maven {
+        name = 'dmulloy2-repo'
+        url = 'https://repo.dmulloy2.net/repository/public/'
+    }
+    
+    maven {
+        name = 'codemc-repo'
+        url = 'https://repo.codemc.io/repository/maven-public/'
+    }
+    
+    maven {
+        name = 'opencollab-snapshot-repo'
+        url = 'https://repo.opencollab.dev/maven-snapshots/'
+    }
+    
+    // For ConfigUpdater dependency
+    maven {
+        name = 'codemc-snapshots'
+        url = 'https://repo.codemc.io/repository/maven-snapshots/'
+    }
+}
+
+dependencies {
+    // Spigot API
+    compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
+    
+    // Shaded dependencies
+    implementation('com.github.Efnilite:vilib:dd786231c3') {
+        exclude group: 'com.tchristofferson', module: 'ConfigUpdater'
+    }
+    implementation 'io.papermc:paperlib:1.0.7'
+    
+    // Provided dependencies (plugins)
+    compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
+    compileOnly 'me.filoghost.holographicdisplays:holographicdisplays-api:3.0.0-SNAPSHOT'
+    compileOnly 'org.geysermc.floodgate:api:2.0-SNAPSHOT'
+    
+    // Annotations
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0-M1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveFileName.set("LoParkour-${project.version}.jar")
+    
+    // Relocate shaded dependencies
+    relocate 'dev.efnilite.vilib', 'dev.loki.loparkour.lib.vilib'
+    relocate 'io.papermc.lib', 'dev.loki.loparkour.lib.paperlib'
+    
+    // Minimize jar size
+    minimize()
+}
+
+build {
+    dependsOn shadowJar
+}
+
+processResources {
+    filesMatching(['plugin.yml', 'config.yml']) {
+        expand(
+            version: project.version,
+            description: project.description
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
+// Default task
+defaultTasks 'clean', 'build'

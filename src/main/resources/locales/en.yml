@@ -1,0 +1,260 @@
+# English (English, en)
+# By loki
+# Copy this file and rename it to add your own language!
+# Materials have to be from: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# Learn more about colouring: https://docs.adventure.kyori.net/minimessage/format.html#format
+
+name: "English"
+
+main:
+  name: "&#FFFFFFParkour"
+
+play:
+  name: "&#FFFFFFPlay"
+
+  item:
+    material: "sugar_cane"
+    name: "&#00D4FF<bold>Play"
+    lore: ""
+
+  single:
+    name: "&#FFFFFFSingle"
+
+    item:
+      material: "ender_pearl"
+      name: "&#00D4FF<bold>Single-player"
+      lore: ""
+
+    default:
+      material: "barrel"
+      name: "&#00D4FF<bold>Default"
+      lore: "&#404040The default gamemode."
+
+  spectator:
+    name: "&#FFFFFFSpectator"
+
+    join: "&#00D4FFYou are now a spectator. You can use \"/parkour\" to leave/change your gamemode."
+    action_bar: "&#00D4FFYou are a spectator &#A0A0A0• &#00D4FFUse \"/parkour\" to leave."
+
+    other_join: "<dark_green><bold>+ <reset>&#A0A0A0%s started spectating you"
+    other_leave: "&#FF4444<bold>- <reset>&#A0A0A0%s stopped spectating you"
+
+    item:
+      material: "glass"
+      name: "&#00D4FF<bold>Spectator"
+      lore: ""
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>%s"
+      lore: ""
+
+community:
+  name: "&#FFFFFFCommunity"
+
+  item:
+    material: "oak_boat"
+    name: "&#00D4FF<bold>Community"
+    lore: ""
+
+  leaderboards:
+    name: "&#FFFFFFLeaderboards"
+
+    item:
+      material: "gold_nugget"
+      name: "&#00D4FF<bold>Leaderboards"
+      lore: ""
+
+    sort:
+      material: "bookshelf"
+      name: "&#00D4FF<bold>Sorted by %s"
+      lore: ""
+      values: ["score", "time", "difficulty"]
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>#%r - %p"
+      lore: "&#00D4FFScore: &#A0A0A0%s||&#00D4FFTime: &#A0A0A0%t||&#00D4FFDifficulty: &#A0A0A0%d&#404040/1.0"
+
+settings:
+  name: "&#FFFFFFSettings"
+
+  item:
+    material: "comparator"
+    name: "&#00D4FF<bold>Settings"
+    lore: ""
+
+  lang:
+    name: "&#FFFFFFLanguage"
+
+    item:
+      material: "writable_book"
+      name: "&#00D4FF<bold>Language"
+      lore: "&#404040Currently: &#00D4FF<bold>%s"
+
+  chat:
+    material: "crossbow"
+    name: "&#00D4FF<bold>Chat"
+    lore: "&#404040Currently: &#00D4FF<bold>%s||&#404040Select who you can chat with"
+    values: ["lobby only", "players only", "public"]
+
+    formats:
+      lobby: "&#00D4FF(Lobby) &#00D4FF%s &#404040> &#A0A0A0%s"
+      players: "&#00D4FF(Players) &#00D4FF%s &#404040> &#A0A0A0%s"
+
+  parkour_settings:
+
+    enabled: "&#00D4FF<bold>✔"
+    disabled: "&#FF4444<bold>✘"
+
+    item:
+      material: "redstone"
+      name: "&#00D4FF<bold>Parkour Settings"
+      lore: "&#404040Change the way your parkour appears."
+
+    items:
+
+      no_change:
+        material: "barrier"
+        name: "<dark_red><bold>You cant change this right now!"
+        lore: "&#A0A0A0You have a score above 0,||&#A0A0A0which means you cant change this setting."
+
+      styles:
+        name: "&#FFFFFFStyles"
+
+        style_item:
+          material: ""
+          name: "&#FFFFFF<bold>%s"
+          lore: "&#00D4FFCategory: &#A0A0A0%s"
+
+        item:
+          material: "crafting_table"
+          name: "&#00D4FF<bold>Style"
+          lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0Choose which blocks will be used."
+
+      leads:
+        material: "feather"
+        name: "&#00D4FF<bold>Lead"
+        lore: "&#00D4FFCurrently: &#A0A0A0%s blocks||&#A0A0A0How many blocks will||&#A0A0A0be generated in front of you."
+
+      time:
+        material: "clock"
+        name: "&#00D4FF<bold>Time"
+        lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0Your current visual time."
+
+      schematics:
+        material: ""
+        name: "&#00D4FF<bold>Schematic difficulty"
+        lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0The difficulty of schematics"
+        values: ["&#FF4444off", "&#00D4FFeasy", "<yellow>medium", "&#00D4FFhard", "<dark_red>very hard"]
+
+      scoreboard:
+        material: ""
+        name: "Show scoreboard"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows the scoreboard."
+
+      fall_message:
+        item:
+          material: ""
+          name: "Show fall message"
+          lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows a message when you fall||&#A0A0A0with extra info."
+
+        divider: "&#404040<strikethrough>-----------------------------------"
+        score: "&#00D4FF<bold>Score <reset>&#FFFFFF%s"
+        time: "&#00D4FF<bold>Time <reset>&#FFFFFF%s"
+        high_score: "&#00D4FF<bold>High-score <reset>&#FFFFFF%s"
+
+        formats:
+          miss: "&#A0A0A0You missed your high score by %s points!"
+          beat: "&#A0A0A0You beat your high score by %s points!"
+          tied: "&#A0A0A0You tied your high score!"
+
+      particles:
+        material: ""
+        name: "Show particles"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, every generated block||&#A0A0A0will show particles."
+
+      sound:
+        material: ""
+        name: "Play sounds"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, every generated block||&#A0A0A0will play a sound."
+
+      special_blocks:
+        material: ""
+        name: "Use special blocks"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, uses special blocks like ice and slabs."
+
+      score_difficulty:
+        material: ""
+        name: "Score difficulty"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0When enabled, the higher score you have,||&#A0A0A0the more difficult it gets."
+
+lobby:
+  name: "&#FFFFFFLobby"
+
+  other_join: '<dark_green><bold>+ <reset>&#A0A0A0%s joined your lobby'
+  other_leave: '&#FF4444<bold>- <reset>&#A0A0A0%s left your lobby'
+
+  item:
+    material: "iron_ingot"
+    name: "&#00D4FF<bold>Your Lobby"
+    lore: ""
+
+  visibility:
+    material: "firework_rocket"
+    name: "&#00D4FF<bold>Visibility"
+    lore: "&#404040Currently: &#00D4FF<bold>%s||&#404040Select who can join your lobby."
+    values: ["private", "invite-only", "public"]
+
+  player_management:
+    name: "&#FFFFFFManage players"
+
+    kicked: "&#A0A0A0You've been kicked from your lobby by the lobby owner."
+    advice: "&#A0A0A0Set your lobby visibility to invite-only or private to avoid people randomly joining."
+    muted: "&#A0A0A0You've been muted by the lobby owner."
+    unmuted: "&#A0A0A0You've been unmuted by the lobby owner."
+
+    item:
+      material: "cake"
+      name: "&#00D4FF<bold>Manage Players"
+      lore: "&#404040Kick or mute players here."
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>%s"
+      lore: ""
+      top: "&#404040Muted in lobby||"
+      bottom: "&#00D4FFLeft click&#404040 to kick from lobby||&#00D4FFRight click&#404040 to (un)mute in lobby"
+
+scoreboard:
+
+  title: "&#00D4FF<bold>LoParkour"
+
+  lines:
+    - "<blue>"
+    - "&#00D4FFScore &#FFFFFF%score%"
+    - "&#00D4FFTime &#FFFFFF%time%"
+    - "&#00D4FFHighscore &#FFFFFF%high_score%"
+    - "&#FF4444"
+    - "&#00D4FF<bold>server.ip"
+
+other:
+
+  no_do: "&#A0A0A0You can't do this right now."
+  no_teleporting: "&#FFFFFFYou can't enter the parkour world by teleporting!"
+  customize: "&#A0A0A0Customize your parkour experience by using \"/parkour\""
+
+  quit:
+    material: "barrier"
+    name: "&#00D4FF<bold>Quit"
+    lore: ""
+
+  close:
+    material: "arrow"
+    name: "&#00D4FF<bold>Close"
+    lore: ""
+
+  iep:
+    material: "elytra"
+    name: "&#00D4FF<bold>Flying"
+    lore: "&#A0A0A0Parkour with elytra!"

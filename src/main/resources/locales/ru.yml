@@ -1,0 +1,51 @@
+menu:
+  main:
+    title: "&#FF6464Главное меню"
+    play: "&#00D4FFИграть"
+    community: "&#FFD700Сообщество"
+    settings: "&#A0A0A0Настройки"
+    lobby: "&#90EE90Лобби"
+    quit: "&#FF4444Выход"
+  
+  play:
+    title: "&#00D4FFВыбор режима"
+    single: "&#00FF00Одиночный"
+    spectator: "&#FFFF00Наблюдатель"
+  
+  settings:
+    title: "&#A0A0A0Настройки"
+    language: "&#FFFFFFЯзык"
+    parkour: "&#00D4FFПаркур"
+    chat: "&#90EE90Чат"
+  
+  parkour_settings:
+    title: "&#00D4FFНастройки паркура"
+    style: "&#FF6464Стиль блоков"
+    leads: "&#FFD700Количество блоков"
+    time: "&#A0A0A0Время"
+    schematics: "&#00FFFFСхематики"
+    scoreboard: "&#90EE90Табло"
+    fall_message: "&#FF4444Сообщение о падении"
+    particles: "&#FFAAFFЧастицы"
+    sound: "&#FFFFAAЗвук"
+    special_blocks: "&#00D4FFСпециальные блоки"
+  
+  community:
+    title: "&#FFD700Сообщество"
+    leaderboards: "&#00D4FFТаблица лидеров"
+  
+  lobby:
+    title: "&#90EE90Лобби"
+    visibility: "&#FFFFFFВидимость игроков"
+    management: "&#A0A0A0Управление"
+
+messages:
+  join: "&#00D4FFВы присоединились к паркуру!"
+  leave: "&#FF6464Вы покинули паркур"
+  fall: "&#FF4444Вы упали! Счет: %score%"
+  score: "&#FFD700Новый рекорд: %score%!"
+  no_permission: "&#FF4444У вас нет прав!"
+  
+commands:
+  help: "&#00D4FF/loparkour &#FFFFFF- Главное меню"
+  reload: "&#00D4FFКонфигурация перезагружена!"

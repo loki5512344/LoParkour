@@ -1,0 +1,84 @@
+package dev.loki.loparkour.hook;
+
+import dev.loki.loparkour.LoParkour;
+import dev.loki.loparkour.api.Registry;
+import dev.loki.loparkour.leaderboard.Leaderboard;
+import dev.loki.loparkour.leaderboard.Score;
+import dev.loki.loparkour.mode.Mode;
+import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
+
+public class HoloHook {
+
+    /**
+     * Initializes this hook.
+     */
+    public static void init() {
+        try {
+            Class.forName("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI");
+        } catch (Exception ex) {
+            LoParkour.logging().warn("##");
+            LoParkour.logging().warn("## LoParkour only supports Holographic Displays v3.0.0 or higher!");
+            LoParkour.logging().warn("## This hook will now be disabled.");
+            LoParkour.logging().warn("##");
+            return;
+        }
+
+        HolographicDisplaysAPI.get(LoParkour.getPlugin()).registerGlobalPlaceholder("ip_leaderboard", 100, argument -> {
+
+            if (argument == null) {
+                return "?";
+            }
+
+            // {ip_leaderboard: default, score, #1}
+            String[] split = argument.replace(" ", "").split(",");
+
+            Mode mode = Registry.getMode(split[0].toLowerCase());
+
+            if (mode == null) {
+                return "?";
+            }
+
+            Leaderboard leaderboard = mode.getLeaderboard();
+
+            if (leaderboard == null) {
+                return "?";
+            }
+
+            String type = split[1].toLowerCase();
+            String rank = split[2].replace("#", "");
+
+            Score score = leaderboard.getScoreAtRank(Integer.parseInt(rank));
+
+            if (score == null) {
+                return "?";
+            }
+
+            return switch (type) {
+                case "score" -> Integer.toString(score.score());
+                case "name" -> score.name();
+                case "time" -> score.time();
+                case "difficulty" -> score.difficulty();
+                case "difficulty_string" -> parseDifficulty(score.difficulty());
+                default -> "?";
+            };
+        });
+    }
+
+    private static String parseDifficulty(String string) {
+        if (string.contains("?")) {
+            return "?";
+        }
+
+        double difficulty = Double.parseDouble(string);
+        if (difficulty <= 0.25) {
+            return "easy";
+        } else if (difficulty <= 0.5) {
+            return "medium";
+        } else if (difficulty <= 0.75) {
+            return "hard";
+        } else if (difficulty <= 1) {
+            return "very hard";
+        }
+        return "?";
+    }
+} 
