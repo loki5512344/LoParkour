@@ -9,6 +9,7 @@ public class Modes {
     public static SpeedrunMode SPEEDRUN;
     public static GravityShiftMode GRAVITY_SHIFT;
     public static HardcoreMode HARDCORE;
+    public static ElytraMode ELYTRA;
 
     public static void init() {
         DEFAULT = (DefaultMode) Registry.getMode("default");
@@ -16,5 +17,6 @@ public class Modes {
         SPEEDRUN = (SpeedrunMode) Registry.getMode("speedrun");
         GRAVITY_SHIFT = (GravityShiftMode) Registry.getMode("gravity-shift");
         HARDCORE = (HardcoreMode) Registry.getMode("hardcore");
+        ELYTRA = (ElytraMode) Registry.getMode("elytra");
     }
 }

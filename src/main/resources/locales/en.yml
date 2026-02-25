@@ -258,3 +258,8 @@ other:
     material: "elytra"
     name: "&#00D4FF<bold>Flying"
     lore: "&#A0A0A0Parkour with elytra!"
+
+modes:
+  elytra:
+    name: "&#00D4FF<bold>Elytra"
+    description: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"

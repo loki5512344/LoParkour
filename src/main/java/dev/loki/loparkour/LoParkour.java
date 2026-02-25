@@ -7,6 +7,7 @@ import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.hook.HoloHook;
 import dev.loki.loparkour.hook.PAPIHook;
 import dev.loki.loparkour.mode.DefaultMode;
+import dev.loki.loparkour.mode.ElytraMode;
 import dev.loki.loparkour.mode.GravityShiftMode;
 import dev.loki.loparkour.mode.HardcoreMode;
 import dev.loki.loparkour.mode.Modes;
@@ -106,6 +107,7 @@ public final class LoParkour extends ViPlugin {
         Registry.register(new SpeedrunMode());
         Registry.register(new GravityShiftMode());
         Registry.register(new HardcoreMode());
+        Registry.register(new ElytraMode());
 
         Modes.init();
         Menu.init(this);

@@ -257,3 +257,8 @@ other:
     material: "elytra"
     name: "&#00D4FF<bold>Полёт"
     lore: "&#A0A0A0Паркур с элитрами!"
+
+modes:
+  elytra:
+    name: "&#00D4FF<bold>Элитры"
+    description: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"

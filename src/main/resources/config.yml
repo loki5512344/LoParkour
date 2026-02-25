@@ -343,6 +343,22 @@ modes:
     # Reset all rewards on fall
     reset-rewards: true
 
+  # -= Elytra mode =-
+  elytra:
+    # Enable elytra mode
+    enabled: true
+    # Distance between rings
+    ring-distance-min: 20
+    ring-distance-max: 40
+    # Ring size (radius)
+    ring-size: 5
+    # Firework boost power
+    boost-power: 1.5
+    # Firework cooldown in seconds
+    firework-cooldown: 3
+    # Starting fireworks amount
+    starting-fireworks: 64
+
 
 
 # -= Scoring options =-
