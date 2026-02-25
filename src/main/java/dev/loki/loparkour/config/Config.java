@@ -187,7 +187,8 @@ public enum Config {
             return new ArrayList<>();
         }
 
-        return new ArrayList<>(section.getKeys(deep != null));
+        boolean isDeep = deep.length > 0 && deep[0];
+        return new ArrayList<>(section.getKeys(isDeep));
     }
 
     // checks if the specified path exists to avoid developer error

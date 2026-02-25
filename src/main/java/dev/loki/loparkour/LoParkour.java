@@ -23,7 +23,6 @@ import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import dev.efnilite.vilib.inventory.Menu;
 import dev.efnilite.vilib.util.Logging;
-import dev.efnilite.vilib.util.UpdateChecker;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -150,8 +149,6 @@ public final class LoParkour extends ViPlugin {
             ParkourUser.joinCount = 0;
             return joins;
         }));
-
-        UpdateChecker.check(this, 87226);
     }
 
     @Override

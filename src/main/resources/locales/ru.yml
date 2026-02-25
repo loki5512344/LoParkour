@@ -1,51 +1,259 @@
-menu:
-  main:
-    title: "&#FF6464Главное меню"
-    play: "&#00D4FFИграть"
-    community: "&#FFD700Сообщество"
-    settings: "&#A0A0A0Настройки"
-    lobby: "&#90EE90Лобби"
-    quit: "&#FF4444Выход"
-  
-  play:
-    title: "&#00D4FFВыбор режима"
-    single: "&#00FF00Одиночный"
-    spectator: "&#FFFF00Наблюдатель"
-  
-  settings:
-    title: "&#A0A0A0Настройки"
-    language: "&#FFFFFFЯзык"
-    parkour: "&#00D4FFПаркур"
-    chat: "&#90EE90Чат"
-  
-  parkour_settings:
-    title: "&#00D4FFНастройки паркура"
-    style: "&#FF6464Стиль блоков"
-    leads: "&#FFD700Количество блоков"
-    time: "&#A0A0A0Время"
-    schematics: "&#00FFFFСхематики"
-    scoreboard: "&#90EE90Табло"
-    fall_message: "&#FF4444Сообщение о падении"
-    particles: "&#FFAAFFЧастицы"
-    sound: "&#FFFFAAЗвук"
-    special_blocks: "&#00D4FFСпециальные блоки"
-  
-  community:
-    title: "&#FFD700Сообщество"
-    leaderboards: "&#00D4FFТаблица лидеров"
-  
-  lobby:
-    title: "&#90EE90Лобби"
-    visibility: "&#FFFFFFВидимость игроков"
-    management: "&#A0A0A0Управление"
+# Русский (Russian, ru)
+# By loki
+# Материалы должны быть из: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# Узнать больше о цветах: https://docs.adventure.kyori.net/minimessage/format.html#format
 
-messages:
-  join: "&#00D4FFВы присоединились к паркуру!"
-  leave: "&#FF6464Вы покинули паркур"
-  fall: "&#FF4444Вы упали! Счет: %score%"
-  score: "&#FFD700Новый рекорд: %score%!"
-  no_permission: "&#FF4444У вас нет прав!"
-  
-commands:
-  help: "&#00D4FF/loparkour &#FFFFFF- Главное меню"
-  reload: "&#00D4FFКонфигурация перезагружена!"
+name: "Русский"
+
+main:
+  name: "&#FFFFFFПаркур"
+
+play:
+  name: "&#FFFFFFИграть"
+
+  item:
+    material: "sugar_cane"
+    name: "&#00D4FF<bold>Играть"
+    lore: ""
+
+  single:
+    name: "&#FFFFFFОдиночный"
+
+    item:
+      material: "ender_pearl"
+      name: "&#00D4FF<bold>Одиночная игра"
+      lore: ""
+
+    default:
+      material: "barrel"
+      name: "&#00D4FF<bold>Обычный"
+      lore: "&#404040Стандартный режим игры."
+
+  spectator:
+    name: "&#FFFFFFНаблюдатель"
+
+    join: "&#00D4FFТеперь вы наблюдатель. Используйте \"/parkour\" чтобы выйти/сменить режим."
+    action_bar: "&#00D4FFВы наблюдатель &#A0A0A0• &#00D4FFИспользуйте \"/parkour\" чтобы выйти."
+
+    other_join: "<dark_green><bold>+ <reset>&#A0A0A0%s начал наблюдать за вами"
+    other_leave: "&#FF4444<bold>- <reset>&#A0A0A0%s перестал наблюдать за вами"
+
+    item:
+      material: "glass"
+      name: "&#00D4FF<bold>Наблюдатель"
+      lore: ""
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>%s"
+      lore: ""
+
+community:
+  name: "&#FFFFFFСообщество"
+
+  item:
+    material: "oak_boat"
+    name: "&#00D4FF<bold>Сообщество"
+    lore: ""
+
+  leaderboards:
+    name: "&#FFFFFFТаблица лидеров"
+
+    item:
+      material: "gold_nugget"
+      name: "&#00D4FF<bold>Таблица лидеров"
+      lore: ""
+
+    sort:
+      material: "bookshelf"
+      name: "&#00D4FF<bold>Сортировка по %s"
+      lore: ""
+      values: ["счёту", "времени", "сложности"]
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>#%r - %p"
+      lore: "&#00D4FFСчёт: &#A0A0A0%s||&#00D4FFВремя: &#A0A0A0%t||&#00D4FFСложность: &#A0A0A0%d&#404040/1.0"
+
+settings:
+  name: "&#FFFFFFНастройки"
+
+  item:
+    material: "comparator"
+    name: "&#00D4FF<bold>Настройки"
+    lore: ""
+
+  lang:
+    name: "&#FFFFFFЯзык"
+
+    item:
+      material: "writable_book"
+      name: "&#00D4FF<bold>Язык"
+      lore: "&#404040Текущий: &#00D4FF<bold>%s"
+
+  chat:
+    material: "crossbow"
+    name: "&#00D4FF<bold>Чат"
+    lore: "&#404040Текущий: &#00D4FF<bold>%s||&#404040Выберите с кем вы можете общаться"
+    values: ["только лобби", "только игроки", "публичный"]
+
+    formats:
+      lobby: "&#00D4FF(Лобби) &#00D4FF%s &#404040> &#A0A0A0%s"
+      players: "&#00D4FF(Игроки) &#00D4FF%s &#404040> &#A0A0A0%s"
+
+  parkour_settings:
+
+    enabled: "&#00D4FF<bold>✔"
+    disabled: "&#FF4444<bold>✘"
+
+    item:
+      material: "redstone"
+      name: "&#00D4FF<bold>Настройки паркура"
+      lore: "&#404040Измените внешний вид вашего паркура."
+
+    items:
+
+      no_change:
+        material: "barrier"
+        name: "<dark_red><bold>Вы не можете изменить это сейчас!"
+        lore: "&#A0A0A0У вас счёт больше 0,||&#A0A0A0поэтому вы не можете изменить эту настройку."
+
+      styles:
+        name: "&#FFFFFFСтили"
+
+        style_item:
+          material: ""
+          name: "&#FFFFFF<bold>%s"
+          lore: "&#00D4FFКатегория: &#A0A0A0%s"
+
+        item:
+          material: "crafting_table"
+          name: "&#00D4FF<bold>Стиль"
+          lore: "&#00D4FFТекущий: &#A0A0A0%s||&#A0A0A0Выберите какие блоки будут использоваться."
+
+      leads:
+        material: "feather"
+        name: "&#00D4FF<bold>Дистанция"
+        lore: "&#00D4FFТекущая: &#A0A0A0%s блоков||&#A0A0A0Сколько блоков будет||&#A0A0A0сгенерировано впереди вас."
+
+      time:
+        material: "clock"
+        name: "&#00D4FF<bold>Время"
+        lore: "&#00D4FFТекущее: &#A0A0A0%s||&#A0A0A0Ваше текущее визуальное время."
+
+      schematics:
+        material: ""
+        name: "&#00D4FF<bold>Сложность схематик"
+        lore: "&#00D4FFТекущая: &#A0A0A0%s||&#A0A0A0Сложность схематик"
+        values: ["&#FF4444выкл", "&#00D4FFлёгкая", "<yellow>средняя", "&#00D4FFсложная", "<dark_red>очень сложная"]
+
+      scoreboard:
+        material: ""
+        name: "Показывать табло"
+        lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, показывает табло."
+
+      fall_message:
+        item:
+          material: ""
+          name: "Показывать сообщение о падении"
+          lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, показывает сообщение при падении||&#A0A0A0с дополнительной информацией."
+
+        divider: "&#404040<strikethrough>-----------------------------------"
+        score: "&#00D4FF<bold>Счёт <reset>&#FFFFFF%s"
+        time: "&#00D4FF<bold>Время <reset>&#FFFFFF%s"
+        high_score: "&#00D4FF<bold>Рекорд <reset>&#FFFFFF%s"
+
+        formats:
+          miss: "&#A0A0A0Вы не дотянули до рекорда на %s очков!"
+          beat: "&#A0A0A0Вы побили свой рекорд на %s очков!"
+          tied: "&#A0A0A0Вы повторили свой рекорд!"
+
+      particles:
+        material: ""
+        name: "Показывать частицы"
+        lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, каждый сгенерированный блок||&#A0A0A0будет показывать частицы."
+
+      sound:
+        material: ""
+        name: "Воспроизводить звуки"
+        lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, каждый сгенерированный блок||&#A0A0A0будет воспроизводить звук."
+
+      special_blocks:
+        material: ""
+        name: "Использовать специальные блоки"
+        lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, использует специальные блоки||&#A0A0A0такие как лёд и плиты."
+
+      score_difficulty:
+        material: ""
+        name: "Сложность от счёта"
+        lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, чем выше ваш счёт,||&#A0A0A0тем сложнее становится."
+
+lobby:
+  name: "&#FFFFFFЛобби"
+
+  other_join: '<dark_green><bold>+ <reset>&#A0A0A0%s присоединился к вашему лобби'
+  other_leave: '&#FF4444<bold>- <reset>&#A0A0A0%s покинул ваше лобби'
+
+  item:
+    material: "iron_ingot"
+    name: "&#00D4FF<bold>Ваше лобби"
+    lore: ""
+
+  visibility:
+    material: "firework_rocket"
+    name: "&#00D4FF<bold>Видимость"
+    lore: "&#404040Текущая: &#00D4FF<bold>%s||&#404040Выберите кто может присоединиться к вашему лобби."
+    values: ["приватное", "только по приглашению", "публичное"]
+
+  player_management:
+    name: "&#FFFFFFУправление игроками"
+
+    kicked: "&#A0A0A0Вы были кикнуты из лобби владельцем."
+    advice: "&#A0A0A0Установите видимость лобби на 'только по приглашению' или 'приватное' чтобы избежать случайных присоединений."
+    muted: "&#A0A0A0Вы были замучены владельцем лобби."
+    unmuted: "&#A0A0A0С вас сняли мут владелец лобби."
+
+    item:
+      material: "cake"
+      name: "&#00D4FF<bold>Управление игроками"
+      lore: "&#404040Кикайте или мутьте игроков здесь."
+
+    head:
+      material: ""
+      name: "&#00D4FF<bold>%s"
+      lore: ""
+      top: "&#404040Замучен в лобби||"
+      bottom: "&#00D4FFЛевый клик&#404040 чтобы кикнуть из лобби||&#00D4FFПравый клик&#404040 чтобы замутить/размутить в лобби"
+
+scoreboard:
+
+  title: "&#00D4FF<bold>LoParkour"
+
+  lines:
+    - "<blue>"
+    - "&#00D4FFСчёт &#FFFFFF%score%"
+    - "&#00D4FFВремя &#FFFFFF%time%"
+    - "&#00D4FFРекорд &#FFFFFF%high_score%"
+    - "&#FF4444"
+    - "&#00D4FF<bold>server.ip"
+
+other:
+
+  no_do: "&#A0A0A0Вы не можете сделать это сейчас."
+  no_teleporting: "&#FFFFFFВы не можете войти в мир паркура телепортацией!"
+  customize: "&#A0A0A0Настройте свой паркур используя \"/parkour\""
+
+  quit:
+    material: "barrier"
+    name: "&#00D4FF<bold>Выход"
+    lore: ""
+
+  close:
+    material: "arrow"
+    name: "&#00D4FF<bold>Закрыть"
+    lore: ""
+
+  iep:
+    material: "elytra"
+    name: "&#00D4FF<bold>Полёт"
+    lore: "&#A0A0A0Паркур с элитрами!"

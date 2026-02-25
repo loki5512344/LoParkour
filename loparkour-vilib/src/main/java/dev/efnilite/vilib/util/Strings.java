@@ -57,6 +57,9 @@ public class Strings {
      */
     @NotNull
     public static String colour(@NotNull String string) {
+        // Convert old hex format &#RRGGBB to MiniMessage format <#RRGGBB>
+        string = string.replaceAll("&#([0-9A-Fa-f]{6})", "<#$1>");
+        
         Component component = MINI_MESSAGE.deserialize(string); // sanitize input
 
         return ChatColor.translateAlternateColorCodes(LegacyComponentSerializer.SECTION_CHAR, LEGACY_COMPONENT_SERIALIZER.serialize(component));

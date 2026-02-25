@@ -246,7 +246,7 @@ public class Option {
         JUMP_TYPE_ENABLED = new HashMap<>();
         JUMP_TYPE_CHANCE = new HashMap<>();
 
-        for (String type : Config.CONFIG.getChildren("jump-types.types", false)) {
+        for (String type : Config.CONFIG.getChildren("jump-types.types")) {
             String path = "jump-types.types." + type;
             JUMP_TYPE_ENABLED.put(type, Config.CONFIG.getBoolean(path + ".enabled"));
             JUMP_TYPE_CHANCE.put(type, Config.CONFIG.getDouble(path + ".chance"));
