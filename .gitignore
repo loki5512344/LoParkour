@@ -65,3 +65,6 @@ modrinth/
 
 # TODO file (local only)
 TODO.md
+
+# API documentation (local only)
+api_docs/
