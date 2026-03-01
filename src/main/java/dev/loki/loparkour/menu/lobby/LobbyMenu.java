@@ -7,14 +7,14 @@ import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.inventory.item.SliderItem;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class LobbyMenu extends DynamicMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public LobbyMenu() {
         registerMainItem(1, 0, (player, user) -> Locales.getItem(player, "lobby.player_management.item").click(event -> Menus.PLAYER_MANAGEMENT.open(player)), player -> {
             ParkourUser user = ParkourUser.getUser(player);
@@ -66,14 +66,18 @@ public class LobbyMenu extends DynamicMenu {
 
         registerMainItem(2, 10, (player, user) -> Locales.getItem(player, "other.close").click(event -> event.getPlayer().closeInventory()), player -> true);
     }
+    */
 
     /**
      * Opens the main menu.
      *
      * @param player The player to open the menu to
      */
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(Player player) {
         display(player, new Menu(3, Locales.getString(player, "lobby.name"))
                 .distributeRowsEvenly());
     }
+    */
 }

@@ -1,9 +1,13 @@
 package dev.loki.loparkour.leaderboard;
 
+import java.util.ArrayList;
+
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.storage.Storage;
-import dev.efnilite.vilib.util.Task;
+import dev.lolib.scheduler.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,21 +44,17 @@ public class Leaderboard {
 
         var interval = Config.CONFIG.getInt("storage-update-interval");
 
+        // TODO: Fix scheduler call - needs proper implementation
         // read/write all data every x seconds after x seconds to allow time for reading/writing
-        Task.create(LoParkour.getPlugin())
-                .delay(interval * 20)
-                .repeat(interval * 20)
-                .async()
-                .execute(Config.CONFIG.getBoolean("joining") ? () -> {
-                    LoParkour.log("Periodic saving of leaderboard data of %s".formatted(mode));
-
-                    write(true);
-                } : () -> {
-                    LoParkour.log("Periodic reading of leaderboard data of %s".formatted(mode));
-
-                    read(true);
-                })
-                .run();
+        Scheduler.get(LoParkour.getPlugin()).runTimerAsync(() -> {
+            if (Config.CONFIG.getBoolean("joining")) {
+                LoParkour.log("Periodic saving of leaderboard data of %s".formatted(mode));
+                write(true);
+            } else {
+                LoParkour.log("Periodic reading of leaderboard data of %s".formatted(mode));
+                read(true);
+            }
+        }, interval * 20, interval * 20);
     }
 
     /**
@@ -82,7 +82,7 @@ public class Leaderboard {
 
     private void run(Runnable runnable, boolean async) {
         if (async) {
-            Task.create(LoParkour.getPlugin()).async().execute(runnable).run();
+            Scheduler.get(LoParkour.getPlugin()).runAsync(runnable);
         } else {
             runnable.run();
         }

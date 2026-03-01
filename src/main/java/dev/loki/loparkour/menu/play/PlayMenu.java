@@ -4,7 +4,6 @@ import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.menu.DynamicMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.menu.ParkourOption;
-import dev.efnilite.vilib.inventory.Menu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -13,6 +12,8 @@ import org.bukkit.entity.Player;
  */
 public class PlayMenu extends DynamicMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public PlayMenu() {
         registerMainItem(1, 0, (player, user) -> Locales.getItem(player, "play.single.item")
                         .click(event -> Menus.SINGLE.open(event.getPlayer())),
@@ -30,9 +31,13 @@ public class PlayMenu extends DynamicMenu {
                         .click(event -> event.getPlayer().closeInventory()),
                 player -> true);
     }
+    */
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(Player player) {
         display(player, new Menu(3, Locales.getString(player, "play.name"))
                 .distributeRowsEvenly());
     }
+    */
 }

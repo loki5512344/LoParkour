@@ -1,5 +1,9 @@
 package dev.loki.loparkour.player;
 
+import java.util.ArrayList;
+
+import dev.lolib.scheduler.Scheduler;
+
 import com.google.gson.annotations.Expose;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
@@ -13,10 +17,8 @@ import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.storage.Storage;
 import dev.loki.loparkour.world.Divider;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.util.Colls;
-import dev.efnilite.vilib.util.Task;
+
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -190,7 +192,7 @@ public class ParkourPlayer extends ParkourUser {
         Runnable write = () -> Storage.writePlayer(this);
 
         if (async) {
-            Task.create(LoParkour.getPlugin()).async().execute(write).run();
+            Scheduler.get(LoParkour.getPlugin()).runAsync(write);
         } else {
             write.run();
         }
@@ -207,12 +209,12 @@ public class ParkourPlayer extends ParkourUser {
 
         // -= Inventory =-
         if (Config.CONFIG.getBoolean("options.inventory-handling")) {
-            Task.create(LoParkour.getPlugin()).delay(5).execute(() -> {
+            Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 LoParkour.log("Setting up inventory for player %s".formatted(player.getName()));
 
                 player.getInventory().clear();
 
-                List<Item> items = new ArrayList<>();
+                List<dev.loki.loparkour.util.Item> items = new ArrayList<>();
 
                 if (ParkourOption.PLAY.mayPerform(player)) items.add(Locales.getItem(locale, "play.item"));
                 if (ParkourOption.COMMUNITY.mayPerform(player)) items.add(Locales.getItem(locale, "community.item"));
@@ -221,9 +223,11 @@ public class ParkourPlayer extends ParkourUser {
 
                 if (ParkourOption.QUIT.mayPerform(player)) items.add(Locales.getItem(locale, "other.quit"));
 
-                List<Integer> slots = Menu.getEvenlyDistributedSlots(items.size());
-                Colls.range(0, items.size()).forEach(idx -> player.getInventory().setItem(slots.get(idx), items.get(idx).build()));
-            }).run();
+                List<Integer> slots = getEvenlyDistributedSlots(items.size());
+                for (int idx = 0; idx < items.size(); idx++) {
+                    player.getInventory().setItem(slots.get(idx), items.get(idx).build());
+                }
+            }, 5);
         } else {
             sendTranslated("other.customize");
         }
@@ -231,5 +235,14 @@ public class ParkourPlayer extends ParkourUser {
 
     public record OptionContainer(ParkourOption option, BiConsumer<ParkourPlayer, String> consumer) {
 
+    }
+
+    private List<Integer> getEvenlyDistributedSlots(int count) {
+        List<Integer> slots = new ArrayList<>();
+        int[] positions = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25};
+        for (int i = 0; i < Math.min(count, positions.length); i++) {
+            slots.add(positions[i]);
+        }
+        return slots;
     }
 }

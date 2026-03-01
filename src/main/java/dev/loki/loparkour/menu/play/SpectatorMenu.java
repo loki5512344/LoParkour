@@ -8,10 +8,6 @@ import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.world.Divider;
-import dev.efnilite.vilib.inventory.PagedMenu;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.inventory.item.MenuItem;
-import dev.efnilite.vilib.util.SkullSetter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +21,8 @@ import java.util.List;
  */
 public class SpectatorMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(Player player) {
         ParkourUser user = ParkourUser.getUser(player);
         String locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
@@ -80,5 +78,6 @@ public class SpectatorMenu {
                 .open(player);
 
     }
+    */
 
 }

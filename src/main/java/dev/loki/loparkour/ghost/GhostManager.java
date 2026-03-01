@@ -1,5 +1,7 @@
 package dev.loki.loparkour.ghost;
 
+import java.util.ArrayList;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import org.bukkit.Location;
@@ -40,7 +42,7 @@ public class GhostManager {
                     GhostData data = GhostData.loadFromFile(file);
                     ghosts.add(data);
                 } catch (IOException e) {
-                    LoParkour.logging().error("Failed to load ghost: " + file.getName());
+                    LoParkour.getPlugin().getLogger().severe("Failed to load ghost: " + file.getName());
                 }
             }
         }
@@ -71,7 +73,7 @@ public class GhostManager {
         try {
             data.saveToFile(file);
         } catch (IOException e) {
-            LoParkour.logging().error("Failed to save ghost: " + file.getName());
+            LoParkour.getPlugin().getLogger().severe("Failed to save ghost: " + file.getName());
         }
     }
 

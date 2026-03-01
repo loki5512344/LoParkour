@@ -1,5 +1,11 @@
 package dev.loki.loparkour.generator;
 
+import java.util.ArrayList;
+
+import dev.loki.loparkour.util.ParticleData;
+
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.api.event.ParkourBlockGenerateEvent;
@@ -19,21 +25,19 @@ import dev.loki.loparkour.reward.Rewards;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.style.Style;
 import dev.loki.loparkour.world.Divider;
-import dev.efnilite.vilib.particle.ParticleData;
-import dev.efnilite.vilib.particle.Particles;
-import dev.efnilite.vilib.schematic.Schematic;
-import dev.efnilite.vilib.schematic.Schematics;
-import dev.efnilite.vilib.util.Colls;
-import dev.efnilite.vilib.util.Locations;
-import dev.efnilite.vilib.util.Probs;
-import dev.efnilite.vilib.util.Task;
+
+import dev.loki.loparkour.util.ParticleUtil;
+
+import dev.loki.loparkour.util.Locations;
+import dev.loki.loparkour.util.Probs;
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.block.data.type.GlassPane;
-import org.bukkit.scheduler.BukkitTask;
+import dev.lolib.scheduler.ScheduledTask;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -61,9 +65,9 @@ public class ParkourGenerator {
 
     public Location[] zone;
     public ParkourPlayer player;
-    public BukkitTask task;
+    public dev.lolib.scheduler.ScheduledTask task;
 
-    private BukkitTask cleanupTask;
+    private dev.lolib.scheduler.ScheduledTask cleanupTask;
 
     public Location blockSpawn;
 
@@ -110,7 +114,7 @@ public class ParkourGenerator {
     protected int lastPositionIndexPlayer = -1;
     protected List<Block> history = new LinkedList<>();
 
-    public ParkourGenerator(@NotNull Session session, @Nullable Schematic schematic, GeneratorOption... generatorOptions) {
+    public ParkourGenerator(@NotNull Session session, @Nullable dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, GeneratorOption... generatorOptions) {
         this.session = session;
         this.generatorOptions = Arrays.asList(generatorOptions);
 
@@ -122,7 +126,8 @@ public class ParkourGenerator {
     }
 
     public ParkourGenerator(@NotNull Session session, GeneratorOption... generatorOptions) {
-        this(session, Schematics.getSchematic(LoParkour.getPlugin(), "spawn-island"), generatorOptions);
+        // TODO: Implement schematic loading with LoLib
+        this(session, null, generatorOptions);
     }
 
     public void overrideProfile() { }
@@ -170,9 +175,9 @@ public class ParkourGenerator {
 
         // display particle
         switch (Option.PARTICLE_SHAPE) {
-            case DOT -> Particles.draw(center.add(0.5, 1, 0.5), data.speed(0.4).size(20).offsetX(0.5).offsetY(1).offsetZ(0.5));
-            case CIRCLE -> Particles.circle(center.add(0.5, 0.5, 0.5), data.size(5), (int) Math.sqrt(blocks.size()), 20);
-            case BOX -> Particles.box(BoundingBox.of(max, min), player.player.getWorld(), data.size(1), 0.2);
+            case DOT -> {} // TODO: ParticleUtil.draw
+            case CIRCLE -> {} // TODO: ParticleUtil.circle
+            case BOX -> {} // TODO: ParticleUtil.box
         }
     }
 
@@ -292,19 +297,14 @@ public class ParkourGenerator {
     }
 
     public void menu(ParkourPlayer player) {
-        Menus.PARKOUR_SETTINGS.open(player);
+        // TODO: Migrate to LoLib GUI system
+        // Menus.PARKOUR_SETTINGS.open(player);
+        player.sendTranslated("other.menu-unavailable");
     }
 
     public void startTick() {
-        task = Task.create(LoParkour.getPlugin())
-            .repeat(1)
-            .execute(this::tick)
-            .run();
-
-        cleanupTask = Task.create(LoParkour.getPlugin())
-            .repeat(Option.CLEANUP_INTERVAL)
-            .execute(this::cleanupDistantBlocks)
-            .run();
+        task = Scheduler.get(LoParkour.getPlugin()).runTimer(this::tick, 0, 1);
+        cleanupTask = Scheduler.get(LoParkour.getPlugin()).runTimer(this::cleanupDistantBlocks, 0, Option.CLEANUP_INTERVAL);
     }
 
     /**
@@ -423,9 +423,9 @@ public class ParkourGenerator {
         stopped = !regenerate;
 
         if (!regenerate && task == null) {
-            LoParkour.logging().warn("## Incomplete joining setup.");
-            LoParkour.logging().warn("## There has probably been an error somewhere. Please report this error!");
-            LoParkour.logging().warn("## You don't have to report this warning.");
+            LoParkour.getPlugin().getLogger().warning("## Incomplete joining setup.");
+            LoParkour.getPlugin().getLogger().warning("## There has probably been an error somewhere. Please report this error!");
+            LoParkour.getPlugin().getLogger().warning("## You don't have to report this warning.");
         }
 
         lastPositionIndexPlayer = 0;
@@ -535,25 +535,8 @@ public class ParkourGenerator {
 
             double difficulty = profile.get("schematicDifficulty").asDouble();
 
-            Schematic schematic = Schematics.getSchematic(LoParkour.getPlugin(),
-                    Colls.random(Schematics.getSchematicNames(LoParkour.getPlugin()).stream()
-                    .filter(name -> name.contains("parkour-") && getDifficulty(name) <= difficulty)
-                    .toList()));
-
-            schematicBlocks = rotatedPaste(schematic, selectBlocks().get(0).getLocation());
-
-            particles(schematicBlocks);
-            sound(schematicBlocks);
-
-            new ParkourSchematicGenerateEvent(schematic, this, player).call();
-
-            if (schematicBlocks.isEmpty()) {
-                LoParkour.logging().stack("Error while trying to paste schematic %s".formatted(schematic.getFile().getName()), new NoSuchElementException("No schematic blocks found"));
-                return;
-            }
-
-            schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
-            waitForSchematicCompletion = true;
+            // TODO: Implement schematic generation with LoLib
+            LoParkour.getPlugin().getLogger().warning("LPSchematic generation temporarily disabled during migration");
             return;
         }
 
@@ -562,7 +545,7 @@ public class ParkourGenerator {
         List<Block> blocks = selectBlocks();
 
         if (blocks.isEmpty()) {
-            LoParkour.logging().stack("Error while trying to generate parkour", new NoSuchElementException("No blocks to generate found"));
+            LoParkour.getPlugin().getLogger().severe("Error while trying to generate parkour: No blocks to generate found");
             return;
         }
 
@@ -587,61 +570,11 @@ public class ParkourGenerator {
         schematicCooldown--;
     }
 
-    private @NotNull List<Block> rotatedPaste(Schematic schematic, Location location) {
-        if (schematic == null || location == null) {
-            return Collections.emptyList();
-        }
-
-        Optional<Vector> optionalStart = schematic.getVectorBlockMap().entrySet().stream()
-                .filter(entry -> {
-                    if (entry == null || entry.getValue() == null) return false;
-
-                    return entry.getValue().getMaterial() == Material.LIME_WOOL;
-                })
-                .map(Map.Entry::getKey)
-                .findAny();
-
-        Optional<Vector> optionalEnd = schematic.getVectorBlockMap().entrySet().stream()
-                .filter(entry -> {
-                    if (entry == null || entry.getValue() == null) return false;
-
-                    return entry.getValue().getMaterial() == Material.RED_WOOL;
-                })
-                .map(Map.Entry::getKey)
-                .findAny();
-
-        if (optionalStart.isEmpty()) {
-            LoParkour.logging().stack("Error while trying to find start of schematic", "check if you placed a lime wool block");
-            return Collections.emptyList();
-        }
-        if (optionalEnd.isEmpty()) {
-            LoParkour.logging().stack("Error while trying to find end of schematic", "check if you placed a red wool block");
-            return Collections.emptyList();
-        }
-
-        Vector start = optionalStart.get();
-        Vector end = optionalEnd.get();
-        Vector startToEnd = end.clone().subtract(start);
-
-        /// snapped vector, supports no rotation if x == z
-        Vector snapped;
-        if (startToEnd.equals(heading)) {
-            snapped = new Vector(0, 0, 0);
-        } else if (Math.abs(startToEnd.getX()) > Math.abs(startToEnd.getZ())) {
-            snapped = new Vector(Math.signum(startToEnd.getX()), 0, 0);
-        } else {
-            snapped = new Vector(0, 0, Math.signum(startToEnd.getZ()));
-        }
-
-        // the angle between heading and normalized direction of schematic, snapped to 90 deg angles
-        double snappedAngle = angleInY(heading, snapped);
-
-        Location rotatedStart = location.clone().subtract(start.clone().rotateAroundY(snappedAngle));
-        Vector rotatedStartToEnd = startToEnd.clone().rotateAroundY(snappedAngle);
-
-        history.add(location.clone().add(rotatedStartToEnd).subtract(0, 1, 0).getBlock());
-        return schematic.paste(rotatedStart, snappedAngle); // only yaw
+    private @NotNull List<Block> rotatedPaste(dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, Location location) {
+        // TODO: Implement schematic rotation with LoLib
+        return new ArrayList<>();
     }
+
 
     private double angleInY(Vector a, Vector b) {
         double det = a.getX() * b.getZ() - a.getZ() * b.getX();
@@ -757,7 +690,7 @@ public class ParkourGenerator {
                     .withZone(ZoneOffset.UTC)
                     .format(timeMs);
         } catch (IllegalArgumentException ex) {
-            LoParkour.logging().stack("Invalid score time format %s".formatted(Config.CONFIG.getString("options.time.score-format")), ex);
+            LoParkour.getPlugin().getLogger().severe("Invalid score time format %s".formatted(Config.CONFIG.getString("options.time.score-format")) + " - " + ex.getMessage());
             return "";
         }
     }

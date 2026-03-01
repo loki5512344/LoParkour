@@ -1,8 +1,12 @@
 package dev.loki.loparkour.world;
 
+import dev.lolib.worlds.VoidGenerator;
+import org.bukkit.Bukkit;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
-import dev.efnilite.vilib.util.VoidGenerator;
+
+import dev.lolib.worlds.VoidGenerator;
 import org.bukkit.*;
 
 import java.io.File;
@@ -29,7 +33,7 @@ public class World {
         }
 
         if (world != null) {
-            LoParkour.logging().warn("Crash detected! The parkour world loading twice is not usual behaviour. This only happens after a server crash.");
+            LoParkour.getPlugin().getLogger().warning("Crash detected! The parkour world loading twice is not usual behaviour. This only happens after a server crash.");
         }
 
         if (Config.CONFIG.getBoolean("world.delete-on-reload")) {
@@ -52,7 +56,7 @@ public class World {
 
             world = Bukkit.createWorld(creator);
         } catch (Exception ex) {
-            LoParkour.logging().stack("Error while trying to create the parkour world", "delete the parkour world folder and restart the server", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to create the parkour world - delete the parkour world folder and restart the server - " + ex.getMessage());
         }
     }
 
@@ -106,7 +110,7 @@ public class World {
                     .map(Path::toFile)
                     .forEach(File::delete);
         } catch (Exception ex) {
-            LoParkour.logging().stack("Error while trying to delete the parkour world", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to delete the parkour world" + " - " + ex.getMessage());
         }
     }
 

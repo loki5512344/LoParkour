@@ -35,7 +35,7 @@ public class LPSchematicManager {
                 loadedSchematics.put(name, schematic);
                 LoParkour.log("Loaded schematic: " + name);
             } catch (IOException e) {
-                LoParkour.logging().error("Failed to load schematic: " + file.getName());
+                LoParkour.getPlugin().getLogger().severe("Failed to load schematic: " + file.getName());
                 e.printStackTrace();
             }
         }

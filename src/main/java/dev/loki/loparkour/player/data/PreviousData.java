@@ -86,7 +86,7 @@ public class PreviousData {
             player.setVelocity(new Vector(0, 0, 0));
             player.setFallDistance(0f);
         } catch (Exception ex) { // not the best way to do this... too bad!
-            LoParkour.logging().stack("Error while recovering stats of %s".formatted(player.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while recovering stats of %s".formatted(player.getName()) + " - " + ex.getMessage());
         }
 
         if (inventoryData != null) {

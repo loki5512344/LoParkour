@@ -1,5 +1,7 @@
 package dev.loki.loparkour.session;
 
+import java.util.ArrayList;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;

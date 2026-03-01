@@ -27,7 +27,7 @@ public class VaultHook {
             RegisteredServiceProvider<Economy> service = Bukkit.getServicesManager().getRegistration(Economy.class);
 
             if (service == null) {
-                LoParkour.logging().stack("Error while trying to fetch the Vault economy", new NoSuchElementException("No economy found"));
+                LoParkour.getPlugin().getLogger().severe("Error while trying to fetch the Vault economy - No economy found");
                 return;
             }
 

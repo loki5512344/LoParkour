@@ -19,8 +19,10 @@ import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.storage.Storage;
 import dev.loki.loparkour.world.Divider;
-import dev.efnilite.vilib.fastboard.FastBoard;
-import dev.efnilite.vilib.util.Strings;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.DisplaySlot;
+import dev.loki.loparkour.util.ColorUtil;
 import io.papermc.lib.PaperLib;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -110,11 +112,13 @@ public abstract class ParkourUser {
         try {
             user.unregister();
 
-            if (user.board != null && !user.board.isDeleted()) {
-                user.board.delete();
-            }
+            // TODO: Implement scoreboard deletion with LoLib
+            // if (user.board != null) {
+            //     user.board.delete();
+            // }
         } catch (Exception ex) { // safeguard to prevent people from losing data
-            LoParkour.logging().stack("Error while trying to make player %s leave".formatted(user.getName()), ex);
+            LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
+                    "Error while trying to make player " + user.getName() + " leave", ex);
             user.send("<red><bold>There was an error while trying to handle leaving.");
         }
 
@@ -129,7 +133,7 @@ public abstract class ParkourUser {
 
         Mode mode = user.session.generator.getMode();
         if (mode == null) {
-            LoParkour.logging().error("Mode is null for %s".formatted(user.getName()));
+            LoParkour.getPlugin().getLogger().severe("Mode is null for %s".formatted(user.getName()));
             mode = Modes.DEFAULT;
         }
 
@@ -148,7 +152,7 @@ public abstract class ParkourUser {
         try {
             player.sendPluginMessage(LoParkour.getPlugin(), "BungeeCord", out.toByteArray());
         } catch (ChannelNotRegisteredException ex) {
-            LoParkour.logging().stack("Error while trying to send %s to server %s. This server is not registered.".formatted(player.getName(), server), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to send %s to server %s. This server is not registered.".formatted(player.getName(), server) + " - " + ex.getMessage());
             player.kickPlayer("Couldn't move you to %s. Please rejoin.".formatted(server));
         }
     }
@@ -190,7 +194,7 @@ public abstract class ParkourUser {
     /**
      * This user's scoreboard
      */
-    public FastBoard board;
+    public Scoreboard board;
 
     /**
      * This user's PreviousData
@@ -230,7 +234,7 @@ public abstract class ParkourUser {
         this.previousData = previousData == null ? new PreviousData(player) : previousData;
 
         if (Boolean.parseBoolean(Option.OPTIONS_DEFAULTS.get(ParkourOption.SCOREBOARD))) {
-            this.board = new FastBoard(player);
+            this.board = Bukkit.getScoreboardManager().getNewScoreboard();
         }
     }
 
@@ -254,7 +258,7 @@ public abstract class ParkourUser {
      * @param message The message
      */
     public void send(String message) {
-        player.sendMessage(Strings.colour(message));
+        player.sendMessage(ColorUtil.color(message));
     }
 
     /**
@@ -274,7 +278,7 @@ public abstract class ParkourUser {
      */
     public void updateScoreboard(ParkourGenerator generator) {
         // board can be null a few ticks after on player leave
-        if (board == null || board.isDeleted() || !generator.profile.get("showScoreboard").asBoolean()) {
+        if (board == null || false || !generator.profile.get("showScoreboard").asBoolean()) {
             return;
         }
 
@@ -285,8 +289,8 @@ public abstract class ParkourUser {
             top = new Score("?", "?", "?", 0);
         }
 
-        board.updateTitle(replace(Locales.getString(locale, "scoreboard.title"), top, high, generator));
-        board.updateLines(replace(Locales.getStringList(locale, "scoreboard.lines"), top, high, generator));
+        // board.updateTitle(replace(Locales.getString(locale, "scoreboard.title"), top, high, generator));
+        // board.updateLines(replace(Locales.getStringList(locale, "scoreboard.lines"), top, high, generator));
     }
 
     private List<String> replace(List<String> s, Score top, Score high, ParkourGenerator generator) {
@@ -294,7 +298,7 @@ public abstract class ParkourUser {
     }
 
     private String replace(String s, Score top, Score high, ParkourGenerator generator) {
-        return Strings.colour(translate(player, s)
+        return ColorUtil.color(translate(player, s)
                 .replace("%score%", Integer.toString(generator.score))
                 .replace("%time%", generator.getFormattedTime())
                 .replace("%difficulty%", Double.toString(generator.getDifficultyScore()))

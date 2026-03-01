@@ -4,10 +4,11 @@ import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.leaderboard.Score;
 import dev.loki.loparkour.player.ParkourPlayer;
-import dev.efnilite.vilib.util.Colls;
+
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
+import dev.lolib.utils.Colls;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -49,7 +50,7 @@ class StorageSQL {
             connection.close();
             LoParkour.log("Closed connection to MySQL");
         } catch (SQLException ex) {
-            LoParkour.logging().stack("Error while trying to close connection to SQL database", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to close connection to SQL database" + " - " + ex.getMessage());
         }
     }
 
@@ -76,7 +77,7 @@ class StorageSQL {
 
             return scores;
         } catch (SQLException ex) {
-            LoParkour.logging().stack("Error while trying to read SQL data of %s".formatted(mode), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to read SQL data of %s".formatted(mode) + " - " + ex.getMessage());
             return new HashMap<>();
         }
     }
@@ -120,18 +121,18 @@ class StorageSQL {
                 return;
             }
 
-            Map<String, Object> settings = Colls.thread(ParkourPlayer.PLAYER_COLUMNS).mapv((key, value) -> {
+            Map<String, Object> settings = new HashMap<>();
+            for (String key : ParkourPlayer.PLAYER_COLUMNS.keySet()) {
                 try {
-                    return results.getObject(key);
+                    settings.put(key, results.getObject(key));
                 } catch (SQLException ex) {
-                    LoParkour.logging().stack("Error while trying to read SQL data of %s, option = %s".formatted(player.getName(), key), ex);
-                    return null;
+                    LoParkour.getPlugin().getLogger().severe("Error while trying to read SQL data of %s, option = %s - %s".formatted(player.getName(), key, ex.getMessage()));
                 }
-            }).get();
+            }
 
             player.setSettings(settings);
         } catch (SQLException ex) {
-            LoParkour.logging().stack("Error while trying to read SQL data of %s".formatted(player.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to read SQL data of %s".formatted(player.getName()) + " - " + ex.getMessage());
         }
     }
 
@@ -206,7 +207,7 @@ class StorageSQL {
 
             LoParkour.log("Connected to MySQL");
         } catch (Exception ex) {
-            LoParkour.logging().stack("Could not connect to MySQL", "check your SQL settings in the config", ex);
+            LoParkour.getPlugin().getLogger().severe("Could not connect to MySQL - check your SQL settings in the config - " + ex.getMessage());
             Bukkit.getPluginManager().disablePlugin(LoParkour.getPlugin()); // disable plugin since data handling without db will go horribly wrong
         }
     }
@@ -217,7 +218,7 @@ class StorageSQL {
                 connect();
             }
         } catch (Exception ex) {
-            LoParkour.logging().stack("Error while trying to reconnect to MySQL", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to reconnect to MySQL" + " - " + ex.getMessage());
         }
     }
 
@@ -228,7 +229,7 @@ class StorageSQL {
         try {
             return connection.prepareStatement(sql).executeQuery();
         } catch (SQLException ex) {
-            LoParkour.logging().stack("Error while sending query %s".formatted(sql), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while sending query %s".formatted(sql) + " - " + ex.getMessage());
             return null;
         }
     }
@@ -240,7 +241,7 @@ class StorageSQL {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.executeUpdate();
         } catch (SQLException ex) {
-            LoParkour.logging().stack("Error while sending query %s".formatted(sql), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while sending query %s".formatted(sql) + " - " + ex.getMessage());
         }
     }
 

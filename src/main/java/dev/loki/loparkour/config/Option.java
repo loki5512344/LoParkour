@@ -1,11 +1,17 @@
 package dev.loki.loparkour.config;
 
+import org.bukkit.Bukkit;
+
+import java.util.ArrayList;
+
+import dev.loki.loparkour.util.ParticleData;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.style.RandomStyle;
 import dev.loki.loparkour.style.Style;
-import dev.efnilite.vilib.particle.ParticleData;
+
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -83,7 +89,7 @@ public class Option {
         POSSIBLE_LEADS = Config.CONFIG.getIntList("options.leads.amount");
         for (int lead : new ArrayList<>(POSSIBLE_LEADS)) {
             if (lead < 1 || lead > 128) {
-                LoParkour.logging().error("Invalid lead: %d. Should be above 1 and below 128.".formatted(lead));
+                LoParkour.getPlugin().getLogger().severe("Invalid lead: %d. Should be above 1 and below 128.".formatted(lead));
                 POSSIBLE_LEADS.remove((Object) lead);
             }
         }
@@ -96,7 +102,7 @@ public class Option {
             case "south" -> HEADING = BlockFace.SOUTH;
             case "west" -> HEADING = BlockFace.WEST;
             case "east" -> HEADING = BlockFace.EAST;
-            default -> LoParkour.logging().error("Invalid heading: %s".formatted(heading));
+            default -> LoParkour.getPlugin().getLogger().severe("Invalid heading: %s".formatted(heading));
         }
 
         // Scoring
@@ -142,7 +148,7 @@ public class Option {
             SOUND_TYPE = Sound.valueOf(value);
         } catch (IllegalArgumentException ex) {
             SOUND_TYPE = Sound.valueOf("BLOCK_NOTE_PLING");
-            LoParkour.logging().error("Invalid sound: %s".formatted(value));
+            LoParkour.getPlugin().getLogger().severe("Invalid sound: %s".formatted(value));
         }
 
         value = Config.CONFIG.getString("particles.particle-type");
@@ -150,13 +156,13 @@ public class Option {
             PARTICLE_TYPE = Particle.valueOf(value);
         } catch (IllegalArgumentException ex) {
             PARTICLE_TYPE = Particle.valueOf("SPELL_INSTANT");
-            LoParkour.logging().error("Invalid particle type: %s".formatted(value));
+            LoParkour.getPlugin().getLogger().severe("Invalid particle type: %s".formatted(value));
         }
 
         SOUND_PITCH = Config.CONFIG.getInt("particles.sound-pitch");
         SOUND_VOLUME = Config.CONFIG.getInt("particles.sound-volume");
         PARTICLE_SHAPE = ParticleShape.valueOf(Config.CONFIG.getString("particles.particle-shape").toUpperCase());
-        PARTICLE_DATA = new ParticleData<>(PARTICLE_TYPE, null, 10, 0, 0, 0, 0);
+        PARTICLE_DATA = new ParticleData<>(PARTICLE_TYPE, null, 10);
     }
 
     public enum ParticleShape {
@@ -287,7 +293,7 @@ public class Option {
             MIN_Y = 100;
             MAX_Y = 200;
 
-            LoParkour.logging().stack("Provided minimum y is the same or larger than maximum y!", "check your generation.yml file");
+            LoParkour.getPlugin().getLogger().severe("Provided minimum y is the same or larger than maximum y! - check your generation.yml file");
         }
     }
 
@@ -303,7 +309,7 @@ public class Option {
                                 var material = Material.getMaterial(name.toUpperCase());
 
                                 if (material == null) {
-                                    LoParkour.logging().error("Invalid material %s in style %s".formatted(name, style));
+                                    LoParkour.getPlugin().getLogger().severe("Invalid material %s in style %s".formatted(name, style));
                                     return Material.STONE;
                                 }
 

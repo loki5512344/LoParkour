@@ -62,15 +62,13 @@ public class Rewards {
                 int value = Integer.parseInt(score);
 
                 if (value < 1) {
-                    LoParkour.logging().stack("Error while trying to read rewards",
-                            "check the rewards file for incorrect numbers",
-                            new IllegalArgumentException("%s is not a valid score".formatted(value)));
+                    LoParkour.getPlugin().getLogger().severe("Error while trying to read rewards - check the rewards file for incorrect numbers - " + value + " is not a valid score");
                     continue;
                 }
 
                 rewardMap.put(value, rewardStrings);
             } catch (NumberFormatException ex) {
-                LoParkour.logging().stack("Error while trying to read rewards", "check the rewards file for incorrect numbers", ex);
+                LoParkour.getPlugin().getLogger().severe("Error while trying to read rewards - check the rewards file for incorrect numbers - " + ex.getMessage());
             }
         }
 

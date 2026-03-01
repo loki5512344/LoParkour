@@ -43,7 +43,7 @@ class StorageDisk {
 
             return scores;
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to read leaderboard file %s".formatted(mode), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to read leaderboard file %s".formatted(mode) + " - " + ex.getMessage());
             return new HashMap<>();
         }
     }
@@ -59,7 +59,7 @@ class StorageDisk {
             LoParkour.getGson().toJson(container, writer);
             writer.flush();
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to write to leaderboard file %s".formatted(mode), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to write to leaderboard file %s".formatted(mode) + " - " + ex.getMessage());
         }
     }
 
@@ -97,7 +97,7 @@ class StorageDisk {
 
             player.setSettings(settings);
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to read disk data of %s".formatted(player.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to read disk data of %s".formatted(player.getName()) + " - " + ex.getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ class StorageDisk {
             LoParkour.getGson().toJson(player, writer);
             writer.flush();
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to write disk data of %s to file %s".formatted(player.getName(), file), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to write disk data of %s to file %s".formatted(player.getName(), file) + " - " + ex.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ class StorageDisk {
             file.getParentFile().mkdirs();
             file.createNewFile();
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to create file %s".formatted(file), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to create file %s".formatted(file) + " - " + ex.getMessage());
         }
     }
 

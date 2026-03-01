@@ -1,5 +1,10 @@
 package dev.loki.loparkour;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import dev.loki.loparkour.util.ParticleData;
+
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.config.Option;
@@ -10,11 +15,11 @@ import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.world.World;
-import dev.efnilite.vilib.event.EventWatcher;
-import dev.efnilite.vilib.particle.ParticleData;
-import dev.efnilite.vilib.particle.Particles;
-import dev.efnilite.vilib.util.Locations;
-import dev.efnilite.vilib.util.Strings;
+import org.bukkit.event.Listener;
+
+import dev.loki.loparkour.util.ParticleUtil;
+import dev.loki.loparkour.util.Locations;
+import dev.loki.loparkour.util.ColorUtil;
 import io.papermc.lib.PaperLib;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -43,7 +48,7 @@ import java.util.NoSuchElementException;
  * Internal event handler
  */
 @ApiStatus.Internal
-public class Events implements EventWatcher {
+public class Events implements Listener {
 
     @EventHandler
     public void chat(AsyncPlayerChatEvent event) {
@@ -131,14 +136,13 @@ public class Events implements EventWatcher {
         event.setCancelled(true);
     }
 
-
     @EventHandler
     public void interactWand(PlayerInteractEvent event) {
         Action action = event.getAction();
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if (!player.hasPermission("LoParkour.admin") || item.getItemMeta() == null || !item.getItemMeta().getDisplayName().contains("Schematic Wand") || event.getClickedBlock() == null || event.getHand() != EquipmentSlot.HAND) {
+        if (!player.hasPermission("LoParkour.admin") || item.getItemMeta() == null || !item.getItemMeta().getDisplayName().contains("LPSchematic Wand") || event.getClickedBlock() == null || event.getHand() != EquipmentSlot.HAND) {
             return;
         }
 
@@ -158,7 +162,7 @@ public class Events implements EventWatcher {
 
                 Command.selections.put(player, new Location[]{location, existingSelection[1]});
 
-                Particles.box(BoundingBox.of(location, existingSelection[1]), player.getWorld(), new ParticleData<>(Particle.END_ROD, null, 2), player, 0.2);
+                ParticleUtil.box(BoundingBox.of(location, existingSelection[1]), player.getWorld(), Particle.END_ROD, player, 0.2);
             }
             case RIGHT_CLICK_BLOCK -> {
                 send(player, LoParkour.PREFIX + "Position 2 was set to " + Locations.toString(location, true));
@@ -170,7 +174,7 @@ public class Events implements EventWatcher {
 
                 Command.selections.put(player, new Location[]{existingSelection[0], location});
 
-                Particles.box(BoundingBox.of(existingSelection[0], location), player.getWorld(), new ParticleData<>(Particle.END_ROD, null, 2), player, 0.2);
+                ParticleUtil.box(BoundingBox.of(existingSelection[0], location), player.getWorld(), Particle.END_ROD, player, 0.2);
             }
         }
     }
@@ -200,22 +204,30 @@ public class Events implements EventWatcher {
 
         Material held = getHeldItem(player).getType();
 
-        Material play = Locales.getItem(player, "play.item").getMaterial();
-        Material community = Locales.getItem(player, "community.item").getMaterial();
-        Material settings = Locales.getItem(player, "settings.item").getMaterial();
-        Material lobby = Locales.getItem(player, "lobby.item").getMaterial();
-        Material quit = Locales.getItem(player, "other.quit").getMaterial();
+        Material play = Locales.getItem(player, "play.item").build().getType();
+        Material community = Locales.getItem(player, "community.item").build().getType();
+        Material settings = Locales.getItem(player, "settings.item").build().getType();
+        Material lobby = Locales.getItem(player, "lobby.item").build().getType();
+        Material quit = Locales.getItem(player, "other.quit").build().getType();
 
         event.setCancelled(true);
 
         if (held == play) {
-            Menus.PLAY.open(player);
+            // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
         } else if (held == community) {
-            Menus.COMMUNITY.open(player);
+            // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
         } else if (held == settings) {
-            Menus.SETTINGS.open(player);
+            // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
         } else if (held == lobby) {
-            Menus.LOBBY.open(player);
+            // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
         } else if (held == quit) {
             ParkourUser.leave(player);
         } else {
@@ -311,6 +323,6 @@ public class Events implements EventWatcher {
     }
 
     private void send(CommandSender sender, String message) {
-        sender.sendMessage(Strings.colour(message));
+        sender.sendMessage(ColorUtil.color(message));
     }
 }

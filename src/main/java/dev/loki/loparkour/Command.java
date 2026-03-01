@@ -1,5 +1,12 @@
 package dev.loki.loparkour;
 
+import org.bukkit.Bukkit;
+
+import java.util.ArrayList;
+
+import dev.loki.loparkour.util.Item;
+import dev.loki.loparkour.util.ParticleData;
+
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
@@ -16,14 +23,13 @@ import dev.loki.loparkour.schematic.lpschem.LPSchematic;
 import dev.loki.loparkour.schematic.lpschem.LPSchematicBuilder;
 import dev.loki.loparkour.schematic.lpschem.SchematicConverter;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.command.ViCommand;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.particle.ParticleData;
-import dev.efnilite.vilib.particle.Particles;
-import dev.efnilite.vilib.schematic.Schematic;
-import dev.efnilite.vilib.schematic.Schematics;
-import dev.efnilite.vilib.util.Locations;
-import dev.efnilite.vilib.util.Strings;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
+
+import dev.loki.loparkour.util.ParticleUtil;
+
+import dev.loki.loparkour.util.Locations;
+import dev.loki.loparkour.util.ColorUtil;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -36,16 +42,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @SuppressWarnings("deprecation")
-public class Command extends ViCommand {
+public class Command implements CommandExecutor, TabCompleter {
 
     public static final HashMap<Player, Location[]> selections = new HashMap<>();
 
-    private static final ItemStack WAND = new Item(Material.GOLDEN_AXE, "<red><bold>Schematic Wand")
+    private static final ItemStack WAND = new Item(Material.GOLDEN_AXE, "<red><bold>LPSchematic Wand")
             .lore("<gray>Left click: first position", "<gray>Right click: second position")
             .build();
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
+    public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
         Player player = null;
         if (sender instanceof Player) {
             player = (Player) sender;
@@ -61,7 +67,7 @@ public class Command extends ViCommand {
     }
 
     @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         switch (args.length) {
             case 1 -> {
@@ -128,7 +134,9 @@ public class Command extends ViCommand {
 
     private void handle0Args(@NotNull CommandSender sender, @Nullable Player player) {
         if (player != null && ParkourOption.MAIN.mayPerform(player)) {
-            Menus.MAIN.open(player);
+            // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
             return;
         }
         sendHelpMessages(sender);
@@ -205,7 +213,9 @@ public class Command extends ViCommand {
             }
             case "play" -> {
                 if (ParkourOption.PLAY.mayPerform(player)) {
-                    Menus.PLAY.open(player);
+                    // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
                 }
             }
             case "leave" -> {
@@ -216,7 +226,9 @@ public class Command extends ViCommand {
             }
             case "menu", "main" -> {
                 if (!ParkourOption.MAIN.mayPerform(player)) {
-                    Menus.MAIN.open(player);
+                    // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
                 }
             }
             case "leaderboard" -> player.performCommand("LoParkour leaderboard invalid");
@@ -454,9 +466,13 @@ public class Command extends ViCommand {
 
                 // if found gamemode is null, return to default
                 if (mode == null) {
-                    Menus.LEADERBOARDS.open(player);
+                    // TODO: Migrate to LoLib GUI
+                // Menus.*.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
                 } else {
-                    Menus.SINGLE_LEADERBOARD.open(player, mode, Leaderboard.Sort.SCORE);
+                    // TODO: Migrate to LoLib GUI
+                // Menus.SINGLE_LEADERBOARD.open(player, mode, Leaderboard.Sort.SCORE);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
                 }
             }
             case "schematic" -> {
@@ -486,7 +502,7 @@ public class Command extends ViCommand {
 
                         selections.put(player, new Location[]{playerLocation, existingSelection[1]});
 
-                        Particles.box(BoundingBox.of(playerLocation, existingSelection[1]), player.getWorld(), new ParticleData<>(Particle.END_ROD, null, 2), player, 0.2);
+                        ParticleUtil.box(BoundingBox.of(playerLocation, existingSelection[1]), player.getWorld(), Particle.END_ROD, player, 0.2);
                     }
                     case "pos2" -> {
                         send(player, "%sPosition 2 was set to %s".formatted(LoParkour.PREFIX, Locations.toString(playerLocation, true)));
@@ -498,7 +514,7 @@ public class Command extends ViCommand {
 
                         selections.put(player, new Location[]{existingSelection[0], playerLocation});
 
-                        Particles.box(BoundingBox.of(existingSelection[0], playerLocation), player.getWorld(), new ParticleData<>(Particle.END_ROD, null, 2), player, 0.2);
+                        ParticleUtil.box(BoundingBox.of(existingSelection[0], playerLocation), player.getWorld(), Particle.END_ROD, player, 0.2);
                     }
                     case "save" -> {
                         if (!cooldown(sender, "LoParkour save schematic", 2500)) {
@@ -514,7 +530,7 @@ public class Command extends ViCommand {
 
                         send(player, ("<dark_red><bold>Schematics <reset><gray>Your schematic is being saved. It will use code <red>'%s'<gray>. " + "You can change the code to whatever you like. " + "Don't forget to add this schematic to <dark_gray>schematics.yml<gray>.").formatted(code));
 
-                        Schematic.save(LoParkour.getInFolder("schematics/parkour-%s".formatted(code)), existingSelection[0], existingSelection[1], LoParkour.getPlugin());
+                        // TODO: LPSchematic.save(file, pos1, pos2);
                     }
                     case "list" -> {
                         send(player, "<dark_red><bold>Schematics <reset><gray>Loaded schematics:");
@@ -588,13 +604,14 @@ public class Command extends ViCommand {
                         return;
                     }
 
-                    Schematic oldSchematic = Schematics.getSchematic(LoParkour.getPlugin(), arg3);
+                    // TODO: Implement schematic loading with LoLib
+                    LPSchematic oldSchematic = null;
                     if (oldSchematic == null) {
                         send(sender, "%sCouldn't find %s".formatted(LoParkour.PREFIX, arg3));
                         return;
                     }
 
-                    oldSchematic.paste(player.getLocation());
+                    // oldSchematic.paste(player.getLocation(), player.getWorld());
                     send(sender, "%sPasted old schematic %s".formatted(LoParkour.PREFIX, arg3));
                 }
             }
@@ -602,6 +619,27 @@ public class Command extends ViCommand {
     }
 
     private void send(CommandSender sender, String message) {
-        sender.sendMessage(Strings.colour(message));
+        sender.sendMessage(ColorUtil.color(message));
+    }
+
+    private final Map<String, Long> cooldowns = new HashMap<>();
+
+    private boolean cooldown(CommandSender sender, String key, long millis) {
+        String fullKey = sender.getName() + ":" + key;
+        long now = System.currentTimeMillis();
+        Long last = cooldowns.get(fullKey);
+
+        if (last != null && now - last < millis) {
+            return false;
+        }
+
+        cooldowns.put(fullKey, now);
+        return true;
+    }
+
+    private List<String> completions(String arg, List<String> completions) {
+        return completions.stream()
+                .filter(s -> s.toLowerCase().startsWith(arg.toLowerCase()))
+                .toList();
     }
 }

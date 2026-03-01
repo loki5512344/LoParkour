@@ -1,8 +1,10 @@
 package dev.loki.loparkour.schematic;
 
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
-import dev.efnilite.vilib.util.Task;
+import dev.lolib.scheduler.Scheduler;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class Schematics {
      * Reads all files.
      */
     public static void init() {
-        Task.create(LoParkour.getPlugin()).async().execute(() -> {
+        Scheduler.get(LoParkour.getPlugin()).runAsync(() -> {
             if (!FOLDER.exists()) {
                 FOLDER.mkdirs();
             }
@@ -38,11 +40,13 @@ public class Schematics {
             }
           
             try {
-                dev.efnilite.vilib.schematic.Schematics.addFromFiles(LoParkour.getPlugin(), files);
-            } catch (IOException | ClassNotFoundException ex) {
-                LoParkour.logging().stack("Error while trying to load schematics", ex);
+                // TODO: Migrate to LoLib schematics
+                // dev.efnilite.vilib.schematic.Schematics.addFromFiles(LoParkour.getPlugin(), files);
+            } catch (Exception ex) {
+                LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
+                        "Error while trying to load schematics", ex);
             }
-        }).run();
+        });
     }
 
     private static void download() {

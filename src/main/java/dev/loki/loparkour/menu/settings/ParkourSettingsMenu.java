@@ -12,14 +12,6 @@ import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.style.RandomStyle;
 import dev.loki.loparkour.style.Style;
-import dev.efnilite.vilib.fastboard.FastBoard;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.inventory.MenuClickEvent;
-import dev.efnilite.vilib.inventory.PagedMenu;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.inventory.item.MenuItem;
-import dev.efnilite.vilib.inventory.item.SliderItem;
-import dev.efnilite.vilib.inventory.item.TimedItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -36,6 +28,8 @@ import java.util.List;
  */
 public class ParkourSettingsMenu extends DynamicMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public ParkourSettingsMenu(ParkourOption... disabled) {
 
         // ---------- top row ----------
@@ -266,23 +260,29 @@ public class ParkourSettingsMenu extends DynamicMenu {
                     .click(event -> Menus.SETTINGS.open(event.getPlayer())),
                 player -> true);
     }
+    */
 
     /**
      * Shows the main menu to a valid ParkourPlayer instance
      *
      * @param user The ParkourPlayer
      */
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(ParkourPlayer user) {
         display(user.player, new Menu(4, Locales.getString(user.locale, "settings.name"))
             .distributeRowEvenly(0, 1, 2, 3)
             .item(27, Locales.getItem(user.locale, "other.close").click(event -> Menus.SETTINGS.open(event.getPlayer()))));
     }
+    */
 
     /**
      * Opens the style menu
      *
      * @param player      The ParkourPlayer instance
      */
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void openStyleMenu(ParkourPlayer player) {
         // init menu
         PagedMenu menu = new PagedMenu(3, Locales.getString(player.locale, ParkourOption.STYLES.path + ".name"));
@@ -314,13 +314,19 @@ public class ParkourSettingsMenu extends DynamicMenu {
                 .item(22, Locales.getItem(player.locale, "other.close").click(event -> open(player)))
                 .open(player.player);
     }
+    */
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     private boolean handleSettingChange(ParkourPlayer player, Runnable onAllowed) {
         onAllowed.run();
         player.updateGeneratorSettings(player.session.generator);
         return true;
     }
+    */
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     private boolean handleScoreSettingChange(ParkourPlayer player, MenuClickEvent event, Runnable onAllowed) {
         if (player.session.generator.score == 0) {
             return handleSettingChange(player, onAllowed);
@@ -331,6 +337,7 @@ public class ParkourSettingsMenu extends DynamicMenu {
         return false;
 
     }
+    */
 
     // replaces true/false with a checkmark and cross
     private String getBooleanSymbol(ParkourUser user, boolean value) {

@@ -6,9 +6,6 @@ import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.PagedMenu;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.util.SkullSetter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -24,30 +21,30 @@ import java.util.List;
  */
 public class PlayerManagementMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(Player p) {
         if (p == null) {
             return;
         }
-
-        ParkourPlayer viewer = ParkourPlayer.getPlayer(p);
-
-        if (viewer == null) {
-            return;
-        }
-
-        Session session = viewer.session;
-
-        PagedMenu menu = new PagedMenu(3, Locales.getString(viewer.locale, "lobby.player_management.name"));
-        add(menu, viewer, session.getPlayers().stream().map(player -> (ParkourUser) player).toList());
-        add(menu, viewer, session.getSpectators().stream().map(player -> (ParkourUser) player).toList());
-
-        menu.displayRows(0, 1)
-                .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
-                .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
-                .item(22, Locales.getItem(viewer.locale, "other.close").click(event -> Menus.LOBBY.open(event.getPlayer())))
-                .open(p);
+        // ParkourPlayer viewer = ParkourPlayer.getPlayer(p);
+        // if (viewer == null) {
+        // return;
+        // }
+        // Session session = viewer.session;
+        // PagedMenu menu = new PagedMenu(3, Locales.getString(viewer.locale, "lobby.player_management.name"));
+        // add(menu, viewer, session.getPlayers().stream().map(player -> (ParkourUser) player).toList());
+        // add(menu, viewer, session.getSpectators().stream().map(player -> (ParkourUser) player).toList());
+        // menu.displayRows(0, 1)
+        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
+        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
+        // .item(22, Locales.getItem(viewer.locale, "other.close").click(event -> Menus.LOBBY.open(event.getPlayer())))
+        // .open(p);
     }
+    */
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     private void add(PagedMenu menu, ParkourUser viewer, Collection<ParkourUser> users) {
         Session session = viewer.session;
 
@@ -115,4 +112,5 @@ public class PlayerManagementMenu {
             menu.addToDisplay(List.of(item));
         }
     }
+    */
 }

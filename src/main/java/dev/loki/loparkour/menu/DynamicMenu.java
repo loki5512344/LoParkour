@@ -1,8 +1,6 @@
 package dev.loki.loparkour.menu;
 
 import dev.loki.loparkour.player.ParkourUser;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.inventory.item.MenuItem;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +27,9 @@ public abstract class DynamicMenu {
      * @param item          The item
      * @param shouldDisplay Whether this item should be displayed right now.
      */
-    public void registerMainItem(int row, int id, BiFunction<@NotNull Player, @Nullable ParkourUser, MenuItem> item, Predicate<Player> shouldDisplay) {
+    // TODO: Migrate to LoLib GUI system
+    /*
+    public void registerMainItem(int row, int id, BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.MenuItem> item, Predicate<Player> shouldDisplay) {
         if (id < 0 || row < 0 || row > 4) {
             return;
         }
@@ -42,6 +42,7 @@ public abstract class DynamicMenu {
 
         registeredItems.put(row, existing);
     }
+    */
 
     /**
      * Opens this dynamic menu to a player
@@ -49,6 +50,8 @@ public abstract class DynamicMenu {
      * @param player The player
      * @param menu   The menu
      */
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void display(Player player, Menu menu) {
         ParkourUser user = ParkourUser.getUser(player);
         for (int row : registeredItems.keySet()) {
@@ -67,10 +70,11 @@ public abstract class DynamicMenu {
 
         menu.open(player);
     }
+    */
 
     /**
      * Data class for registered items
      */
-    protected record ItemContainer(int id, BiFunction<@NotNull Player, @Nullable ParkourUser, MenuItem> item,
+    protected record ItemContainer(int id, BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.MenuItem> item,
                                    Predicate<Player> predicate) {}
 }

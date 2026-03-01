@@ -1,12 +1,14 @@
 package dev.loki.loparkour.mode;
 
+import dev.loki.loparkour.util.Item;
+
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.item.Item;
+
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -30,7 +32,7 @@ public class GravityShiftMode implements Mode {
 
     @Override
     @Nullable
-    public Item getItem(String locale) {
+    public dev.loki.loparkour.util.Item getItem(String locale) {
         return Locales.getItem(locale, "play.single.gravity-shift");
     }
 

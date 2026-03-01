@@ -3,7 +3,7 @@ package dev.loki.loparkour.config;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.reward.Rewards;
 import dev.loki.loparkour.schematic.Schematics;
-import dev.efnilite.vilib.configupdater.ConfigUpdater;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,8 +27,9 @@ public enum Config {
 
     /**
      * The path to this file, incl. plugin folder.
+     * Not final — resolved lazily on first reload() call after plugin instance is set.
      */
-    public final File path;
+    public File path;
     /**
      * The name of this file, e.g. config.yml
      */
@@ -45,21 +46,27 @@ public enum Config {
     Config(String fileName, @Nullable List<String> ignoredSections) {
         this.fileName = fileName;
         this.ignoredSections = ignoredSections;
-        this.path = LoParkour.getInFolder(fileName);
-
-        if (!path.exists()) {
-            LoParkour.getPlugin().saveResource(fileName, false);
-        }
-
-        update();
-        load();
+        // path resolved lazily via getPath() — do NOT call LoParkour.getInFolder() here,
+        // because enum constants are initialized before onEnable() sets the instance.
+        this.path = null; // placeholder; real path resolved on first access
     }
+
+
 
     /**
      * Reloads all config files.
+     * On first call (initialLoad=true) also resolves file paths and saves defaults.
      */
     public static void reload(boolean initialLoad) {
         for (Config config : values()) {
+            if (initialLoad) {
+                // Resolve path now that instance is guaranteed to be set
+                config.path = LoParkour.getInFolder(config.fileName);
+                if (!config.path.exists()) {
+                    LoParkour.getPlugin().saveResource(config.fileName, false);
+                }
+                config.update();
+            }
             config.load();
         }
 
@@ -76,6 +83,7 @@ public enum Config {
      * Loads the file from disk.
      */
     public void load() {
+        if (path == null) return; // not yet initialized, skip
         this.fileConfiguration = YamlConfiguration.loadConfiguration(path);
     }
 
@@ -84,9 +92,10 @@ public enum Config {
      */
     public void update() {
         try {
-            ConfigUpdater.update(LoParkour.getPlugin(), fileName, path, ignoredSections);
+            // TODO: ConfigUpdater.update(LoParkour.getPlugin(), fileName, path, ignoredSections);
         } catch (Exception ex) {
-            LoParkour.logging().stack("Error while trying to update config file", ex);
+            LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
+                    "Error while trying to update config file: " + fileName, ex);
         }
     }
 
@@ -107,7 +116,6 @@ public enum Config {
 
         return fileConfiguration.get(path);
     }
-
 
     /**
      * @param path The path.

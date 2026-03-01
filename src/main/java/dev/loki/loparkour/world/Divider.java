@@ -3,7 +3,7 @@ package dev.loki.loparkour.world;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.util.Locations;
+import dev.loki.loparkour.util.Locations;
 import org.bukkit.Location;
 
 import java.util.HashMap;

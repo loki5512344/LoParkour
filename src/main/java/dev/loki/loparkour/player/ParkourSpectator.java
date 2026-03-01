@@ -1,17 +1,19 @@
 package dev.loki.loparkour.player;
 
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.event.ParkourSpectateEvent;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.util.Strings;
-import dev.efnilite.vilib.util.Task;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.scheduler.Scheduler;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
+import dev.lolib.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +26,7 @@ import java.util.Comparator;
  */
 public class ParkourSpectator extends ParkourUser {
 
-    private final BukkitTask closestChecker;
+    private final dev.lolib.scheduler.ScheduledTask closestChecker;
     /**
      * The closest player.
      */
@@ -38,9 +40,7 @@ public class ParkourSpectator extends ParkourUser {
 
         new ParkourSpectateEvent(this).call();
 
-        Task.create(LoParkour.getPlugin())
-            .delay(1)
-            .execute(() -> {
+        Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 teleport(closest.getLocation());
 
                 sendTranslated("play.spectator.join");
@@ -52,14 +52,9 @@ public class ParkourSpectator extends ParkourUser {
                     player.setInvisible(true);
                     player.setCollidable(false);
                 }
-            })
-            .run();
+            }, 1);
 
-        closestChecker = Task.create(LoParkour.getPlugin())
-            .async()
-            .delay(1)
-            .repeat(10)
-            .execute(() -> {
+        closestChecker = Scheduler.get(LoParkour.getPlugin()).runTimerAsync(() -> {
                 if (session.getPlayers().isEmpty()) {
                     return;
                 }
@@ -67,15 +62,14 @@ public class ParkourSpectator extends ParkourUser {
                 closest = session.getPlayers().stream()
                         .min(Comparator.comparing(other -> other.getLocation().distanceSquared(player.getLocation()))) // x or x^2 doesn't matter in getting smallest
                         .orElse(closest);
-            })
-            .run();
+            }, 1, 10);
     }
 
     /**
      * Updates the spectator's action bar, scoreboard and checks distance.
      */
     public void update() {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Strings.colour(Locales.getString(player, "play.spectator.action_bar"))));
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ColorUtil.color(Locales.getString(player, "play.spectator.action_bar"))));
         player.setGameMode(GameMode.SPECTATOR);
         updateScoreboard(session.generator);
 

@@ -1,5 +1,9 @@
 package dev.loki.loparkour.mode;
 
+import dev.loki.loparkour.util.Item;
+
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
@@ -7,8 +11,8 @@ import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.util.Task;
+
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -33,7 +37,7 @@ public class SpeedrunMode implements Mode {
 
     @Override
     @Nullable
-    public Item getItem(String locale) {
+    public dev.loki.loparkour.util.Item getItem(String locale) {
         return Locales.getItem(locale, "play.single.speedrun");
     }
 
@@ -74,25 +78,19 @@ public class SpeedrunMode implements Mode {
         long removalTime = (long) (blockLifetime * 1000);
         long warningTimeMs = (long) (warningTime * 1000);
 
-        Task.create(LoParkour.getPlugin())
-            .delay((int) ((removalTime - warningTimeMs) / 50))
-            .execute(() -> {
+        Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 if (block.getType() != Material.AIR) {
                     player.player.playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
                     player.player.spawnParticle(Particle.FLAME, block.getLocation().add(0.5, 1, 0.5), 10, 0.3, 0.3, 0.3, 0.01);
                 }
-            })
-            .run();
+            }, warningTimeMs / 50);
 
-        Task.create(LoParkour.getPlugin())
-            .delay((int) (removalTime / 50))
-            .execute(() -> {
+        Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 if (block.getType() != Material.AIR) {
                     block.setType(Material.AIR);
                     blockTimestamps.remove(block);
                 }
-            })
-            .run();
+            }, removalTime / 50);
     }
 
     public void reset() {

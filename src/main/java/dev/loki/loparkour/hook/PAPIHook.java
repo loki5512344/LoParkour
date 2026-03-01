@@ -159,7 +159,6 @@ public class PAPIHook extends PlaceholderExpansion {
         return "?";
     }
 
-
     private String getInfiniteScore(String rankData, Function<Score, ?> f) {
         int rank;
         Leaderboard leaderboard = null;

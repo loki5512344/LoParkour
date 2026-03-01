@@ -3,9 +3,6 @@ package dev.loki.loparkour.menu.settings;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.player.ParkourPlayer;
-import dev.efnilite.vilib.inventory.PagedMenu;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.inventory.item.MenuItem;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -18,29 +15,28 @@ public class LangMenu {
      *
      * @param user The ParkourPlayer instance
      */
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(ParkourPlayer user) {
         if (user == null) {
             return;
         }
-
-        PagedMenu style = new PagedMenu(3, Locales.getString(user.locale, "settings.lang.name"));
-
-        List<MenuItem> items = new ArrayList<>();
-        for (String lang : Locales.locales.keySet()) {
-            Item item = new Item(Material.PAPER, "<#238681><bold>" + Locales.getString(lang, "name"));
-
-            items.add(item.click(event -> {
-                user.locale = lang;
-                user._locale = lang;
-                Menus.SETTINGS.open(event.getPlayer());
-            }));
-        }
-
-        style.displayRows(0, 1).addToDisplay(items)
-                .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> style.page(1)))
-                .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> style.page(-1)))
-                .item(22, Locales.getItem(user.locale, "other.close").click(event -> Menus.SETTINGS.open(event.getPlayer())))
-                .open(user.player);
+        // PagedMenu style = new PagedMenu(3, Locales.getString(user.locale, "settings.lang.name"));
+        // List<MenuItem> items = new ArrayList<>();
+        // for (String lang : Locales.locales.keySet()) {
+        // Item item = new Item(Material.PAPER, "<#238681><bold>" + Locales.getString(lang, "name"));
+        // items.add(item.click(event -> {
+        // user.locale = lang;
+        // user._locale = lang;
+        // Menus.SETTINGS.open(event.getPlayer());
+        // }));
+        // }
+        // style.displayRows(0, 1).addToDisplay(items)
+        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> style.page(1)))
+        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> style.page(-1)))
+        // .item(22, Locales.getItem(user.locale, "other.close").click(event -> Menus.SETTINGS.open(event.getPlayer())))
+        // .open(user.player);
     }
+    */
 
 }

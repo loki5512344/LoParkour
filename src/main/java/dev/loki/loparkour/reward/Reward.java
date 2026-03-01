@@ -62,7 +62,7 @@ public record Reward(@NotNull String string) {
             try {
                 VaultHook.deposit(player.player, Double.parseDouble(string));
             } catch (NumberFormatException ex) {
-                LoParkour.logging().stack("Error while trying to process Vault reward", "check your rewards file for incorrect numbers", ex);
+                LoParkour.getPlugin().getLogger().severe("Error while trying to process Vault reward - check your rewards file for incorrect numbers - " + ex.getMessage());
             }
         } else {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), string);

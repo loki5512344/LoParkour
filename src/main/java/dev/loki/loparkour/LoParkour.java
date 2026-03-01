@@ -18,12 +18,13 @@ import dev.loki.loparkour.reward.Rewards;
 import dev.loki.loparkour.schematic.lpschem.LPSchematicManager;
 import dev.loki.loparkour.storage.Storage;
 import dev.loki.loparkour.world.World;
-import dev.efnilite.vilib.ViPlugin;
+import dev.lolib.core.LoPlugin;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.util.Logging;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -33,12 +34,16 @@ import java.io.File;
  *
  * @author loki
  */
-public final class LoParkour extends ViPlugin {
+public final class LoParkour extends LoPlugin {
 
     public static final String NAME = "&#FF6464<bold>LoParkour<reset>";
     public static final String PREFIX = NAME + " &#404040» &#A0A0A0";
 
-    private static Logging logging;
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    
+    public static Gson getGson() {
+        return gson;
+    }
     private static LoParkour instance;
     private static LPSchematicManager schematicManager;
 
@@ -47,7 +52,7 @@ public final class LoParkour extends ViPlugin {
 
     public static void log(String message) {
         if (Config.CONFIG.getBoolean("debug")) {
-            logging.info("[Debug] " + message);
+            LoParkour.getPlugin().getLogger().info("[Debug] " + message);
         }
     }
 
@@ -62,9 +67,7 @@ public final class LoParkour extends ViPlugin {
     /**
      * @return This plugin's {@link Logging} instance.
      */
-    public static Logging logging() {
-        return logging;
-    }
+    
 
     /**
      * @return The plugin instance.
@@ -82,66 +85,72 @@ public final class LoParkour extends ViPlugin {
         return schematicManager;
     }
 
+    
+
     @Override
-    public void onLoad() {
+    public void onEnable() {
         instance = this;
-        logging = new Logging(this);
+        super.onEnable();
     }
 
     @Override
     public void enable() {
+        loadConfigs();
+        loadSchematics();
+        registerModes();
+        registerHooks();
+        setupWorld();
+        registerEventsAndCommands();
+        setupMetrics();
+    }
 
-        // ----- Configurations -----
-
+    private void loadConfigs() {
         Config.reload(true);
+    }
 
-        // ----- Schematics -----
-
+    private void loadSchematics() {
         schematicManager = new LPSchematicManager();
         schematicManager.loadAll();
+    }
 
-        // ----- Registry -----
-
+    private void registerModes() {
         Registry.register(new DefaultMode());
         Registry.register(new SpectatorMode());
         Registry.register(new SpeedrunMode());
         Registry.register(new GravityShiftMode());
         Registry.register(new HardcoreMode());
         Registry.register(new ElytraMode());
-
         Modes.init();
-        Menu.init(this);
+    }
 
-        // hook with hd / papi after gamemode leaderboards have initialized
+    private void registerHooks() {
         if (getServer().getPluginManager().isPluginEnabled("HolographicDisplays")) {
-            logging.info("Registered Holographic Displays hook");
+            getLogger().info("Registered Holographic Displays hook");
             HoloHook.init();
         }
-
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            logging.info("Registered PlaceholderAPI hook");
+            getLogger().info("Registered PlaceholderAPI hook");
             placeholderHook = new PAPIHook();
             placeholderHook.register();
         }
-
         if (Config.CONFIG.getBoolean("bungeecord.enabled")) {
             getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-            logging.info("Registered BungeeCord hook");
+            getLogger().info("Registered BungeeCord hook");
         }
+    }
 
-        // ----- Worlds -----
-
+    private void setupWorld() {
         if (Config.CONFIG.getBoolean("joining")) {
             World.create();
         }
+    }
 
-        // ----- Events -----
+    private void registerEventsAndCommands() {
+        getServer().getPluginManager().registerEvents(new Events(), this);
+        getCommand("LoParkour").setExecutor(new Command());
+    }
 
-        registerListener(new Events());
-        registerCommand("LoParkour", new Command());
-
-        // ----- Metrics -----
-
+    private void setupMetrics() {
         Metrics metrics = new Metrics(this, 29754);
         metrics.addCustomChart(new SimplePie("using_sql", () -> Boolean.toString(Option.SQL)));
         metrics.addCustomChart(new SimplePie("using_rewards", () -> Boolean.toString(Rewards.REWARDS_ENABLED)));

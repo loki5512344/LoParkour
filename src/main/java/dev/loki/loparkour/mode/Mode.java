@@ -1,7 +1,7 @@
 package dev.loki.loparkour.mode;
 
 import dev.loki.loparkour.leaderboard.Leaderboard;
-import dev.efnilite.vilib.inventory.item.Item;
+
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public interface Mode {
      * @param locale The locale of the menu, used to adjust the name.
      * @return The item used in menus to show this mode. If this item is null, the mode won't be displayed.
      */
-    @Nullable Item getItem(String locale);
+    @Nullable dev.loki.loparkour.util.Item getItem(String locale);
 
     /**
      * @return The {@link Leaderboard} that belongs to this mode

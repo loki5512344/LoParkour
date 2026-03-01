@@ -1,8 +1,10 @@
 package dev.loki.loparkour.player.data;
 
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
-import dev.efnilite.vilib.util.Task;
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -46,7 +48,7 @@ public class InventoryData {
             return;
         }
 
-        Task.create(LoParkour.getPlugin()).async().execute(() -> loadFile(onFinish)).run();
+        Scheduler.get(LoParkour.getPlugin()).runAsync(() -> loadFile(onFinish));
     }
 
     @SuppressWarnings("unchecked")
@@ -56,7 +58,7 @@ public class InventoryData {
 
             onFinish.accept(this);
         } catch (IOException | ClassNotFoundException ex) {
-            LoParkour.logging().stack("Error while reading inventory of %s from file %s".formatted(player.getName(), file.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while reading inventory of %s from file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
             onFinish.accept(null);
         }
     }
@@ -84,7 +86,7 @@ public class InventoryData {
         }
 
         if (toFile) {
-            Task.create(LoParkour.getPlugin()).async().execute(this::saveFile).run();
+            Scheduler.get(LoParkour.getPlugin()).runAsync(this::saveFile);
         }
     }
 
@@ -93,14 +95,14 @@ public class InventoryData {
             file.getParentFile().mkdirs();
             file.createNewFile();
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while creating file to save inventory of %s to file %s".formatted(player.getName(), file.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while creating file to save inventory of %s to file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
         }
 
         try (ObjectOutputStream stream = new BukkitObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
             stream.writeObject(items);
             stream.flush();
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while saving inventory of %s to file %s".formatted(player.getName(), file.getName()), ex);
+            LoParkour.getPlugin().getLogger().severe("Error while saving inventory of %s to file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
         }
     }
 }

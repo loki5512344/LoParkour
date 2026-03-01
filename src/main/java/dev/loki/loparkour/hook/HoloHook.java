@@ -16,10 +16,10 @@ public class HoloHook {
         try {
             Class.forName("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI");
         } catch (Exception ex) {
-            LoParkour.logging().warn("##");
-            LoParkour.logging().warn("## LoParkour only supports Holographic Displays v3.0.0 or higher!");
-            LoParkour.logging().warn("## This hook will now be disabled.");
-            LoParkour.logging().warn("##");
+            LoParkour.getPlugin().getLogger().warning("##");
+            LoParkour.getPlugin().getLogger().warning("## LoParkour only supports Holographic Displays v3.0.0 or higher!");
+            LoParkour.getPlugin().getLogger().warning("## This hook will now be disabled.");
+            LoParkour.getPlugin().getLogger().warning("##");
             return;
         }
 

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  *     <li>For player spectating, please view {@link dev.efnilite.LoParkour.player.ParkourSpectator}.</li>
  *     <li>For events, please view {@link ParkourBlockGenerateEvent} and others in the events package.</li>
  *     <li>For Sessions, please view {@link dev.efnilite.LoParkour.session.Session}.</li>
- *     <li>For Schematics, please view {@link dev.efnilite.LoParkour.schematic.Schematic}</li>
+ *     <li>For Schematics, please view {@link dev.efnilite.LoParkour.schematic.LPSchematic}</li>
  * </ul>
  */
 @SuppressWarnings("unused")

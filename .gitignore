@@ -63,8 +63,5 @@ test-output/
 # Modrinth files (local only)
 modrinth/
 
-# TODO file (local only)
-TODO.md
-
-# API documentation (local only)
+# LoLib API Documentation (не нужно в репозитории)
 api_docs/

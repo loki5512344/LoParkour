@@ -7,8 +7,6 @@ import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.Menu;
-import dev.efnilite.vilib.inventory.item.SliderItem;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -18,6 +16,8 @@ import java.util.List;
  */
 public class SettingsMenu extends DynamicMenu {
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public SettingsMenu() {
         registerMainItem(1, 0, (player, user) -> Locales.getItem(player, "settings.parkour_settings.item").click(event -> {
             ParkourPlayer pp = ParkourPlayer.getPlayer(event.getPlayer());
@@ -68,8 +68,12 @@ public class SettingsMenu extends DynamicMenu {
 
         registerMainItem(2, 0, (player, user) -> Locales.getItem(player, "other.close").click(event -> event.getPlayer().closeInventory()), player -> true);
     }
+    */
 
+    // TODO: Migrate to LoLib GUI system
+    /*
     public void open(Player player) {
         display(player, new Menu(3, Locales.getString(player, "settings.name")).distributeRowsEvenly());
     }
+    */
 }

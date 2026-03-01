@@ -1,5 +1,7 @@
 package dev.loki.loparkour.mode;
 
+import dev.loki.loparkour.util.Item;
+
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.leaderboard.Leaderboard;
@@ -8,8 +10,8 @@ import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.util.Strings;
+
+import dev.loki.loparkour.util.ColorUtil;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +25,7 @@ public class SpectatorMode implements Mode {
 
     @Override
     @Nullable
-    public Item getItem(String locale) {
+    public dev.loki.loparkour.util.Item getItem(String locale) {
         return null;
     }
 
@@ -35,12 +37,14 @@ public class SpectatorMode implements Mode {
 
     @Override
     public void create(Player player) {
-        Menus.SPECTATOR.open(player);
+        // TODO: Migrate to LoLib GUI
+                // Menus.SPECTATOR.open(player);
+                player.sendMessage("§cМеню временно недоступно во время миграции");
     }
 
     public void create(Player player, Session session) {
         if (!Config.CONFIG.getBoolean("joining")) {
-            player.sendMessage(Strings.colour("<red><bold>Joining is currently disabled."));
+            player.sendMessage(ColorUtil.color("<red><bold>Joining is currently disabled."));
             return;
         }
         if (!ParkourOption.SPECTATOR.mayPerform(player)) {

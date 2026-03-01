@@ -1,12 +1,14 @@
 package dev.loki.loparkour.ghost;
 
+import dev.lolib.scheduler.Scheduler;
+
 import dev.loki.loparkour.LoParkour;
-import dev.efnilite.vilib.util.Task;
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
-import org.bukkit.scheduler.BukkitTask;
+import dev.lolib.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
 
 public class GhostPlayer {
@@ -14,7 +16,7 @@ public class GhostPlayer {
     private final GhostData data;
     private final World world;
     private ArmorStand entity;
-    private BukkitTask task;
+    private dev.lolib.scheduler.ScheduledTask task;
     private int currentFrame = 0;
     private long startTime;
 
@@ -38,10 +40,7 @@ public class GhostPlayer {
         startTime = System.currentTimeMillis();
         currentFrame = 0;
 
-        task = Task.create(LoParkour.getPlugin())
-            .repeat(1)
-            .execute(this::update)
-            .run();
+        task = Scheduler.get(LoParkour.getPlugin()).runTimer(this::update, 0, 1);
     }
 
     private void update() {

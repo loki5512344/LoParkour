@@ -1,9 +1,11 @@
 package dev.loki.loparkour.generator;
 
+import java.util.ArrayList;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.session.Session;
-import dev.efnilite.vilib.schematic.Schematic;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -28,14 +30,14 @@ public final class Island {
     /**
      * The schematic.
      */
-    public final Schematic schematic;
+    public final dev.loki.loparkour.schematic.lpschem.LPSchematic schematic;
 
     /**
      * The blocks that have been affected by the schematic.
      */
     public List<Block> blocks;
 
-    public Island(@NotNull Session session, @Nullable Schematic schematic) {
+    public Island(@NotNull Session session, @Nullable dev.loki.loparkour.schematic.lpschem.LPSchematic schematic) {
         this.session = session;
         this.schematic = schematic;
     }
@@ -49,7 +51,7 @@ public final class Island {
         }
         LoParkour.log("Building island");
 
-        blocks = schematic.paste(location.subtract(0, schematic.getDimensions().getY(), 0));
+        blocks = new ArrayList<>(); // TODO: schematic.paste(location, world)
 
         Material playerMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.spawn.player-block").toUpperCase());
         Material parkourMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.parkour.begin-block").toUpperCase());
@@ -69,8 +71,7 @@ public final class Island {
             session.generator.startTick();
             session.getPlayers().forEach(pp -> pp.setup(ps));
         } catch (NoSuchElementException ex) {
-            LoParkour.logging().stack("Error while trying to find parkour or player spawn in schematic %s".formatted(schematic.getFile().getName()),
-                    "check if you used the same material as the one in generation.yml", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to find parkour or player spawn in schematic %s - check if you used the same material as the one in generation.yml - ".formatted("schematic") + ex.getMessage());
 
             blocks.forEach(block -> block.setType(Material.AIR));
         }

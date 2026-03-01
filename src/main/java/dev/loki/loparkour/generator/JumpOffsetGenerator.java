@@ -1,7 +1,6 @@
 package dev.loki.loparkour.generator;
 
-import dev.efnilite.vilib.util.Colls;
-import dev.efnilite.vilib.util.Probs;
+import dev.loki.loparkour.util.Probs;
 
 import java.util.Map;
 import java.util.Random;
@@ -53,11 +52,14 @@ public class JumpOffsetGenerator {
      * @return A random jump-able offset.
      */
     public int getRandomOffset(double mean, double standardDeviation, Random random) {
-        Map<Integer, Double> distribution = Colls.range(-maxOffset, maxOffset + 1)
-                .stream()
-                .collect(Collectors.toMap(offset -> offset, offset -> Probs.normalpdf(mean, standardDeviation, offset)));
+        Map<Double, Double> distribution = java.util.stream.IntStream.range(-maxOffset, maxOffset + 1)
+                .boxed()
+                .collect(Collectors.toMap(
+                    offset -> (double) offset, 
+                    offset -> Probs.normalpdf(mean, standardDeviation, (double) offset)
+                ));
 
-        return Probs.random(distribution, random);
+        return (int) (double) Probs.random(distribution, random);
     }
 
     /**

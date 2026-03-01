@@ -1,10 +1,14 @@
 package dev.loki.loparkour.config;
 
+import java.util.ArrayList;
+
+import dev.loki.loparkour.util.Item;
+
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.efnilite.vilib.inventory.item.Item;
-import dev.efnilite.vilib.util.Task;
+
+import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,7 +48,7 @@ public class Locales {
     public static void init() {
         Plugin plugin = LoParkour.getPlugin();
 
-        Task.create(plugin).async().execute(() -> {
+        Scheduler.get(plugin).runAsync(() -> {
             locales.clear();
 
             FileConfiguration embedded = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
@@ -86,9 +90,9 @@ public class Locales {
                     locales.put(locale, config);
                 });
             } catch (Exception ex) {
-                LoParkour.logging().stack("Error while trying to read locale files", "restart/reload your server", ex);
+                LoParkour.getPlugin().getLogger().severe("Error while trying to read locale files - restart/reload your server - " + ex.getMessage());
             }
-        }).run();
+        });
     }
 
     // validates whether a lang file contains all required keys.
@@ -111,7 +115,7 @@ public class Locales {
         try {
             user.save(localPath);
         } catch (IOException ex) {
-            LoParkour.logging().stack("Error while trying to save fixed config file %s".formatted(localPath), "delete this file and restart your server", ex);
+            LoParkour.getPlugin().getLogger().severe("Error while trying to save fixed config file %s - delete this file and restart your server - ".formatted(localPath) + ex.getMessage());
         }
     }
 
@@ -244,7 +248,7 @@ public class Locales {
         }
 
         if (modelId != -1) {
-            item.modelId(modelId);
+            // TODO: item.setCustomModelData(modelId);
         }
 
         return item;
