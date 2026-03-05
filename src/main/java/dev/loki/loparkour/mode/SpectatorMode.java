@@ -37,9 +37,7 @@ public class SpectatorMode implements Mode {
 
     @Override
     public void create(Player player) {
-        // TODO: Migrate to LoLib GUI
-                // Menus.SPECTATOR.open(player);
-                player.sendMessage("§cМеню временно недоступно во время миграции");
+        Menus.SPECTATOR.open(player);
     }
 
     public void create(Player player, Session session) {

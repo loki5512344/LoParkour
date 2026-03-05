@@ -72,6 +72,10 @@ dependencies {
     // Spigot API
     compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
     
+    // Adventure API (for Component)
+    compileOnly("net.kyori:adventure-api:4.14.0")
+    compileOnly("net.kyori:adventure-text-minimessage:4.14.0")
+    
     // LoLib Core
     implementation(files("libs/lolib-2.0.1.jar"))
     

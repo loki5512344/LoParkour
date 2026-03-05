@@ -1,16 +1,9 @@
 package dev.loki.loparkour.generator;
 
-import java.util.ArrayList;
-
-import dev.loki.loparkour.util.ParticleData;
-
 import dev.lolib.scheduler.Scheduler;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
-import dev.loki.loparkour.api.event.ParkourBlockGenerateEvent;
 import dev.loki.loparkour.api.event.ParkourFallEvent;
-import dev.loki.loparkour.api.event.ParkourSchematicGenerateEvent;
 import dev.loki.loparkour.api.event.ParkourScoreEvent;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Option;
@@ -22,23 +15,13 @@ import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.reward.Rewards;
+import dev.loki.loparkour.schematic.lpschem.LPSchematic;
 import dev.loki.loparkour.session.Session;
-import dev.loki.loparkour.style.Style;
 import dev.loki.loparkour.world.Divider;
-
-import dev.loki.loparkour.util.ParticleUtil;
-
-import dev.loki.loparkour.util.Locations;
-import dev.loki.loparkour.util.Probs;
-import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Fence;
-import org.bukkit.block.data.type.GlassPane;
-import dev.lolib.scheduler.ScheduledTask;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,98 +32,102 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * The class that generates the parkour, which each {@link ParkourPlayer} has.
+ * Coordinates parkour generation, ticking, scoring, and reset.
  *
- * @author loki
- * @since 5.0.0
+ * Heavy lifting is delegated to:
+ * <ul>
+ *   <li>{@link BlockPlacer}   – block selection &amp; placement</li>
+ *   <li>{@link EffectManager} – particles &amp; sounds</li>
+ * </ul>
  */
 public class ParkourGenerator {
 
     public static final int BLOCK_TRAIL = 2;
 
+    // ── State ──────────────────────────────────────────────────────────────────
     public int score = 0;
     public int totalScore = 0;
-    public int schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
+    public int schematicCooldown;
     public boolean stopped = false;
 
     public Location[] zone;
     public ParkourPlayer player;
     public dev.lolib.scheduler.ScheduledTask task;
-
     private dev.lolib.scheduler.ScheduledTask cleanupTask;
 
     public Location blockSpawn;
-
-    /**
-     * Where the player spawns on reset
-     */
     public Location playerSpawn;
-
-    /**
-     * Instant when run started.
-     */
     public Instant start;
-
-    /**
-     * The direction of the parkour
-     */
     public Vector heading = Option.HEADING.getDirection();
 
-    /**
-     * Generator options
-     */
     public final List<GeneratorOption> generatorOptions;
-
-    /**
-     * The {@link Session} associated with this Generator.
-     */
     public final Session session;
-
-    /**
-     * This Generator's {@link Profile}.
-     */
     public final Profile profile = new Profile();
-
     public final Island island;
-    public final Map<Integer, Double> distanceChances = new HashMap<>();
-    public final Map<Integer, Double> heightChances = new HashMap<>();
-    public final Map<BlockData, Double> specialChances = new HashMap<>();
-    public final Map<BlockGenerationType, Double> defaultChances = new HashMap<>();
 
-    protected boolean deleteSchematic = false;
-    protected boolean waitForSchematicCompletion = false;
-    protected Location lastStandingPlayerLocation;
-    protected List<Block> schematicBlocks = new ArrayList<>();
-    protected int lastPositionIndexPlayer = -1;
-    protected List<Block> history = new LinkedList<>();
+    // Chance maps – populated by calculateChances()
+    public final Map<Integer, Double>               distanceChances = new HashMap<>();
+    public final Map<Integer, Double>               heightChances   = new HashMap<>();
+    public final Map<BlockData, Double>             specialChances  = new HashMap<>();
+    public final Map<BlockGenerationType, Double>   defaultChances  = new HashMap<>();
 
-    public ParkourGenerator(@NotNull Session session, @Nullable dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, GeneratorOption... generatorOptions) {
+    // Schematic state
+    public boolean deleteSchematic = false;
+    public boolean waitForSchematicCompletion = false;
+    public List<Block> schematicBlocks = new ArrayList<>();
+
+    // History
+    public List<Block> history = new LinkedList<>();
+    public int lastPositionIndexPlayer = -1;
+    public Location lastStandingPlayerLocation;
+
+    // Delegates
+    public final EffectManager effects;
+    public final BlockPlacer placer;
+
+    // ── Constructors ───────────────────────────────────────────────────────────
+
+    public ParkourGenerator(@NotNull Session session, @Nullable LPSchematic schematic,
+                            GeneratorOption... generatorOptions) {
         this.session = session;
         this.generatorOptions = Arrays.asList(generatorOptions);
-
-        player = session.getPlayers().get(0);
-        island = new Island(session, schematic);
-        zone = Divider.toSelection(session);
-
+        this.player = session.getPlayers().get(0);
+        this.island = new Island(session, schematic);
+        this.zone = Divider.toSelection(session);
+        this.schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
+        this.effects = new EffectManager(this);
+        this.placer  = new BlockPlacer(this);
         calculateChances();
     }
 
     public ParkourGenerator(@NotNull Session session, GeneratorOption... generatorOptions) {
-        // TODO: Implement schematic loading with LoLib
-        this(session, null, generatorOptions);
+        this(session, loadIslandSchematic(), generatorOptions);
     }
 
-    public void overrideProfile() { }
+    private static LPSchematic loadIslandSchematic() {
+        String name = Config.GENERATION.getString("advanced.island.schematic-name");
+        if (name == null || name.isEmpty()) return null;
+        var manager = LoParkour.getSchematicManager();
+        if (manager == null) return null;
+        LPSchematic s = manager.getSchematic(name);
+        if (s == null) LoParkour.getPlugin().getLogger()
+                .warning("Island schematic '%s' not found!".formatted(name));
+        return s;
+    }
+
+    public void overrideProfile() {}
+
+    // ── Chances ────────────────────────────────────────────────────────────────
 
     protected void calculateChances() {
         defaultChances.clear();
-        defaultChances.put(BlockGenerationType.DEFAULT, Option.TYPE_NORMAL);
+        defaultChances.put(BlockGenerationType.DEFAULT,   Option.TYPE_NORMAL);
         defaultChances.put(BlockGenerationType.SCHEMATIC, Option.TYPE_SCHEMATICS);
-        defaultChances.put(BlockGenerationType.SPECIAL, Option.TYPE_SPECIAL);
+        defaultChances.put(BlockGenerationType.SPECIAL,   Option.TYPE_SPECIAL);
 
         heightChances.clear();
-        heightChances.put(1, Option.NORMAL_HEIGHT_1);
-        heightChances.put(0, Option.NORMAL_HEIGHT_0);
+        heightChances.put( 1, Option.NORMAL_HEIGHT_1);
+        heightChances.put( 0, Option.NORMAL_HEIGHT_0);
         heightChances.put(-1, Option.NORMAL_HEIGHT_NEG1);
         heightChances.put(-2, Option.NORMAL_HEIGHT_NEG2);
 
@@ -151,208 +138,47 @@ public class ParkourGenerator {
         distanceChances.put(4, Option.NORMAL_DISTANCE_4);
 
         specialChances.clear();
-        specialChances.put(Material.PACKED_ICE.createBlockData(), Option.SPECIAL_ICE);
+        specialChances.put(Material.PACKED_ICE.createBlockData(),                        Option.SPECIAL_ICE);
         specialChances.put(Material.SMOOTH_QUARTZ_SLAB.createBlockData("[type=bottom]"), Option.SPECIAL_SLAB);
-        specialChances.put(Material.GLASS_PANE.createBlockData(), Option.SPECIAL_PANE);
-        specialChances.put(Material.OAK_FENCE.createBlockData(), Option.SPECIAL_FENCE);
+        specialChances.put(Material.GLASS_PANE.createBlockData(),                        Option.SPECIAL_PANE);
+        specialChances.put(Material.OAK_FENCE.createBlockData(),                         Option.SPECIAL_FENCE);
     }
 
-    /**
-     * Generates particles around blocks.
-     *
-     * @param blocks The blocks.
-     */
-    protected void particles(List<Block> blocks) {
-        if (!profile.get("particles").asBoolean()) {
-            return;
-        }
+    // ── Generation (delegates) ─────────────────────────────────────────────────
 
-        ParticleData<?> data = Option.PARTICLE_DATA;
-        List<Location> locations = blocks.stream().map(Block::getLocation).toList();
-        Location max = locations.stream().reduce(Locations::max).orElseThrow();
-        Location min = locations.stream().reduce(Locations::min).orElseThrow();
-        Location center = min.clone().add(max.clone().subtract(min));
+    public void generate()              { placer.generate(); }
+    public void generate(int amount)    { placer.generate(amount); }
 
-        // display particle
-        switch (Option.PARTICLE_SHAPE) {
-            case DOT -> {} // TODO: ParticleUtil.draw
-            case CIRCLE -> {} // TODO: ParticleUtil.circle
-            case BOX -> {} // TODO: ParticleUtil.box
-        }
+    public void generateFirst(Location spawn, Location block) {
+        placer.generateFirst(spawn, block);
     }
 
-    /**
-     * Generates sound around blocks.
-     *
-     * @param blocks The blocks.
-     */
-    protected void sound(List<Block> blocks) {
-        if (!profile.get("sound").asBoolean()) {
-            return;
-        }
-
-        // play sound
-        getPlayers().forEach(viewer -> viewer.player.playSound(blocks.get(0).getLocation(), Option.SOUND_TYPE, Option.SOUND_VOLUME, Option.SOUND_PITCH));
-        getSpectators().forEach(viewer -> viewer.player.playSound(blocks.get(0).getLocation(), Option.SOUND_TYPE, Option.SOUND_VOLUME, Option.SOUND_PITCH));
-    }
-
-    protected BlockData selectBlockData() {
-        Style style = Registry.getStyle(profile.get("style").value());
-
-        if (style == null) {
-            profile.set("style", Registry.getStyles().stream()
-                    .findFirst()
-                    .orElseThrow()
-                    .getName());
-            return selectBlockData();
-        }
-
-        return style.getNext().createBlockData();
-    }
-
-    protected List<Block> selectBlocks() {
-        int height = Probs.random(heightChances);
-        int distance = Probs.random(distanceChances);
-
-        return List.of(selectNext(getLatest(), distance, height));
-    }
-
-    // Selects the next block that will continue the parkour.
-    // This is done by choosing a random value for the sideways movement.
-    // Based on this sideways movement, a value for forward movement will be chosen.
-    // This is done to ensure players are able to complete the jump.
-    protected Block selectNext(Block current, int distance, int height) {
-        JumpDirector director = new JumpDirector(BoundingBox.of(zone[0], zone[1]), getLatest().getLocation().toVector());
-
-        heading = director.getRecommendedHeading(heading);
-        height = director.getRecommendedHeight(height);
-
-        // ensure special is possible
-        switch (getLatest().getType()) {
-            case SMOOTH_QUARTZ_SLAB -> height = Math.min(height, 0);
-            case GLASS_PANE -> distance = Math.min(distance, 3);
-        }
-
-        if (height > 0) {
-            distance = Math.max(distance - height, 1);
-        }
-
-        double mean = 0;
-        double standardDeviation = generatorOptions.contains(GeneratorOption.REDUCE_RANDOM_BLOCK_SELECTION_ANGLE) ? 0.5 : 1;
-
-        int randomOffset = new JumpOffsetGenerator(height, distance).getRandomOffset(mean, standardDeviation);
-
-        Vector offset = heading.clone()
-                .multiply(distance + 1)
-                .setY(height);
-        if (offset.getX() == 0) {
-            offset.setX(randomOffset);
-        } else {
-            offset.setZ(randomOffset);
-        }
-
-        // rotate offset to match heading
-        offset.rotateAroundY(angleInY(heading, Option.HEADING.getDirection()));
-
-        return current.getLocation().add(offset).getBlock();
-    }
-
-    protected void score() {
-        score++;
-        totalScore++;
-
-        checkRewards();
-        new ParkourScoreEvent(player).call();
-    }
-
-    private void checkRewards() {
-        if (!Rewards.REWARDS_ENABLED || score == 0) {
-            return;
-        }
-
-        // check generic score rewards
-        if (Rewards.SCORE_REWARDS.containsKey(score)) {
-            Rewards.SCORE_REWARDS.get(score).forEach(s -> s.execute(player, getMode()));
-        }
-
-        // gets the correct type of score to check based on the config option
-        int intervalScore = Config.CONFIG.getBoolean("scoring.rewards-use-total-score") ? totalScore : score;
-        for (int interval : Rewards.INTERVAL_REWARDS.keySet()) {
-            if (intervalScore % interval != 0) {
-                continue;
-            }
-
-            Rewards.INTERVAL_REWARDS.get(interval).forEach(s -> s.execute(player, getMode()));
-        }
-
-        if (Rewards.ONE_TIME_REWARDS.containsKey(score) && !player.collectedRewards.contains(Integer.toString(score))) {
-            Rewards.ONE_TIME_REWARDS.get(score).forEach(s -> s.execute(player, getMode()));
-            player.collectedRewards.add(Integer.toString(score));
-        }
-    }
-
-    protected void fall() {
-        new ParkourFallEvent(player).call();
-        reset(true);
-    }
-
-    public void menu(ParkourPlayer player) {
-        // TODO: Migrate to LoLib GUI system
-        // Menus.PARKOUR_SETTINGS.open(player);
-        player.sendTranslated("other.menu-unavailable");
-    }
+    // ── Tick ───────────────────────────────────────────────────────────────────
 
     public void startTick() {
-        task = Scheduler.get(LoParkour.getPlugin()).runTimer(this::tick, 0, 1);
+        task        = Scheduler.get(LoParkour.getPlugin()).runTimer(this::tick, 0, 1);
         cleanupTask = Scheduler.get(LoParkour.getPlugin()).runTimer(this::cleanupDistantBlocks, 0, Option.CLEANUP_INTERVAL);
     }
 
-    /**
-     * Starts the check
-     */
     public void tick() {
-        if (stopped) {
-            task.cancel();
-            if (cleanupTask != null) {
-                cleanupTask.cancel();
-            }
-            return;
-        }
+        if (stopped) { task.cancel(); if (cleanupTask != null) cleanupTask.cancel(); return; }
 
-        getPlayers().forEach(other -> {
-            updateVisualTime(other, other.selectedTime);
-            other.updateScoreboard(this);
-            other.player.setSaturation(20);
+        getPlayers().forEach(p -> {
+            updateVisualTime(p, p.selectedTime);
+            p.updateScoreboard(this);
+            p.player.setSaturation(20);
         });
-
         getSpectators().forEach(ParkourSpectator::update);
 
-        if (player.getLocation().getWorld() != lastStandingPlayerLocation.getWorld()) {
-            return;
-        }
+        if (player.getLocation().getWorld() != lastStandingPlayerLocation.getWorld()) return;
+        if (player.getLocation().subtract(lastStandingPlayerLocation).getY() < -10) { fall(); return; }
 
-        if (player.getLocation().subtract(lastStandingPlayerLocation).getY() < -10) { // fall check
-            LoParkour.log("Player %s is falling".formatted(player.getName()));
+        Block below = blockBelow();
+        if (below == null) return;
 
-            fall();
-            return;
-        }
-
-        Location belowPlayer = player.getLocation().subtract(0, 1, 0);
-        Block blockBelowPlayer = belowPlayer.getBlock(); // Get the block below
-
-        if (blockBelowPlayer.getType() == Material.AIR) {
-            if (belowPlayer.subtract(0, 0.5, 0).getBlock().getType() == Material.AIR) {
-                return;
-            }
-            blockBelowPlayer = belowPlayer.getBlock();
-        }
-
-        if (schematicBlocks.contains(blockBelowPlayer) && blockBelowPlayer.getType() == Material.RED_WOOL && !deleteSchematic) { // Structure deletion check
-            for (int i = 0; i < profile.get("schematicDifficulty").asDouble() * 15; i++) {
-                score();
-            }
-
+        // Schematic end block
+        if (schematicBlocks.contains(below) && below.getType() == Material.RED_WOOL && !deleteSchematic) {
+            for (int i = 0; i < profile.get("schematicDifficulty").asDouble() * 15; i++) score();
             waitForSchematicCompletion = false;
             schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
             generate(profile.get("blockLead").asInt());
@@ -360,365 +186,194 @@ public class ParkourGenerator {
             return;
         }
 
-        if (!history.contains(blockBelowPlayer)) {
-            return; // player is on an unknown block
-        }
+        if (!history.contains(below)) return;
 
-        int currentIndex = history.indexOf(blockBelowPlayer); // current index of the player
-        int deltaFromLast = currentIndex - lastPositionIndexPlayer;
-
-        if (deltaFromLast <= 0) { // the player is actually making progress and not going backwards (current index is higher than the previous)
-            return;
-        }
+        int idx   = history.indexOf(below);
+        int delta = idx - lastPositionIndexPlayer;
+        if (delta <= 0) return;
 
         lastStandingPlayerLocation = player.getLocation();
 
-        int blockLead = profile.get("blockLead").asInt();
+        int lead = profile.get("blockLead").asInt();
+        if (history.size() - idx <= lead) generate(lead - (history.size() - idx));
+        lastPositionIndexPlayer = idx;
 
-        int deltaCurrentTotal = history.size() - currentIndex; // delta between current index and total
-        if (deltaCurrentTotal <= blockLead) {
-            generate(blockLead - deltaCurrentTotal); // generate the remaining amount so it will match
-        }
-        lastPositionIndexPlayer = currentIndex;
-
-        for (int i = currentIndex - BLOCK_TRAIL - 1; i >= currentIndex - 4 * BLOCK_TRAIL; i--) {
-            if (i <= 0) {
-                continue;
-            }
-
-            history.get(i).setType(Material.AIR);
+        // Remove trail blocks behind player
+        for (int i = idx - BLOCK_TRAIL - 1; i >= idx - 4 * BLOCK_TRAIL; i--) {
+            if (i > 0) history.get(i).setType(Material.AIR);
         }
 
         cleanupDistantBlocks();
+        placer.deleteSchematic();
 
-        deleteSchematic();
+        int pts = Config.CONFIG.getBoolean("scoring.all-points") ? delta : 1;
+        for (int i = 0; i < pts; i++) score();
 
-        for (int i = 0; i < (Config.CONFIG.getBoolean("scoring.all-points") ? deltaFromLast : 1); i++) { // score the difference
-            score();
+        if (start == null) start = Instant.now();
+    }
+
+    private @Nullable Block blockBelow() {
+        Location loc = player.getLocation().subtract(0, 1, 0);
+        Block b = loc.getBlock();
+        if (b.getType() == Material.AIR) {
+            if (loc.subtract(0, 0.5, 0).getBlock().getType() == Material.AIR) return null;
+            b = loc.getBlock();
+        }
+        return b;
+    }
+
+    private void updateVisualTime(ParkourPlayer p, int selectedTime) {
+        int t = 18000 + selectedTime;
+        if (t >= 24000) t -= 24000;
+        p.player.setPlayerTime(t, false);
+    }
+
+    // ── Score ──────────────────────────────────────────────────────────────────
+
+    protected void score() {
+        score++;
+        totalScore++;
+        checkRewards();
+        new ParkourScoreEvent(player).call();
+    }
+
+    private void checkRewards() {
+        if (!Rewards.REWARDS_ENABLED || score == 0) return;
+
+        if (Rewards.SCORE_REWARDS.containsKey(score))
+            Rewards.SCORE_REWARDS.get(score).forEach(r -> r.execute(player, getMode()));
+
+        int intervalScore = Config.CONFIG.getBoolean("scoring.rewards-use-total-score") ? totalScore : score;
+        for (int interval : Rewards.INTERVAL_REWARDS.keySet()) {
+            if (intervalScore % interval == 0)
+                Rewards.INTERVAL_REWARDS.get(interval).forEach(r -> r.execute(player, getMode()));
         }
 
-        if (start == null) { // start stopwatch when first point is achieved
-            start = Instant.now();
+        String key = Integer.toString(score);
+        if (Rewards.ONE_TIME_REWARDS.containsKey(score) && !player.collectedRewards.contains(key)) {
+            Rewards.ONE_TIME_REWARDS.get(score).forEach(r -> r.execute(player, getMode()));
+            player.collectedRewards.add(key);
         }
     }
 
-    // updates the player time
-    protected void updateVisualTime(ParkourPlayer player, int selectedTime) {
-        int newTime = 18000 + selectedTime;
-        if (newTime >= 24000) {
-            newTime -= 24000;
-        }
+    // ── Fall / Reset ───────────────────────────────────────────────────────────
 
-        player.player.setPlayerTime(newTime, false);
+    protected void fall() {
+        new ParkourFallEvent(player).call();
+        reset(true);
     }
 
-    /**
-     * Resets the parkour. If regenerate is false, this generator is stopped and the island is destroyed.
-     *
-     * @param regenerate True if parkour should regenerate, false if not.
-     */
     public void reset(boolean regenerate) {
-        LoParkour.log("Resetting generator, regenerate = %s".formatted(regenerate));
-
         stopped = !regenerate;
 
-        if (!regenerate && task == null) {
-            LoParkour.getPlugin().getLogger().warning("## Incomplete joining setup.");
-            LoParkour.getPlugin().getLogger().warning("## There has probably been an error somewhere. Please report this error!");
-            LoParkour.getPlugin().getLogger().warning("## You don't have to report this warning.");
-        }
+        if (!regenerate && task == null)
+            LoParkour.getPlugin().getLogger().warning("## Incomplete joining setup — report this!");
 
         lastPositionIndexPlayer = 0;
         if (!history.isEmpty()) {
             history.remove(0);
-            history.forEach(block -> block.setType(Material.AIR, false));
+            history.forEach(b -> b.setType(Material.AIR, false));
             history.clear();
         }
 
         waitForSchematicCompletion = false;
         deleteSchematic = true;
-        deleteSchematic();
+        placer.deleteSchematic();
 
-        Leaderboard leaderboard = getMode().getLeaderboard();
-        int record = leaderboard != null ? leaderboard.get(player.getUUID()).score() : 0;
+        Leaderboard lb = getMode().getLeaderboard();
+        int record = lb != null ? lb.get(player.getUUID()).score() : 0;
 
-        if (profile.get("showFallMessage").asBoolean()) {
-            String message;
-            int number = 0;
-
-            if (score == record) {
-                message = "settings.parkour_settings.items.fall_message.formats.tied";
-            } else if (score > record) {
-                number = score - record;
-                message = "settings.parkour_settings.items.fall_message.formats.beat";
-            } else {
-                number = record - score;
-                message = "settings.parkour_settings.items.fall_message.formats.miss";
-            }
-
-            for (ParkourPlayer players : getPlayers()) {
-                players.sendTranslated("settings.parkour_settings.items.fall_message.divider");
-                players.sendTranslated("settings.parkour_settings.items.fall_message.score", Integer.toString(score));
-                players.sendTranslated("settings.parkour_settings.items.fall_message.time", getFormattedTime());
-                players.sendTranslated("settings.parkour_settings.items.fall_message.high_score", Integer.toString(record));
-                players.sendTranslated(message, Integer.toString(number));
-                players.sendTranslated("settings.parkour_settings.items.fall_message.divider");
-            }
-        }
-
-        if (leaderboard != null && score > record) {
+        if (profile.get("showFallMessage").asBoolean()) sendFallMessage(record);
+        if (lb != null && score > record)
             registerScore(getDetailedTime(), Double.toString(getDifficultyScore()).substring(0, 3), score);
-        }
 
         score = 0;
         start = null;
         heading = Option.HEADING.getDirection();
 
-        if (regenerate) { // generate back the blocks
+        if (regenerate) {
             player.teleport(playerSpawn);
             generateFirst(playerSpawn, blockSpawn);
             return;
         }
 
         island.destroy();
+        if (getPlayers().isEmpty())
+            getSpectators().forEach(s -> Modes.DEFAULT.create(s.player));
+    }
 
-        if (getPlayers().isEmpty()) {
-            getSpectators().forEach(spectator -> Modes.DEFAULT.create(spectator.player));
+    private void sendFallMessage(int record) {
+        String key;
+        int number = 0;
+        if      (score == record) key = "settings.parkour_settings.items.fall_message.formats.tied";
+        else if (score > record)  { key = "settings.parkour_settings.items.fall_message.formats.beat"; number = score - record; }
+        else                      { key = "settings.parkour_settings.items.fall_message.formats.miss"; number = record - score; }
+
+        for (ParkourPlayer p : getPlayers()) {
+            p.sendTranslated("settings.parkour_settings.items.fall_message.divider");
+            p.sendTranslated("settings.parkour_settings.items.fall_message.score",      Integer.toString(score));
+            p.sendTranslated("settings.parkour_settings.items.fall_message.time",       getFormattedTime());
+            p.sendTranslated("settings.parkour_settings.items.fall_message.high_score", Integer.toString(record));
+            p.sendTranslated(key,                                                        Integer.toString(number));
+            p.sendTranslated("settings.parkour_settings.items.fall_message.divider");
         }
     }
 
     protected void registerScore(String time, String difficulty, int score) {
-        Leaderboard leaderboard = getMode().getLeaderboard();
-
-        if (leaderboard == null) {
-            return;
-        }
-
-        getPlayers().forEach(player -> leaderboard.put(player.getUUID(), new Score(player.getName(), time, difficulty, score)));
+        Leaderboard lb = getMode().getLeaderboard();
+        if (lb == null) return;
+        getPlayers().forEach(p -> lb.put(p.getUUID(), new Score(p.getName(), time, difficulty, score)));
     }
 
-    private void deleteSchematic() {
-        if (!deleteSchematic) {
-            return;
-        }
-        LoParkour.log("Deleting schematic");
+    // ── Cleanup ────────────────────────────────────────────────────────────────
 
-        schematicBlocks.forEach(block -> block.setType(Material.AIR));
-        schematicBlocks.clear();
-
-        deleteSchematic = false;
-        schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
-    }
-
-    /**
-     * Generates the next parkour block or schematic.
-     */
-    public void generate() {
-        if (waitForSchematicCompletion) {
-            return;
-        }
-
-        Map<BlockGenerationType, Double> chances = new HashMap<>(defaultChances);
-        if (schematicCooldown > 0 || generatorOptions.contains(GeneratorOption.DISABLE_SCHEMATICS) || profile.get("schematicDifficulty").asDouble() == 0.0 || !schematicBlocks.isEmpty()) {
-            chances.remove(BlockGenerationType.SCHEMATIC);
-        }
-        if (!profile.get("useSpecialBlocks").asBoolean()) {
-            chances.remove(BlockGenerationType.SPECIAL);
-        }
-        if (chances.isEmpty()) {
-            chances.put(BlockGenerationType.DEFAULT, 1.0);
-        }
-
-        BlockGenerationType jump = Probs.random(chances);
-        if (jump == BlockGenerationType.SCHEMATIC) {
-            LoParkour.log("Generating schematic jump at index %s".formatted(history.size() + 1));
-
-            double difficulty = profile.get("schematicDifficulty").asDouble();
-
-            // TODO: Implement schematic generation with LoLib
-            LoParkour.getPlugin().getLogger().warning("LPSchematic generation temporarily disabled during migration");
-            return;
-        }
-
-        LoParkour.log("Generating normal jump at index %s".formatted(history.size() + 1));
-
-        List<Block> blocks = selectBlocks();
-
-        if (blocks.isEmpty()) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to generate parkour: No blocks to generate found");
-            return;
-        }
-
-        List<Block> movedBlocks = new ArrayList<>();
-        for (Block block : blocks) {
-            BlockData data = (jump == BlockGenerationType.SPECIAL && !generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL)) ? Probs.random(specialChances) : selectBlockData();
-
-            if (data instanceof Fence) {
-                block = block.getLocation().subtract(0, 1, 0).getBlock();
-            }
-
-            block.setBlockData(data, data instanceof Fence || data instanceof GlassPane);
-            movedBlocks.add(block);
-        }
-
-        new ParkourBlockGenerateEvent(movedBlocks, this, player).call();
-
-        particles(movedBlocks);
-        sound(movedBlocks);
-
-        history.addAll(movedBlocks);
-        schematicCooldown--;
-    }
-
-    private @NotNull List<Block> rotatedPaste(dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, Location location) {
-        // TODO: Implement schematic rotation with LoLib
-        return new ArrayList<>();
-    }
-
-
-    private double angleInY(Vector a, Vector b) {
-        double det = a.getX() * b.getZ() - a.getZ() * b.getX();
-        return Math.atan2(det, a.dot(b));
-    }
-
-    protected Block getLatest() {
-        return history.get(history.size() - 1);
-    }
-
-    // Очистка блоков на большом расстоянии от игрока для экономии памяти
     protected void cleanupDistantBlocks() {
-        if (history.size() < Option.BLOCK_CLEANUP_DISTANCE * 2) {
-            return;
-        }
-
-        Location playerLoc = player.getLocation();
+        if (history.size() < Option.BLOCK_CLEANUP_DISTANCE * 2) return;
+        Location loc = player.getLocation();
         int removed = 0;
-
-        Iterator<Block> iterator = history.iterator();
-        while (iterator.hasNext()) {
-            Block block = iterator.next();
-            
-            if (block.getLocation().distance(playerLoc) > Option.BLOCK_CLEANUP_DISTANCE) {
-                block.setType(Material.AIR, false);
-                iterator.remove();
+        Iterator<Block> it = history.iterator();
+        while (it.hasNext()) {
+            Block b = it.next();
+            if (b.getLocation().distance(loc) > Option.BLOCK_CLEANUP_DISTANCE) {
+                b.setType(Material.AIR, false);
+                it.remove();
                 removed++;
-            } else {
-                break;
-            }
+            } else break;
         }
-
-        if (removed > 0) {
-            lastPositionIndexPlayer = Math.max(0, lastPositionIndexPlayer - removed);
-        }
+        if (removed > 0) lastPositionIndexPlayer = Math.max(0, lastPositionIndexPlayer - removed);
     }
 
-    private double getDifficulty(String fileName) {
-        String path = "difficulty.%s".formatted(fileName.split("[-.]")[1]);
+    // ── Misc ───────────────────────────────────────────────────────────────────
 
-        if (!Config.SCHEMATICS.isPath(path))  {
-            return 1.0; // todo remove
-        }
+    public void menu(ParkourPlayer player) { Menus.PARKOUR_SETTINGS.open(player); }
 
-        return Config.SCHEMATICS.getDouble(path);
-    }
+    public Block getLatest() { return history.get(history.size() - 1); }
 
-    /**
-     * Generates a specific amount of blocks ahead of the player
-     *
-     * @param amount The amount
-     */
-    public void generate(int amount) {
-        for (int i = 0; i < amount + 1; i++) {
-            generate();
-        }
-    }
-
-    /**
-     * Generates the first few blocks (which come off the spawn island)
-     *
-     * @param spawn The spawn of the player
-     * @param block The location used to begin the parkour of off
-     */
-    public void generateFirst(Location spawn, Location block) {
-        LoParkour.log("First generation");
-
-        playerSpawn = spawn;
-        lastStandingPlayerLocation = spawn;
-        blockSpawn = block;
-        history.add(blockSpawn.getBlock());
-
-        generate(profile.get("blockLead").asInt());
-    }
-
-    /**
-     * Calculates a score between 0 (inclusive) and 1 (inclusive) to determine how difficult it was for
-     * the player to achieve this score using their settings.
-     */
     public double getDifficultyScore() {
-        double score = 0;
-
-        if (profile.get("useSpecialBlocks").asBoolean()) score += 0.5;
-        if (profile.get("schematicDifficulty").asDouble() > 0) {
-            if (profile.get("schematicDifficulty").asDouble() <= 0.25) score += 0.2;
-            else if (profile.get("schematicDifficulty").asDouble() <= 0.5) score += 0.3;
-            else if (profile.get("schematicDifficulty").asDouble() <= 0.75) score += 0.4;
-            else if (profile.get("schematicDifficulty").asDouble() <= 1.0) score += 0.5;
-        }
-
-        return score;
+        double s = 0;
+        if (profile.get("useSpecialBlocks").asBoolean()) s += 0.5;
+        double d = profile.get("schematicDifficulty").asDouble();
+        if (d > 0) s += d <= 0.25 ? 0.2 : d <= 0.5 ? 0.3 : d <= 0.75 ? 0.4 : 0.5;
+        return s;
     }
 
-    /**
-     * @return The time in custom format.
-     */
-    public String getFormattedTime() {
-        return getTime(Config.CONFIG.getString("options.time.score-format"));
-    }
-
-    /**
-     * @return The current detailed duration of the run.
-     */
-    public String getDetailedTime() {
-        return getTime("mm:ss:SSS");
-    }
+    public String getFormattedTime() { return getTime(Config.CONFIG.getString("options.time.score-format")); }
+    public String getDetailedTime()  { return getTime("mm:ss:SSS"); }
 
     private String getTime(String format) {
-        var timeMs = Instant.now().minusMillis(start != null ? start.toEpochMilli() : Instant.now().toEpochMilli());
-
+        var ms = Instant.now().minusMillis(start != null ? start.toEpochMilli() : Instant.now().toEpochMilli());
         try {
-            return DateTimeFormatter.ofPattern(format)
-                    .withZone(ZoneOffset.UTC)
-                    .format(timeMs);
+            return DateTimeFormatter.ofPattern(format).withZone(ZoneOffset.UTC).format(ms);
         } catch (IllegalArgumentException ex) {
-            LoParkour.getPlugin().getLogger().severe("Invalid score time format %s".formatted(Config.CONFIG.getString("options.time.score-format")) + " - " + ex.getMessage());
+            LoParkour.getPlugin().getLogger().severe("Invalid time format: " + format);
             return "";
         }
     }
 
-    /**
-     * @return This generator's mode.
-     */
-    public Mode getMode() {
-        return Modes.DEFAULT;
-    }
+    public Mode getMode() { return Modes.DEFAULT; }
 
-    /**
-     * @return The players in this session.
-     */
-    @NotNull
-    public List<ParkourPlayer> getPlayers() {
-        return session.getPlayers();
-    }
+    @NotNull public List<ParkourPlayer>    getPlayers()    { return session.getPlayers(); }
+    @NotNull public List<ParkourSpectator> getSpectators() { return session.getSpectators(); }
 
-    /**
-     * @return The spectators in this session.
-     */
-    @NotNull
-    public List<ParkourSpectator> getSpectators() {
-        return session.getSpectators();
-    }
-
-    public enum BlockGenerationType {
-        DEFAULT, SCHEMATIC, SPECIAL
-    }
+    public enum BlockGenerationType { DEFAULT, SCHEMATIC, SPECIAL }
 }

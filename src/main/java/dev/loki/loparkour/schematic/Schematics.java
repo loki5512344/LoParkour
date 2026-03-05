@@ -31,30 +31,14 @@ public class Schematics {
                 FOLDER.mkdirs();
             }
 
-            File[] files = FOLDER.listFiles((dir, name) -> name.contains("parkour-") || name.contains("spawn-island"));
+            File[] files = FOLDER.listFiles((dir, name) -> name.endsWith(".lpschem"));
 
             if (files == null || files.length == 0) {
-                download();
-                init();
+                LoParkour.log("No schematics found in " + FOLDER.getAbsolutePath());
                 return;
             }
           
-            try {
-                // TODO: Migrate to LoLib schematics
-                // dev.efnilite.vilib.schematic.Schematics.addFromFiles(LoParkour.getPlugin(), files);
-            } catch (Exception ex) {
-                LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
-                        "Error while trying to load schematics", ex);
-            }
+            LoParkour.log("Found " + files.length + " schematic files");
         });
-    }
-
-    private static void download() {
-        LoParkour.log("Downloading schematics");
-
-        List<String> schematics = new ArrayList<>();
-        schematics.addAll(Arrays.asList(SPAWN_SCHEMATICS));
-        schematics.addAll(Config.SCHEMATICS.getChildren("difficulty", false).stream().map("parkour-%s"::formatted).toList());
-        schematics.forEach(file -> LoParkour.getPlugin().saveResource("schematics/%s".formatted(file), true));
     }
 }

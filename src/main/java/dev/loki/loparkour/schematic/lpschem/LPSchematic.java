@@ -168,6 +168,16 @@ public class LPSchematic {
         this.logic = logic;
     }
 
+    /** Raw block palette-index array. Do not modify directly. */
+    public int[] getBlockArray() {
+        return blocks;
+    }
+
+    /** The palette of block data strings. Do not modify directly. */
+    public List<String> getPalette() {
+        return palette;
+    }
+
     private static class SchematicData {
         int format_version;
         SchematicMetadata metadata;

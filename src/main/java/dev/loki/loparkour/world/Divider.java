@@ -40,8 +40,6 @@ public class Divider {
 
         var location = toLocation(session);
 
-        LoParkour.log("Added session at %s".formatted(Locations.toString(location, true)));
-
         return location;
     }
 
@@ -51,8 +49,6 @@ public class Divider {
      * @param session The session.
      */
     public static void remove(Session session) {
-        LoParkour.log("Removed session at %s".formatted(Locations.toString(toLocation(session), true)));
-
         sections.remove(session);
     }
 

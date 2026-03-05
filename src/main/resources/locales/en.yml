@@ -14,7 +14,7 @@ play:
 
   item:
     material: "sugar_cane"
-    name: "&#00D4FF<bold>Play"
+    name: "&#00D4FF&lPlay"
     lore: ""
 
   single:
@@ -22,13 +22,28 @@ play:
 
     item:
       material: "ender_pearl"
-      name: "&#00D4FF<bold>Single-player"
+      name: "&#00D4FF&lSingle-player"
       lore: ""
 
     default:
       material: "barrel"
-      name: "&#00D4FF<bold>Default"
+      name: "&#00D4FF&lDefault"
       lore: "&#404040The default gamemode."
+
+    speedrun:
+      material: "clock"
+      name: "&#00D4FF&lSpeedrun"
+      lore: "&#404040Race against time! Blocks||&#404040disappear after you step on them."
+
+    gravity-shift:
+      material: "feather"
+      name: "&#00D4FF&lGravity Shift"
+      lore: "&#404040Gravity changes direction||&#404040as you parkour!"
+
+    hardcore:
+      material: "skeleton_skull"
+      name: "&#00D4FF&lHardcore"
+      lore: "&#404040One mistake and you're out!||&#404040No second chances."
 
   spectator:
     name: "&#FFFFFFSpectator"
@@ -36,17 +51,17 @@ play:
     join: "&#00D4FFYou are now a spectator. You can use \"/parkour\" to leave/change your gamemode."
     action_bar: "&#00D4FFYou are a spectator &#A0A0A0• &#00D4FFUse \"/parkour\" to leave."
 
-    other_join: "<dark_green><bold>+ <reset>&#A0A0A0%s started spectating you"
-    other_leave: "&#FF4444<bold>- <reset>&#A0A0A0%s stopped spectating you"
+    other_join: "&#006400&l+ &r&#A0A0A0%s started spectating you"
+    other_leave: "&#FF4444&l- &r&#A0A0A0%s stopped spectating you"
 
     item:
       material: "glass"
-      name: "&#00D4FF<bold>Spectator"
+      name: "&#00D4FF&lSpectator"
       lore: ""
 
     head:
       material: ""
-      name: "&#00D4FF<bold>%s"
+      name: "&#00D4FF&l%s"
       lore: ""
 
 community:
@@ -54,7 +69,7 @@ community:
 
   item:
     material: "oak_boat"
-    name: "&#00D4FF<bold>Community"
+    name: "&#00D4FF&lCommunity"
     lore: ""
 
   leaderboards:
@@ -62,18 +77,18 @@ community:
 
     item:
       material: "gold_nugget"
-      name: "&#00D4FF<bold>Leaderboards"
+      name: "&#00D4FF&lLeaderboards"
       lore: ""
 
     sort:
       material: "bookshelf"
-      name: "&#00D4FF<bold>Sorted by %s"
+      name: "&#00D4FF&lSorted by %s"
       lore: ""
       values: ["score", "time", "difficulty"]
 
     head:
       material: ""
-      name: "&#00D4FF<bold>#%r - %p"
+      name: "&#00D4FF&l#%r - %p"
       lore: "&#00D4FFScore: &#A0A0A0%s||&#00D4FFTime: &#A0A0A0%t||&#00D4FFDifficulty: &#A0A0A0%d&#404040/1.0"
 
 settings:
@@ -81,7 +96,7 @@ settings:
 
   item:
     material: "comparator"
-    name: "&#00D4FF<bold>Settings"
+    name: "&#00D4FF&lSettings"
     lore: ""
 
   lang:
@@ -89,13 +104,13 @@ settings:
 
     item:
       material: "writable_book"
-      name: "&#00D4FF<bold>Language"
-      lore: "&#404040Currently: &#00D4FF<bold>%s"
+      name: "&#00D4FF&lLanguage"
+      lore: "&#404040Currently: &#00D4FF&l%s"
 
   chat:
     material: "crossbow"
-    name: "&#00D4FF<bold>Chat"
-    lore: "&#404040Currently: &#00D4FF<bold>%s||&#404040Select who you can chat with"
+    name: "&#00D4FF&lChat"
+    lore: "&#404040Currently: &#00D4FF&l%s||&#404040Select who you can chat with"
     values: ["lobby only", "players only", "public"]
 
     formats:
@@ -104,19 +119,19 @@ settings:
 
   parkour_settings:
 
-    enabled: "&#00D4FF<bold>✔"
-    disabled: "&#FF4444<bold>✘"
+    enabled: "&#00D4FF&l✔"
+    disabled: "&#FF4444&l✘"
 
     item:
       material: "redstone"
-      name: "&#00D4FF<bold>Parkour Settings"
+      name: "&#00D4FF&lParkour Settings"
       lore: "&#404040Change the way your parkour appears."
 
     items:
 
       no_change:
         material: "barrier"
-        name: "<dark_red><bold>You cant change this right now!"
+        name: "&#8B0000&lYou cant change this right now!"
         lore: "&#A0A0A0You have a score above 0,||&#A0A0A0which means you cant change this setting."
 
       styles:
@@ -124,29 +139,29 @@ settings:
 
         style_item:
           material: ""
-          name: "&#FFFFFF<bold>%s"
+          name: "&#FFFFFF&l%s"
           lore: "&#00D4FFCategory: &#A0A0A0%s"
 
         item:
           material: "crafting_table"
-          name: "&#00D4FF<bold>Style"
+          name: "&#00D4FF&lStyle"
           lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0Choose which blocks will be used."
 
       leads:
         material: "feather"
-        name: "&#00D4FF<bold>Lead"
+        name: "&#00D4FF&lLead"
         lore: "&#00D4FFCurrently: &#A0A0A0%s blocks||&#A0A0A0How many blocks will||&#A0A0A0be generated in front of you."
 
       time:
         material: "clock"
-        name: "&#00D4FF<bold>Time"
+        name: "&#00D4FF&lTime"
         lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0Your current visual time."
 
       schematics:
         material: ""
-        name: "&#00D4FF<bold>Schematic difficulty"
+        name: "&#00D4FF&lSchematic difficulty"
         lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0The difficulty of schematics"
-        values: ["&#FF4444off", "&#00D4FFeasy", "<yellow>medium", "&#00D4FFhard", "<dark_red>very hard"]
+        values: ["&#FF4444off", "&#00D4FFeasy", "&#FFFF00medium", "&#00D4FFhard", "&#8B0000very hard"]
 
       scoreboard:
         material: ""
@@ -159,10 +174,10 @@ settings:
           name: "Show fall message"
           lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows a message when you fall||&#A0A0A0with extra info."
 
-        divider: "&#404040<strikethrough>-----------------------------------"
-        score: "&#00D4FF<bold>Score <reset>&#FFFFFF%s"
-        time: "&#00D4FF<bold>Time <reset>&#FFFFFF%s"
-        high_score: "&#00D4FF<bold>High-score <reset>&#FFFFFF%s"
+        divider: "&#404040&m-----------------------------------"
+        score: "&#00D4FF&lScore &r&#FFFFFF%s"
+        time: "&#00D4FF&lTime &r&#FFFFFF%s"
+        high_score: "&#00D4FF&lHigh-score &r&#FFFFFF%s"
 
         formats:
           miss: "&#A0A0A0You missed your high score by %s points!"
@@ -192,18 +207,18 @@ settings:
 lobby:
   name: "&#FFFFFFLobby"
 
-  other_join: '<dark_green><bold>+ <reset>&#A0A0A0%s joined your lobby'
-  other_leave: '&#FF4444<bold>- <reset>&#A0A0A0%s left your lobby'
+  other_join: '&#006400&l+ &r&#A0A0A0%s joined your lobby'
+  other_leave: '&#FF4444&l- &r&#A0A0A0%s left your lobby'
 
   item:
     material: "iron_ingot"
-    name: "&#00D4FF<bold>Your Lobby"
+    name: "&#00D4FF&lYour Lobby"
     lore: ""
 
   visibility:
     material: "firework_rocket"
-    name: "&#00D4FF<bold>Visibility"
-    lore: "&#404040Currently: &#00D4FF<bold>%s||&#404040Select who can join your lobby."
+    name: "&#00D4FF&lVisibility"
+    lore: "&#404040Currently: &#00D4FF&l%s||&#404040Select who can join your lobby."
     values: ["private", "invite-only", "public"]
 
   player_management:
@@ -216,27 +231,27 @@ lobby:
 
     item:
       material: "cake"
-      name: "&#00D4FF<bold>Manage Players"
+      name: "&#00D4FF&lManage Players"
       lore: "&#404040Kick or mute players here."
 
     head:
       material: ""
-      name: "&#00D4FF<bold>%s"
+      name: "&#00D4FF&l%s"
       lore: ""
       top: "&#404040Muted in lobby||"
       bottom: "&#00D4FFLeft click&#404040 to kick from lobby||&#00D4FFRight click&#404040 to (un)mute in lobby"
 
 scoreboard:
 
-  title: "&#00D4FF<bold>LoParkour"
+  title: "&#00D4FF&lLoParkour"
 
   lines:
-    - "<blue>"
+    - "&#0000FF"
     - "&#00D4FFScore &#FFFFFF%score%"
     - "&#00D4FFTime &#FFFFFF%time%"
     - "&#00D4FFHighscore &#FFFFFF%high_score%"
     - "&#FF4444"
-    - "&#00D4FF<bold>server.ip"
+    - "&#00D4FF&lserver.ip"
 
 other:
 
@@ -246,20 +261,21 @@ other:
 
   quit:
     material: "barrier"
-    name: "&#00D4FF<bold>Quit"
+    name: "&#00D4FF&lQuit"
     lore: ""
 
   close:
     material: "arrow"
-    name: "&#00D4FF<bold>Close"
+    name: "&#00D4FF&lClose"
     lore: ""
 
   iep:
     material: "elytra"
-    name: "&#00D4FF<bold>Flying"
+    name: "&#00D4FF&lFlying"
     lore: "&#A0A0A0Parkour with elytra!"
 
 modes:
   elytra:
-    name: "&#00D4FF<bold>Elytra"
-    description: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"
+    material: "elytra"
+    name: "&#00D4FF&lElytra"
+    lore: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"

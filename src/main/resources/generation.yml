@@ -54,6 +54,13 @@ advanced:
   # -= Spawn island options =-
   # Options for the spawn island
   island:
+    
+    # -= Island schematic =-
+    # The name of the schematic file to use for the spawn island
+    # This schematic should be placed in the schematics-new folder
+    # If not specified or not found, no island will be generated
+    schematic-name: "island"
+    
     spawn:
 
       # -= Player block =-

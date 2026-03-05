@@ -22,6 +22,18 @@ public class Storage {
         }
     }
 
+    /**
+     * If SQL is enabled, defers the callback until the connection is ready.
+     * If SQL is disabled (disk), calls the callback immediately.
+     */
+    public static void runWhenReady(Runnable callback) {
+        if (Option.SQL) {
+            StorageSQL.runWhenConnected(callback);
+        } else {
+            callback.run();
+        }
+    }
+
     public static void close() {
         if (Option.SQL) {
             StorageSQL.close();

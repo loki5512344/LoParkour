@@ -1,83 +1,60 @@
 package dev.loki.loparkour.menu.play;
 
 import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.menu.Menus;
-import dev.loki.loparkour.menu.ParkourOption;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
+import dev.loki.loparkour.util.ColorUtil;
 import dev.loki.loparkour.world.Divider;
+import dev.lolib.gui.ScrollableGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The menu to select other players to spectate
- */
-public class SpectatorMenu {
+public class SpectatorMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(Player player) {
+    @Override
+    public void open(@NotNull Player player) {
+        String locale = locale(player);
         ParkourUser user = ParkourUser.getUser(player);
-        String locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
+        String title = Locales.getString(locale, "play.spectator.name");
 
-        PagedMenu spectator = new PagedMenu(3, Locales.getString(player, "play.spectator.name"));
-
-        List<MenuItem> display = new ArrayList<>();
+        List<Session> sessions = new ArrayList<>();
+        List<ItemStack> items = new ArrayList<>();
 
         for (Session session : Divider.sections.keySet()) {
-            if (!session.isAcceptingSpectators()) { // only showcase sessions with spectators enabled
-                continue;
-            }
-
-            if (user != null && session == user.session) { // don't let player join their own session
-                continue;
-            }
-
-            if (session.getPlayers().isEmpty()) { // weird but possible
-                continue;
-            }
+            if (!session.isAcceptingSpectators()) continue;
+            if (user != null && session == user.session) continue;
+            if (session.getPlayers().isEmpty()) continue;
 
             var pp = session.getPlayers().get(0);
-
-            Item item = Locales.getItem(locale, "play.spectator.head", pp.getName());
-            // Player head gathering
-            item.material(Material.PLAYER_HEAD);
-
-            ItemStack stack = item.build(); // Updating meta requires building
-            stack.setType(Material.PLAYER_HEAD);
-
-            // bedrock has no player skull support
-            if (!ParkourUser.isBedrockPlayer(player)) {
-                if (pp.getName() != null && !pp.getName().startsWith(".")) { // bedrock players' names with geyser start with a .
-                    SkullMeta meta = (SkullMeta) stack.getItemMeta();
-
-                    if (meta != null) {
-                        SkullSetter.setPlayerHead(pp.player, meta);
-                        item.meta(meta);
-                    }
-                }
+            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+            if (!ParkourUser.isBedrockPlayer(player)
+                    && pp.getName() != null && !pp.getName().startsWith(".")) {
+                SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                if (meta != null) { meta.setOwningPlayer(pp.player); skull.setItemMeta(meta); }
             }
-
-            item.click(event -> Modes.SPECTATOR.create(player, session));
-
-            display.add(item);
+            sessions.add(session);
+            items.add(skull);
         }
 
-        spectator.displayRows(0, 1)
-                .addToDisplay(display)
-                .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> spectator.page(1)))
-                .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> spectator.page(-1)))
-                .item(22, Locales.getItem(player, "other.close").click(event -> Menus.PLAY.open(event.getPlayer())))
-                .open(player);
+        ScrollableGUI gui = ScrollableGUI.create()
+                .title(ColorUtil.color(title))
+                .rows(3)
+                .scrollUpButton(backItem(), 0)
+                .scrollDownButton(nextItem(), 8);
 
+        for (int i = 0; i < items.size(); i++) {
+            final Session session = sessions.get(i);
+            gui = gui.addItem(items.get(i), e -> Modes.SPECTATOR.create(player, session));
+        }
+
+        gui.open(player);
     }
-    */
-
 }

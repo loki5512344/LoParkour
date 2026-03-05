@@ -34,6 +34,7 @@ public class World {
 
         if (world != null) {
             LoParkour.getPlugin().getLogger().warning("Crash detected! The parkour world loading twice is not usual behaviour. This only happens after a server crash.");
+            World.world = world; // ensure static field is populated
         }
 
         if (Config.CONFIG.getBoolean("world.delete-on-reload")) {
@@ -61,6 +62,10 @@ public class World {
     }
 
     private static void setup() {
+        if (world == null) {
+            LoParkour.getPlugin().getLogger().severe("Cannot setup world rules — world is null (createWorld failed).");
+            return;
+        }
         LoParkour.log("Initializing world rules");
 
         world.setGameRule(GameRule.DO_FIRE_TICK, false);

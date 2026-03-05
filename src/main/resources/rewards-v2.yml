@@ -9,7 +9,7 @@
 # %player% - the player's name.
 # test %player% - execute a console command. Don't add "/"!
 # leave:test - executes a command on leave.
-# send:<bold>test - sends a message.
+# send:&ltest - sends a message.
 # vault:-87 - deposits a specific amount of money (Vault required)
 # default:test - mode-specific rewards. Mode names are "default", or for IP+ modes the same as the name used in the IP+ config.
 #
@@ -32,7 +32,7 @@ score-rewards:
 interval-rewards:
   10:
     - "witpreward10"
-    - "send:<green>Good job!"
+    - "send:&#00FF00Good job!"
 
 # -= One time rewards =-
 # Rewards which players will receive just once.
@@ -42,13 +42,13 @@ interval-rewards:
 one-time-rewards:
   1:
     - "send:You made your first jump!"
-    - "team_survival:send:<gray>Be sure to invite your friends!"
-    - "duels:send:<gray>Good luck!"
+    - "team_survival:send:&#808080Be sure to invite your friends!"
+    - "duels:send:&#808080Good luck!"
   2023:
     - "leave:currentyear"
     - "vault:100"
   2024:
-    - "send:<reset>"
-    - "send:<red><bold>Time travelling is illegal!"
-    - "send:<reset>"
+    - "send:&r"
+    - "send:&#FF0000&lTime travelling is illegal!"
+    - "send:&r"
     - "vault:-100"

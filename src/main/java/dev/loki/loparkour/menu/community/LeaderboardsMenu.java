@@ -2,55 +2,55 @@ package dev.loki.loparkour.menu.community;
 
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.leaderboard.Leaderboard;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.mode.Mode;
-import dev.loki.loparkour.player.ParkourUser;
-import org.bukkit.Material;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.ScrollableGUI;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Leaderboards menu
- */
-public class LeaderboardsMenu {
+public class LeaderboardsMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(Player player) {
-        ParkourUser user = ParkourUser.getUser(player);
-        String locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
+    @Override
+    public void open(@NotNull Player player) {
+        String locale = locale(player);
+        String title = Locales.getString(locale, ParkourOption.LEADERBOARDS.path + ".name");
 
-        PagedMenu menu = new PagedMenu(3, Locales.getString(player, "%s.name".formatted(ParkourOption.LEADERBOARDS.path)));
+        List<Mode> modes = new ArrayList<>();
+        List<ItemStack> items = new ArrayList<>();
 
-        Mode latest = null;
-        List<MenuItem> items = new ArrayList<>();
         for (Mode mode : Registry.getModes()) {
-            Leaderboard leaderboard = mode.getLeaderboard();
-            Item item = mode.getItem(locale);
-
-            if (leaderboard == null || item == null) {
-                continue;
-            }
-
-            items.add(item.clone().click(event -> Menus.SINGLE_LEADERBOARD.open(player, mode, leaderboard.sort)));
-            latest = mode;
+            if (mode.getLeaderboard() == null) continue;
+            var item = mode.getItem(locale);
+            if (item == null) continue;
+            modes.add(mode);
+            items.add(item.build());
         }
 
-        if (items.size() == 1) {
-            Menus.SINGLE_LEADERBOARD.open(player, latest, Leaderboard.Sort.SCORE);
+        if (modes.size() == 1) {
+            Menus.SINGLE_LEADERBOARD.open(player, modes.get(0), Leaderboard.Sort.SCORE);
             return;
         }
-        // menu.displayRows(0, 1)
-        // .addToDisplay(items)
-        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
-        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
-        // .item(22, Locales.getItem(player, "other.close").click(event -> Menus.COMMUNITY.open(event.getPlayer())))
-        // .open(player);
+
+        ScrollableGUI gui = ScrollableGUI.create()
+                .title(ColorUtil.color(title))
+                .rows(3)
+                .scrollUpButton(backItem(), 0)
+                .scrollDownButton(nextItem(), 8);
+
+        for (int i = 0; i < items.size(); i++) {
+            final Mode mode = modes.get(i);
+            gui = gui.addItem(items.get(i),
+                    e -> Menus.SINGLE_LEADERBOARD.open(player, mode, Leaderboard.Sort.SCORE));
+        }
+
+        gui.open(player);
     }
-    */
 }

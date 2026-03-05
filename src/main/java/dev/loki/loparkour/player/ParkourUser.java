@@ -19,9 +19,6 @@ import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.storage.Storage;
 import dev.loki.loparkour.world.Divider;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.DisplaySlot;
 import dev.loki.loparkour.util.ColorUtil;
 import io.papermc.lib.PaperLib;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -29,6 +26,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.ChannelNotRegisteredException;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,28 +47,17 @@ import java.util.stream.Collectors;
  */
 public abstract class ParkourUser {
 
-    /**
-     * Registers a player. This registers the player internally.
-     * This automatically unregisters the player if it is already registered.
-     *
-     * @param player The player
-     * @return the ParkourPlayer instance of the newly joined player
-     */
     public static @NotNull ParkourPlayer register(@NotNull Player player, @NotNull Session session) {
         PreviousData data = null;
         ParkourUser existing = getUser(player);
 
         if (existing != null) {
-            LoParkour.log("Registering player %s with existing data".formatted(player.getName()));
-
             data = existing.previousData;
             unregister(existing, false, false, false);
         } else {
-            LoParkour.log("Registering player %s".formatted(player.getName()));
         }
         ParkourPlayer pp = new ParkourPlayer(player, session, data);
 
-        // stats
         joinCount++;
         new ParkourJoinEvent(pp).call();
 
@@ -75,48 +65,28 @@ public abstract class ParkourUser {
         return pp;
     }
 
-    /**
-     * This is the same as {@link #leave(ParkourUser)}, but instead for a Bukkit player instance.
-     *
-     * @param player The Bukkit player instance that will be removed from the game if the player is active.
-     * @see #leave(ParkourUser)
-     */
     public static void leave(@NotNull Player player) {
         ParkourUser user = getUser(player);
-        if (user == null) {
-            return;
-        }
+        if (user == null) return;
         leave(user);
     }
 
-    /**
-     * Forces user to leave. Follows behaviour of /parkour leave.
-     *
-     * @param user The user.
-     */
     public static void leave(@NotNull ParkourUser user) {
         unregister(user, true, true, false);
     }
 
-    /**
-     * Unregisters a Parkour user instance.
-     *
-     * @param user                The user to unregister.
-     * @param restorePreviousData Whether to restore the data from before the player joined the parkour.
-     * @param kickIfBungee        Whether to kick the player if Bungeecord mode is enabled.
-     */
     public static void unregister(@NotNull ParkourUser user, boolean restorePreviousData, boolean kickIfBungee, boolean urgent) {
         new ParkourLeaveEvent(user).call();
-        LoParkour.log("Unregistering player %s, restorePreviousData = %s, kickIfBungee = %s".formatted(user.getName(), restorePreviousData, kickIfBungee));
 
         try {
             user.unregister();
 
-            // TODO: Implement scoreboard deletion with LoLib
-            // if (user.board != null) {
-            //     user.board.delete();
-            // }
-        } catch (Exception ex) { // safeguard to prevent people from losing data
+            // Reset scoreboard to main
+            if (user.board != null) {
+                user.player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+                user.board = null;
+            }
+        } catch (Exception ex) {
             LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
                     "Error while trying to make player " + user.getName() + " leave", ex);
             user.send("<red><bold>There was an error while trying to handle leaving.");
@@ -143,7 +113,6 @@ public abstract class ParkourUser {
         }
     }
 
-    // Sends a player to a BungeeCord server. server is the server name.
     private static void sendPlayerToServer(Player player, String server) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
@@ -152,79 +121,38 @@ public abstract class ParkourUser {
         try {
             player.sendPluginMessage(LoParkour.getPlugin(), "BungeeCord", out.toByteArray());
         } catch (ChannelNotRegisteredException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to send %s to server %s. This server is not registered.".formatted(player.getName(), server) + " - " + ex.getMessage());
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while trying to send %s to server %s. - %s".formatted(player.getName(), server, ex.getMessage()));
             player.kickPlayer("Couldn't move you to %s. Please rejoin.".formatted(server));
         }
     }
 
-    /**
-     * @param player The player.
-     * @return True when this player is a {@link ParkourUser}, false if not.
-     */
     public static boolean isUser(@Nullable Player player) {
         return player != null && getUsers().stream().anyMatch(other -> other.player == player);
     }
 
-    /**
-     * @param player The player.
-     * @return player as a {@link ParkourUser}, null if not found.
-     */
     public static @Nullable ParkourUser getUser(@NotNull Player player) {
         return getUsers().stream()
-                .filter(other -> other.getUUID() == player.getUniqueId())
+                .filter(other -> other.getUUID().equals(player.getUniqueId()))
                 .findAny()
                 .orElse(null);
     }
 
-    /**
-     * @return Set with all users.
-     */
     public static Set<ParkourUser> getUsers() {
         return Divider.sections.keySet().stream()
                 .flatMap(session -> session.getUsers().stream())
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * This user's locale
-     */
-    @NotNull
-    public String locale = Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG);
+    // ─── Fields ───────────────────────────────────────────────────────────────
 
-    /**
-     * This user's scoreboard
-     */
-    public Scoreboard board;
-
-    /**
-     * This user's PreviousData
-     */
-    @NotNull
-    public PreviousData previousData;
-
-    /**
-     * The selected {@link Session.ChatType}
-     */
+    @NotNull public String locale = Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG);
+    @Nullable public Scoreboard board;
+    @NotNull public PreviousData previousData;
     public Session.ChatType chatType = Session.ChatType.PUBLIC;
-
-    /**
-     * The {@link Session} this user is in.
-     */
     public final Session session;
-
-    /**
-     * The Bukkit player instance associated with this user.
-     */
     public final Player player;
-
-    /**
-     * The {@link Instant} when the player joined.
-     */
     public final Instant joined;
-
-    /**
-     * The amount of players that have joined while the plugin has been enabled.
-     */
     public static int joinCount;
 
     public ParkourUser(@NotNull Player player, @NotNull Session session, @Nullable PreviousData previousData) {
@@ -235,62 +163,72 @@ public abstract class ParkourUser {
 
         if (Boolean.parseBoolean(Option.OPTIONS_DEFAULTS.get(ParkourOption.SCOREBOARD))) {
             this.board = Bukkit.getScoreboardManager().getNewScoreboard();
+            // Create the sidebar objective immediately and assign to player
+            Objective obj = this.board.registerNewObjective("lp_sidebar", "dummy",
+                    ColorUtil.color(Locales.getString(locale, "scoreboard.title")));
+            obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+            player.setScoreboard(this.board);
         }
     }
 
-    /**
-     * Unregisters this user.
-     */
     protected abstract void unregister();
 
-    /**
-     * Teleports the player asynchronously.
-     *
-     * @param to Where the player will be teleported to
-     */
     public void teleport(@NotNull Location to) {
-        PaperLib.teleportAsync(player, to);
+        player.teleport(to);
     }
 
-    /**
-     * Sends a message.
-     *
-     * @param message The message
-     */
     public void send(String message) {
         player.sendMessage(ColorUtil.color(message));
     }
 
-    /**
-     * Sends a translated message
-     *
-     * @param key    The translation key
-     * @param format Any objects that may be given to the formatting of the string.
-     */
     public void sendTranslated(String key, Object... format) {
         send(Locales.getString(locale, key).formatted(format));
     }
 
     /**
-     * Updates the scoreboard for the specified generator.
-     *
-     * @param generator The generator.
+     * Updates the sidebar scoreboard for the given generator state.
+     * Uses vanilla Bukkit scoreboard API — Team prefix trick for coloured lines.
      */
     public void updateScoreboard(ParkourGenerator generator) {
-        // board can be null a few ticks after on player leave
-        if (board == null || false || !generator.profile.get("showScoreboard").asBoolean()) {
+        if (board == null || !generator.profile.get("showScoreboard").asBoolean()) {
             return;
         }
 
         Leaderboard leaderboard = generator.getMode().getLeaderboard();
         Score top = leaderboard == null ? new Score("?", "?", "?", 0) : leaderboard.getScoreAtRank(1);
         Score high = leaderboard == null ? new Score("?", "?", "?", 0) : leaderboard.get(getUUID());
-        if (top == null) {
-            top = new Score("?", "?", "?", 0);
+        if (top == null) top = new Score("?", "?", "?", 0);
+
+        // Update title
+        Objective obj = board.getObjective("lp_sidebar");
+        if (obj == null) {
+            obj = board.registerNewObjective("lp_sidebar", "dummy",
+                    ColorUtil.color(replace(Locales.getString(locale, "scoreboard.title"), top, high, generator)));
+            obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+        } else {
+            obj.setDisplayName(ColorUtil.color(
+                    replace(Locales.getString(locale, "scoreboard.title"), top, high, generator)));
         }
 
-        // board.updateTitle(replace(Locales.getString(locale, "scoreboard.title"), top, high, generator));
-        // board.updateLines(replace(Locales.getStringList(locale, "scoreboard.lines"), top, high, generator));
+        // Update lines using Team prefix trick (each line = unique entry).
+        // We need globally-unique entries: use a combination of colour codes that gives
+        // up to 32 unique strings (§0§0, §0§1, … §1§0 …). This safely covers any
+        // reasonable scoreboard length.
+        List<String> lines = replace(Locales.getStringList(locale, "scoreboard.lines"), top, high, generator);
+        String[] codes = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"};
+        for (int i = 0; i < lines.size(); i++) {
+            String entry = "§" + codes[i / codes.length % codes.length] + "§" + codes[i % codes.length];
+            String teamName = "lp_line_" + i;
+
+            Team team = board.getTeam(teamName);
+            if (team == null) {
+                team = board.registerNewTeam(teamName);
+                team.addEntry(entry);
+            }
+
+            team.setPrefix(ColorUtil.color(lines.get(i)));
+            obj.getScore(entry).setScore(lines.size() - i);
+        }
     }
 
     private List<String> replace(List<String> s, Score top, Score high, ParkourGenerator generator) {
@@ -302,45 +240,21 @@ public abstract class ParkourUser {
                 .replace("%score%", Integer.toString(generator.score))
                 .replace("%time%", generator.getFormattedTime())
                 .replace("%difficulty%", Double.toString(generator.getDifficultyScore()))
-
                 .replace("%top_score%", Integer.toString(top.score()))
                 .replace("%top_player%", top.name())
                 .replace("%top_time%", top.time())
-
                 .replace("%high_score%", Integer.toString(high.score()))
                 .replace("%high_score_time%", high.time()));
     }
 
-    // translate papi
     private String translate(Player player, String string) {
         return LoParkour.getPlaceholderHook() == null ? string : PlaceholderAPI.setPlaceholders(player, string);
     }
 
-    /**
-     * @return The player's uuid
-     */
-    public UUID getUUID() {
-        return player.getUniqueId();
-    }
+    public UUID getUUID() { return player.getUniqueId(); }
+    public Location getLocation() { return player.getLocation(); }
+    public String getName() { return player.getName(); }
 
-    /**
-     * @return The player's location
-     */
-    public Location getLocation() {
-        return player.getLocation();
-    }
-
-    /**
-     * @return The player's name
-     */
-    public String getName() {
-        return player.getName();
-    }
-
-    /**
-     * @param player The player
-     * @return true if the player is a Bedrock player, false if not.
-     */
     public static boolean isBedrockPlayer(Player player) {
         return Bukkit.getPluginManager().isPluginEnabled("floodgate") && FloodgateHook.isBedrockPlayer(player);
     }

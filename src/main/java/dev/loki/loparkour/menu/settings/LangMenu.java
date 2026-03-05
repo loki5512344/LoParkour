@@ -1,42 +1,55 @@
 package dev.loki.loparkour.menu.settings;
 
 import dev.loki.loparkour.config.Locales;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.player.ParkourPlayer;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LangMenu {
+public class LangMenu extends LPMenu {
 
-    /**
-     * Opens the language menu
-     *
-     * @param user The ParkourPlayer instance
-     */
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(ParkourPlayer user) {
-        if (user == null) {
-            return;
-        }
-        // PagedMenu style = new PagedMenu(3, Locales.getString(user.locale, "settings.lang.name"));
-        // List<MenuItem> items = new ArrayList<>();
-        // for (String lang : Locales.locales.keySet()) {
-        // Item item = new Item(Material.PAPER, "<#238681><bold>" + Locales.getString(lang, "name"));
-        // items.add(item.click(event -> {
-        // user.locale = lang;
-        // user._locale = lang;
-        // Menus.SETTINGS.open(event.getPlayer());
-        // }));
-        // }
-        // style.displayRows(0, 1).addToDisplay(items)
-        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> style.page(1)))
-        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> style.page(-1)))
-        // .item(22, Locales.getItem(user.locale, "other.close").click(event -> Menus.SETTINGS.open(event.getPlayer())))
-        // .open(user.player);
+    public void open(@NotNull ParkourPlayer user) {
+        if (user == null) return;
+        open(user.player);
     }
-    */
 
+    @Override
+    public void open(@NotNull Player player) {
+        ParkourPlayer pp = ParkourPlayer.getPlayer(player);
+        if (pp == null) return;
+
+        String locale = pp.locale;
+        String title = Locales.getString(locale, "settings.lang.name");
+
+        List<String> langs = new ArrayList<>(Locales.locales.keySet());
+
+        InventoryGUI gui = baseGui(title, 3);
+
+        for (int i = 0; i < Math.min(langs.size(), 7); i++) {
+            final String lang = langs.get(i);
+            String langName = Locales.getString(lang, "name");
+            ItemStack item = new ItemStack(Material.PAPER);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorUtil.color("&#238681&l" + langName));
+                item.setItemMeta(meta);
+            }
+            gui = gui.setItem(10 + i, item, e -> {
+                pp.locale = lang;
+                pp._locale = lang;
+                Menus.SETTINGS.open(player);
+            });
+        }
+
+        gui.open(player);
+    }
 }

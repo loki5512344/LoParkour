@@ -92,7 +92,7 @@ world:
 
   # -= World name =-
   # The world in which parkour will take place
-  name: 'witp'
+  name: 'loparkour'
 
   # -= Delete world on reload =-
   # Deletes the world on reload/restart of the server.

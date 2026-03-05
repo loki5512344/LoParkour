@@ -13,7 +13,7 @@ play:
 
   item:
     material: "sugar_cane"
-    name: "&#00D4FF<bold>Играть"
+    name: "&#00D4FF&lИграть"
     lore: ""
 
   single:
@@ -21,13 +21,28 @@ play:
 
     item:
       material: "ender_pearl"
-      name: "&#00D4FF<bold>Одиночная игра"
+      name: "&#00D4FF&lОдиночная игра"
       lore: ""
 
     default:
       material: "barrel"
-      name: "&#00D4FF<bold>Обычный"
+      name: "&#00D4FF&lОбычный"
       lore: "&#404040Стандартный режим игры."
+
+    speedrun:
+      material: "clock"
+      name: "&#00D4FF&lСпидран"
+      lore: "&#404040Гонка на время! Блоки||&#404040исчезают после того, как вы на них наступите."
+
+    gravity-shift:
+      material: "feather"
+      name: "&#00D4FF&lСмена гравитации"
+      lore: "&#404040Гравитация меняет направление||&#404040во время паркура!"
+
+    hardcore:
+      material: "skeleton_skull"
+      name: "&#00D4FF&lХардкор"
+      lore: "&#404040Одна ошибка и всё! Нет||&#404040второго шанса."
 
   spectator:
     name: "&#FFFFFFНаблюдатель"
@@ -35,17 +50,17 @@ play:
     join: "&#00D4FFТеперь вы наблюдатель. Используйте \"/parkour\" чтобы выйти/сменить режим."
     action_bar: "&#00D4FFВы наблюдатель &#A0A0A0• &#00D4FFИспользуйте \"/parkour\" чтобы выйти."
 
-    other_join: "<dark_green><bold>+ <reset>&#A0A0A0%s начал наблюдать за вами"
-    other_leave: "&#FF4444<bold>- <reset>&#A0A0A0%s перестал наблюдать за вами"
+    other_join: "&#006400&l+ &r&#A0A0A0%s начал наблюдать за вами"
+    other_leave: "&#FF4444&l- &r&#A0A0A0%s перестал наблюдать за вами"
 
     item:
       material: "glass"
-      name: "&#00D4FF<bold>Наблюдатель"
+      name: "&#00D4FF&lНаблюдатель"
       lore: ""
 
     head:
       material: ""
-      name: "&#00D4FF<bold>%s"
+      name: "&#00D4FF&l%s"
       lore: ""
 
 community:
@@ -53,7 +68,7 @@ community:
 
   item:
     material: "oak_boat"
-    name: "&#00D4FF<bold>Сообщество"
+    name: "&#00D4FF&lСообщество"
     lore: ""
 
   leaderboards:
@@ -61,18 +76,18 @@ community:
 
     item:
       material: "gold_nugget"
-      name: "&#00D4FF<bold>Таблица лидеров"
+      name: "&#00D4FF&lТаблица лидеров"
       lore: ""
 
     sort:
       material: "bookshelf"
-      name: "&#00D4FF<bold>Сортировка по %s"
+      name: "&#00D4FF&lСортировка по %s"
       lore: ""
       values: ["счёту", "времени", "сложности"]
 
     head:
       material: ""
-      name: "&#00D4FF<bold>#%r - %p"
+      name: "&#00D4FF&l#%r - %p"
       lore: "&#00D4FFСчёт: &#A0A0A0%s||&#00D4FFВремя: &#A0A0A0%t||&#00D4FFСложность: &#A0A0A0%d&#404040/1.0"
 
 settings:
@@ -80,7 +95,7 @@ settings:
 
   item:
     material: "comparator"
-    name: "&#00D4FF<bold>Настройки"
+    name: "&#00D4FF&lНастройки"
     lore: ""
 
   lang:
@@ -88,13 +103,13 @@ settings:
 
     item:
       material: "writable_book"
-      name: "&#00D4FF<bold>Язык"
-      lore: "&#404040Текущий: &#00D4FF<bold>%s"
+      name: "&#00D4FF&lЯзык"
+      lore: "&#404040Текущий: &#00D4FF&l%s"
 
   chat:
     material: "crossbow"
-    name: "&#00D4FF<bold>Чат"
-    lore: "&#404040Текущий: &#00D4FF<bold>%s||&#404040Выберите с кем вы можете общаться"
+    name: "&#00D4FF&lЧат"
+    lore: "&#404040Текущий: &#00D4FF&l%s||&#404040Выберите с кем вы можете общаться"
     values: ["только лобби", "только игроки", "публичный"]
 
     formats:
@@ -103,19 +118,19 @@ settings:
 
   parkour_settings:
 
-    enabled: "&#00D4FF<bold>✔"
-    disabled: "&#FF4444<bold>✘"
+    enabled: "&#00D4FF&l✔"
+    disabled: "&#FF4444&l✘"
 
     item:
       material: "redstone"
-      name: "&#00D4FF<bold>Настройки паркура"
+      name: "&#00D4FF&lНастройки паркура"
       lore: "&#404040Измените внешний вид вашего паркура."
 
     items:
 
       no_change:
         material: "barrier"
-        name: "<dark_red><bold>Вы не можете изменить это сейчас!"
+        name: "&#8B0000&lВы не можете изменить это сейчас!"
         lore: "&#A0A0A0У вас счёт больше 0,||&#A0A0A0поэтому вы не можете изменить эту настройку."
 
       styles:
@@ -123,29 +138,29 @@ settings:
 
         style_item:
           material: ""
-          name: "&#FFFFFF<bold>%s"
+          name: "&#FFFFFF&l%s"
           lore: "&#00D4FFКатегория: &#A0A0A0%s"
 
         item:
           material: "crafting_table"
-          name: "&#00D4FF<bold>Стиль"
+          name: "&#00D4FF&lСтиль"
           lore: "&#00D4FFТекущий: &#A0A0A0%s||&#A0A0A0Выберите какие блоки будут использоваться."
 
       leads:
         material: "feather"
-        name: "&#00D4FF<bold>Дистанция"
+        name: "&#00D4FF&lДистанция"
         lore: "&#00D4FFТекущая: &#A0A0A0%s блоков||&#A0A0A0Сколько блоков будет||&#A0A0A0сгенерировано впереди вас."
 
       time:
         material: "clock"
-        name: "&#00D4FF<bold>Время"
+        name: "&#00D4FF&lВремя"
         lore: "&#00D4FFТекущее: &#A0A0A0%s||&#A0A0A0Ваше текущее визуальное время."
 
       schematics:
         material: ""
-        name: "&#00D4FF<bold>Сложность схематик"
+        name: "&#00D4FF&lСложность схематик"
         lore: "&#00D4FFТекущая: &#A0A0A0%s||&#A0A0A0Сложность схематик"
-        values: ["&#FF4444выкл", "&#00D4FFлёгкая", "<yellow>средняя", "&#00D4FFсложная", "<dark_red>очень сложная"]
+        values: ["&#FF4444выкл", "&#00D4FFлёгкая", "&#FFFF00средняя", "&#00D4FFсложная", "&#8B0000очень сложная"]
 
       scoreboard:
         material: ""
@@ -158,10 +173,10 @@ settings:
           name: "Показывать сообщение о падении"
           lore: "&#A0A0A0Текущее: %s||&#A0A0A0Если включено, показывает сообщение при падении||&#A0A0A0с дополнительной информацией."
 
-        divider: "&#404040<strikethrough>-----------------------------------"
-        score: "&#00D4FF<bold>Счёт <reset>&#FFFFFF%s"
-        time: "&#00D4FF<bold>Время <reset>&#FFFFFF%s"
-        high_score: "&#00D4FF<bold>Рекорд <reset>&#FFFFFF%s"
+        divider: "&#404040&m-----------------------------------"
+        score: "&#00D4FF&lСчёт &r&#FFFFFF%s"
+        time: "&#00D4FF&lВремя &r&#FFFFFF%s"
+        high_score: "&#00D4FF&lРекорд &r&#FFFFFF%s"
 
         formats:
           miss: "&#A0A0A0Вы не дотянули до рекорда на %s очков!"
@@ -191,18 +206,18 @@ settings:
 lobby:
   name: "&#FFFFFFЛобби"
 
-  other_join: '<dark_green><bold>+ <reset>&#A0A0A0%s присоединился к вашему лобби'
-  other_leave: '&#FF4444<bold>- <reset>&#A0A0A0%s покинул ваше лобби'
+  other_join: '&#006400&l+ &r&#A0A0A0%s присоединился к вашему лобби'
+  other_leave: '&#FF4444&l- &r&#A0A0A0%s покинул ваше лобби'
 
   item:
     material: "iron_ingot"
-    name: "&#00D4FF<bold>Ваше лобби"
+    name: "&#00D4FF&lВаше лобби"
     lore: ""
 
   visibility:
     material: "firework_rocket"
-    name: "&#00D4FF<bold>Видимость"
-    lore: "&#404040Текущая: &#00D4FF<bold>%s||&#404040Выберите кто может присоединиться к вашему лобби."
+    name: "&#00D4FF&lВидимость"
+    lore: "&#404040Текущая: &#00D4FF&l%s||&#404040Выберите кто может присоединиться к вашему лобби."
     values: ["приватное", "только по приглашению", "публичное"]
 
   player_management:
@@ -215,27 +230,27 @@ lobby:
 
     item:
       material: "cake"
-      name: "&#00D4FF<bold>Управление игроками"
+      name: "&#00D4FF&lУправление игроками"
       lore: "&#404040Кикайте или мутьте игроков здесь."
 
     head:
       material: ""
-      name: "&#00D4FF<bold>%s"
+      name: "&#00D4FF&l%s"
       lore: ""
       top: "&#404040Замучен в лобби||"
       bottom: "&#00D4FFЛевый клик&#404040 чтобы кикнуть из лобби||&#00D4FFПравый клик&#404040 чтобы замутить/размутить в лобби"
 
 scoreboard:
 
-  title: "&#00D4FF<bold>LoParkour"
+  title: "&#00D4FF&lLoParkour"
 
   lines:
-    - "<blue>"
+    - "&#0000FF"
     - "&#00D4FFСчёт &#FFFFFF%score%"
     - "&#00D4FFВремя &#FFFFFF%time%"
     - "&#00D4FFРекорд &#FFFFFF%high_score%"
     - "&#FF4444"
-    - "&#00D4FF<bold>server.ip"
+    - "&#00D4FF&lserver.ip"
 
 other:
 
@@ -245,20 +260,21 @@ other:
 
   quit:
     material: "barrier"
-    name: "&#00D4FF<bold>Выход"
+    name: "&#00D4FF&lВыход"
     lore: ""
 
   close:
     material: "arrow"
-    name: "&#00D4FF<bold>Закрыть"
+    name: "&#00D4FF&lЗакрыть"
     lore: ""
 
   iep:
     material: "elytra"
-    name: "&#00D4FF<bold>Полёт"
+    name: "&#00D4FF&lПолёт"
     lore: "&#A0A0A0Паркур с элитрами!"
 
 modes:
   elytra:
-    name: "&#00D4FF<bold>Элитры"
-    description: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"
+    material: "elytra"
+    name: "&#00D4FF&lЭлитры"
+    lore: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"

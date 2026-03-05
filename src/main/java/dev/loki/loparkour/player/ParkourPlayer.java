@@ -114,7 +114,7 @@ public class ParkourPlayer extends ParkourUser {
      */
     public static @Nullable ParkourPlayer getPlayer(@NotNull Player player) {
         return getPlayers().stream()
-                .filter(other -> other.getUUID() == player.getUniqueId())
+                .filter(other -> other.getUUID().equals(player.getUniqueId()))
                 .findAny()
                 .orElse(null);
     }
@@ -130,8 +130,6 @@ public class ParkourPlayer extends ParkourUser {
 
     @Override
     public void unregister() {
-        LoParkour.log("Unregistering player %s".formatted(player.getName()));
-
         if (session.generator != null &&
                 session.generator.getMode() != null &&
                 session.generator.getMode() instanceof MultiMode mode) {
@@ -199,19 +197,14 @@ public class ParkourPlayer extends ParkourUser {
     }
 
     public void setup(Location to) {
-        LoParkour.log("Setting up player %s".formatted(player.getName()));
-
         if (to != null) {
             teleport(to);
         }
 
         player.setGameMode(GameMode.ADVENTURE);
 
-        // -= Inventory =-
         if (Config.CONFIG.getBoolean("options.inventory-handling")) {
             Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
-                LoParkour.log("Setting up inventory for player %s".formatted(player.getName()));
-
                 player.getInventory().clear();
 
                 List<dev.loki.loparkour.util.Item> items = new ArrayList<>();

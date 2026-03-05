@@ -1,351 +1,138 @@
 package dev.loki.loparkour.menu.settings;
 
-import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.menu.DynamicMenu;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourPlayer;
-import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.style.RandomStyle;
 import dev.loki.loparkour.style.Style;
-import org.bukkit.ChatColor;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-/**
- * Handles all menu-related activities
- *
- * @author loki
- * @since v3.0.0
- */
-public class ParkourSettingsMenu extends DynamicMenu {
+public class ParkourSettingsMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public ParkourSettingsMenu(ParkourOption... disabled) {
-
-        // ---------- top row ----------
-
-        // styles
-        registerMainItem(1, 0, (p, user) -> Locales.getItem(p, ParkourOption.STYLES.path + ".item", user instanceof ParkourPlayer player ? player.style : null).click(event -> {
-            if (!(user instanceof ParkourPlayer player)) {
-                return;
-            }
-
-            openStyleMenu(player);
-        }), player -> checkOptions(player, ParkourOption.STYLES, disabled));
-
-        // leads
-        registerMainItem(1, 1, (p, user) -> {
-            Item displayItem = Locales.getItem(p, ParkourOption.LEADS.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return displayItem;
-            }
-
-            List<Integer> leads = Option.POSSIBLE_LEADS;
-
-            SliderItem item = new SliderItem().initial(leads.indexOf(player.blockLead)); // initial value of the player
-
-            int slot = 0;
-            for (int value : leads) {
-                item.add(slot, displayItem.clone()
-                            .amount(value)
-                            .modifyLore(line -> line.replace("%s", Integer.toString(value))),
-                        event2 -> handleSettingChange(player, () -> player.blockLead = value));
-                slot++;
-            }
-            return item;
-        }, player -> checkOptions(player, ParkourOption.LEADS, disabled));
-
-        // schematics
-        registerMainItem(1, 8, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.SCHEMATICS.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            List<Double> difficulties = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
-            List<String> values = Locales.getStringList(user.locale, "%s.values".formatted(ParkourOption.SCHEMATICS.path));
-
-            if (!difficulties.contains(player.schematicDifficulty)) {
-                player.schematicDifficulty = difficulties.get(0);
-            }
-
-            return new SliderItem()
-                .initial(difficulties.indexOf(player.schematicDifficulty))
-                .add(0, item.clone()
-                        .material(Material.RED_STAINED_GLASS_PANE)
-                        .modifyLore(line -> line.replace("%s", values.get(0))),
-                    event -> handleScoreSettingChange(player, event, () -> player.schematicDifficulty = 0.0))
-                .add(1, item.clone()
-                        .material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyLore(line -> line.replace("%s", values.get(1))),
-                    event -> handleScoreSettingChange(player, event, () -> player.schematicDifficulty = 0.25))
-                .add(2, item.clone()
-                        .material(Material.YELLOW_STAINED_GLASS_PANE)
-                        .modifyLore(line -> line.replace("%s", values.get(2))),
-                    event -> handleScoreSettingChange(player, event, () -> player.schematicDifficulty = 0.5))
-                .add(3, item.clone()
-                        .material(Material.ORANGE_STAINED_GLASS_PANE)
-                        .modifyLore(line -> line.replace("%s", values.get(3))),
-                    event -> handleScoreSettingChange(player, event, () -> player.schematicDifficulty = 0.75))
-                .add(4, item.clone()
-                        .material(Material.SKELETON_SKULL)
-                        .modifyLore(line -> line.replace("%s", values.get(4))),
-                    event -> handleScoreSettingChange(player, event, () -> player.schematicDifficulty = 1.0));
-        }, player -> checkOptions(player, ParkourOption.SCHEMATICS, disabled));
-
-        // time
-        registerMainItem(1, 9, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.TIME.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            // Tick times start at 6:00 and total is 24.000.
-            // Source: https://minecraft.fandom.com/wiki/Daylight_cycle?file=Day_Night_Clock_24h.png
-            List<Integer> times = Arrays.asList(0, 6000, 12000, 18000); // 00:00 -> 6:00 -> 12:00 -> 18:00
-
-            var format = Config.CONFIG.getInt("options.time.format");
-
-            return new SliderItem()
-                .initial(times.indexOf(player.selectedTime))
-                .add(0, item.clone()
-                        .modifyLore(line -> line.replace("%s", format == 12 ? "12:00 AM" : "00:00")),
-                    event -> handleSettingChange(player, () -> player.selectedTime = 0))
-                .add(1, item.clone()
-                        .modifyLore(line -> line.replace("%s", format == 12 ? "6:00 AM" : "6:00")),
-                    event -> handleSettingChange(player, () -> player.selectedTime = 6000))
-                .add(2, item.clone()
-                        .modifyLore(line -> line.replace("%s", format == 12 ? "12:00 PM" : "12:00")),
-                    event -> handleSettingChange(player, () -> player.selectedTime = 12000))
-                .add(3, item.clone()
-                        .modifyLore(line -> line.replace("%s", format == 12 ? "6:00 PM" : "18:00")),
-                    event -> handleSettingChange(player, () -> player.selectedTime = 18000));
-        }, player -> checkOptions(player, ParkourOption.TIME, disabled));
-
-        // ---------- bottom row ----------
-
-        // show scoreboard
-        registerMainItem(2, 0, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.SCOREBOARD.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            return new SliderItem()
-                .initial(player.showScoreboard ? 0 : 1)
-                .add(0, item.clone()
-                        .material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<#0DCB07><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, true))),
-                    event -> handleSettingChange(player, () -> {
-                            player.showScoreboard = true;
-                            player.board = new FastBoard(p);
-                        }))
-                .add(1, item.clone()
-                        .material(Material.RED_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<red><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, false))),
-                    event -> handleSettingChange(player, () -> {
-                        player.showScoreboard = false;
-                        if (player.board != null && !player.board.isDeleted()) {
-                            player.board.delete();
-                        }
-                    }));
-        }, player -> checkOptions(player, ParkourOption.SCOREBOARD, disabled) && Boolean.parseBoolean(Option.OPTIONS_DEFAULTS.get(ParkourOption.SCOREBOARD)));
-
-        // show fall message
-        registerMainItem(2, 1, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.FALL_MESSAGE.path + ".item");
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            return new SliderItem()
-                .initial(player.showFallMessage ? 0 : 1)
-                .add(0, item.clone()
-                        .material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<#0DCB07><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, true))),
-                    event -> handleSettingChange(player, () -> player.showFallMessage = true))
-                .add(1, item.clone()
-                        .material(Material.RED_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<red><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, false))),
-                    event -> handleSettingChange(player, () -> player.showFallMessage = false));
-        }, player -> checkOptions(player, ParkourOption.FALL_MESSAGE, disabled));
-
-        // show sound
-        registerMainItem(2, 2, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.PARTICLES.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            return new SliderItem()
-                .initial(player.particles ? 0 : 1)
-                .add(0, item.clone().material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<#0DCB07><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, true))),
-                    event -> handleSettingChange(player, () -> player.particles = true))
-                .add(1, item.clone()
-                        .material(Material.RED_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<red><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, false))),
-                    event -> handleSettingChange(player, () -> player.particles = false));
-        }, player -> checkOptions(player, ParkourOption.PARTICLES, disabled));
-
-        // show sound
-        registerMainItem(2, 3, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.SOUND.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            return new SliderItem()
-                .initial(player.sound ? 0 : 1)
-                .add(0, item.clone()
-                        .material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<#0DCB07><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, true))),
-                    event -> handleSettingChange(player, () -> player.sound = true))
-                .add(1, item.clone()
-                    .material(Material.RED_STAINED_GLASS_PANE)
-                    .modifyName(name -> "<red><bold>" + ChatColor.stripColor(name))
-                    .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, false))),
-                    event -> handleSettingChange(player, () -> player.sound = false));
-        }, player -> checkOptions(player, ParkourOption.SOUND, disabled));
-
-        // show special blocks
-        registerMainItem(2, 4, (p, user) -> {
-            Item item = Locales.getItem(p, ParkourOption.SPECIAL_BLOCKS.path);
-
-            if (!(user instanceof ParkourPlayer player)) {
-                return item;
-            }
-
-            return new SliderItem()
-                .initial(player.useSpecialBlocks ? 0 : 1)
-                .add(0, item.clone()
-                        .material(Material.LIME_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<#0DCB07><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, true))),
-                    event -> handleScoreSettingChange(player, event, () -> player.useSpecialBlocks = true))
-                .add(1, item.clone()
-                        .material(Material.RED_STAINED_GLASS_PANE)
-                        .modifyName(name -> "<red><bold>" + ChatColor.stripColor(name))
-                        .modifyLore(line -> line.replace("%s", getBooleanSymbol(user, false))),
-                    event -> handleScoreSettingChange(player, event, () -> player.useSpecialBlocks = false));
-        }, player -> checkOptions(player, ParkourOption.SPECIAL_BLOCKS, disabled));
-
-        // Always allow closing of the menu
-        registerMainItem(3, 10,
-                (player, user) -> Locales.getItem(player, "other.close")
-                    .click(event -> Menus.SETTINGS.open(event.getPlayer())),
-                player -> true);
+    public void open(@NotNull ParkourPlayer user) {
+        if (user == null) return;
+        open(user.player);
     }
-    */
 
-    /**
-     * Shows the main menu to a valid ParkourPlayer instance
-     *
-     * @param user The ParkourPlayer
-     */
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(ParkourPlayer user) {
-        display(user.player, new Menu(4, Locales.getString(user.locale, "settings.name"))
-            .distributeRowEvenly(0, 1, 2, 3)
-            .item(27, Locales.getItem(user.locale, "other.close").click(event -> Menus.SETTINGS.open(event.getPlayer()))));
+    @Override
+    public void open(@NotNull Player player) {
+        ParkourPlayer pp = ParkourPlayer.getPlayer(player);
+        if (pp == null) return;
+
+        String locale = pp.locale;
+        String title = Locales.getString(locale, "settings.name");
+
+        baseGui(title, 4)
+                .setItem(10, toggleItem(locale, "particles", pp.particles), e -> {
+                    pp.particles = !pp.particles;
+                    pp.updateGeneratorSettings(pp.session.generator);
+                    open(pp);
+                })
+                .setItem(11, toggleItem(locale, "sound", pp.sound), e -> {
+                    pp.sound = !pp.sound;
+                    pp.updateGeneratorSettings(pp.session.generator);
+                    open(pp);
+                })
+                .setItem(12, toggleItem(locale, "special_blocks", pp.useSpecialBlocks), e -> {
+                    if (pp.session.generator.score == 0) {
+                        pp.useSpecialBlocks = !pp.useSpecialBlocks;
+                        pp.updateGeneratorSettings(pp.session.generator);
+                    }
+                    open(pp);
+                })
+                .setItem(13, toggleItem(locale, "fall_message", pp.showFallMessage), e -> {
+                    pp.showFallMessage = !pp.showFallMessage;
+                    pp.updateGeneratorSettings(pp.session.generator);
+                    open(pp);
+                })
+                .setItem(14, toggleItem(locale, "scoreboard", pp.showScoreboard), e -> {
+                    pp.showScoreboard = !pp.showScoreboard;
+                    pp.updateGeneratorSettings(pp.session.generator);
+                    open(pp);
+                })
+                .setItem(19, localeItem(player, "settings.parkour_settings.styles.item"),
+                        e -> openStyleMenu(pp))
+                .setItem(20, schemDiffItem(pp), e -> {
+                    if (pp.session.generator.score == 0) {
+                        List<Double> diffs = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
+                        int idx = diffs.indexOf(pp.schematicDifficulty);
+                        pp.schematicDifficulty = diffs.get((idx + 1) % diffs.size());
+                        pp.updateGeneratorSettings(pp.session.generator);
+                    }
+                    open(pp);
+                })
+                .setItem(31, closeButton(player), e -> Menus.SETTINGS.open(player))
+                .open(player);
     }
-    */
 
-    /**
-     * Opens the style menu
-     *
-     * @param player      The ParkourPlayer instance
-     */
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void openStyleMenu(ParkourPlayer player) {
-        // init menu
-        PagedMenu menu = new PagedMenu(3, Locales.getString(player.locale, ParkourOption.STYLES.path + ".name"));
+    private ItemStack toggleItem(String locale, String key, boolean value) {
+        Material mat = value ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
+        String symbol = Locales.getString(locale, "settings.parkour_settings." + (value ? "enabled" : "disabled"));
+        String label = Locales.getString(locale, "settings.parkour_settings." + key + ".item");
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ColorUtil.color(label + " §7[" + symbol + "§7]"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
 
-        List<MenuItem> items = new ArrayList<>();
+    private ItemStack schemDiffItem(ParkourPlayer pp) {
+        List<Double> diffs = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
+        List<String> values = Locales.getStringList(pp.locale, "settings.parkour_settings.schematics.values");
+        int idx = Math.max(0, diffs.indexOf(pp.schematicDifficulty));
+        String label = idx < values.size() ? values.get(idx) : String.valueOf(pp.schematicDifficulty);
+        Material[] mats = {Material.RED_STAINED_GLASS_PANE, Material.LIME_STAINED_GLASS_PANE,
+                Material.YELLOW_STAINED_GLASS_PANE, Material.ORANGE_STAINED_GLASS_PANE, Material.SKELETON_SKULL};
+        ItemStack item = new ItemStack(idx < mats.length ? mats[idx] : Material.PAPER);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ColorUtil.color("§eSchematics §7» §f" + label));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private void openStyleMenu(ParkourPlayer pp) {
+        Player player = pp.player;
+        String locale = pp.locale;
+        String title = Locales.getString(locale, "settings.parkour_settings.styles.name");
+
+        List<Style> styles = new ArrayList<>();
+        InventoryGUI gui = baseGui(title, 3);
+
+        int slot = 10;
         for (Style style : Registry.getStyles()) {
-            var name = style.getName();
+            if (slot > 16) break;
+            String name = style.getName();
+            String perm = ParkourOption.STYLES.permission + "." + name.toLowerCase().replace(" ", ".");
+            if (Config.CONFIG.getBoolean("permissions.per-style") && !player.hasPermission(perm)) continue;
 
-            var perm = "%s.%s".formatted(ParkourOption.STYLES.permission, name.toLowerCase());
-            if (Config.CONFIG.getBoolean("permissions.per-style") && !player.player.hasPermission(perm.replace(" ", "."))) {
-                continue;
-            }
+            ItemStack item = new ItemStack(style.getNext());
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) { meta.setDisplayName(ColorUtil.color("&#A020F0" + name)); item.setItemMeta(meta); }
 
-            var category = style instanceof RandomStyle ? "random" : "incremental";
-
-            items.add(Locales.getItem(player.player, ParkourOption.STYLES.path + ".style_item", name, category)
-                .material(style.getNext())
-                .click(event -> {
-                    player.style = name;
-                    player.updateGeneratorSettings(player.session.generator);
-                    open(player);
-                }));
+            final Style s = style;
+            gui = gui.setItem(slot++, item, e -> {
+                pp.style = s.getName();
+                pp.updateGeneratorSettings(pp.session.generator);
+                open(pp);
+            });
         }
 
-        menu.displayRows(0, 1)
-                .addToDisplay(items)
-                .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
-                .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
-                .item(22, Locales.getItem(player.locale, "other.close").click(event -> open(player)))
-                .open(player.player);
-    }
-    */
-
-    // TODO: Migrate to LoLib GUI system
-    /*
-    private boolean handleSettingChange(ParkourPlayer player, Runnable onAllowed) {
-        onAllowed.run();
-        player.updateGeneratorSettings(player.session.generator);
-        return true;
-    }
-    */
-
-    // TODO: Migrate to LoLib GUI system
-    /*
-    private boolean handleScoreSettingChange(ParkourPlayer player, MenuClickEvent event, Runnable onAllowed) {
-        if (player.session.generator.score == 0) {
-            return handleSettingChange(player, onAllowed);
-        }
-
-        event.menu().item(event.slot(), new TimedItem(Locales.getItem(player.locale, "settings.parkour_settings.items.no_change").click((event1) -> {}), event, LoParkour.getPlugin()).stay(5 * 20));
-        event.menu().updateItem(event.slot());
-        return false;
-
-    }
-    */
-
-    // replaces true/false with a checkmark and cross
-    private String getBooleanSymbol(ParkourUser user, boolean value) {
-        return value ? Locales.getString(user.player, "settings.parkour_settings.enabled") : Locales.getString(user.player, "settings.parkour_settings.disabled");
-    }
-
-    // check if option is allowed to be displayed
-    private boolean checkOptions(Player player, ParkourOption option, ParkourOption[] disabled) {
-        return !Arrays.asList(disabled).contains(option) && option.mayPerform(player);
+        gui.open(player);
     }
 }

@@ -75,8 +75,6 @@ public enum Config {
         Locales.init();
         Schematics.init();
         Option.init(initialLoad);
-
-        LoParkour.log("Loaded all config files");
     }
 
     /**

@@ -47,11 +47,11 @@ public final class Island {
      */
     public void build(Location location) {
         if (schematic == null) {
+            LoParkour.getPlugin().getLogger().warning("Cannot build island - schematic is null!");
             return;
         }
-        LoParkour.log("Building island");
 
-        blocks = new ArrayList<>(); // TODO: schematic.paste(location, world)
+        blocks = schematic.paste(location, location.getWorld());
 
         Material playerMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.spawn.player-block").toUpperCase());
         Material parkourMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.parkour.begin-block").toUpperCase());
@@ -60,14 +60,18 @@ public final class Island {
             Block player = blocks.stream().filter(block -> block.getType() == playerMaterial).findAny().orElseThrow();
             Block parkour = blocks.stream().filter(block -> block.getType() == parkourMaterial).findAny().orElseThrow();
 
-            player.setType(Material.AIR);
-            parkour.setType(Material.AIR);
+            player.setType(Material.STONE);
+            parkour.setType(Material.STONE);
 
-            Location ps = player.getLocation().add(0.5, 0, 0.5);
+            Location ps = player.getLocation().add(0.5, 1.0, 0.5);
             ps.setYaw(Config.GENERATION.getInt("advanced.island.spawn.yaw"));
             ps.setPitch(Config.GENERATION.getInt("advanced.island.spawn.pitch"));
 
-            session.generator.generateFirst(ps, parkour.getLocation().subtract(session.generator.heading).subtract(0, 1, 0));
+            // First parkour block should be generated FROM the parkour start block
+            // in the direction of heading, not AT the parkour start block
+            Location parkourStart = parkour.getLocation().add(session.generator.heading);
+            
+            session.generator.generateFirst(ps, parkourStart);
             session.generator.startTick();
             session.getPlayers().forEach(pp -> pp.setup(ps));
         } catch (NoSuchElementException ex) {

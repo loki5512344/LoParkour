@@ -74,12 +74,6 @@ public class Session {
                                  Function<Session, Boolean> isAcceptingPlayers,
                                  Function<Session, Boolean> isAcceptingSpectators,
                                  Player... players) {
-        LoParkour.log("Creating session");
-
-        if (players != null) {
-            LoParkour.log("Players in session: %s".formatted(Arrays.stream(players).map(Player::getName).toList()));
-        }
-
         Session session = new Session();
 
         if (isAcceptingPlayers != null) session.isAcceptingPlayers = isAcceptingPlayers;
@@ -128,8 +122,6 @@ public class Session {
      */
     public void addPlayers(ParkourPlayer... toAdd) {
         for (ParkourPlayer player : toAdd) {
-            LoParkour.log("Adding player %s to session".formatted(player.getName()));
-
             for (ParkourPlayer to : getPlayers()) {
                 to.send(Locales.getString(player.locale, "lobby.other_join").formatted(player.getName()));
             }
@@ -145,8 +137,6 @@ public class Session {
      */
     public void removePlayers(ParkourPlayer... toRemove) {
         for (ParkourPlayer player : toRemove) {
-            LoParkour.log("Removing player %s from session".formatted(player.getName()));
-
             users.remove(player.getUUID());
         }
 
@@ -180,8 +170,6 @@ public class Session {
      */
     public void addSpectators(ParkourSpectator... spectators) {
         for (ParkourSpectator spectator : spectators) {
-            LoParkour.log("Adding spectator %s to session".formatted(spectator.getName()));
-
             for (ParkourPlayer player : getPlayers()) {
                 player.sendTranslated("play.spectator.other_join", spectator.getName());
             }
@@ -197,8 +185,6 @@ public class Session {
      */
     public void removeSpectators(ParkourSpectator... spectators) {
         for (ParkourSpectator spectator : spectators) {
-            LoParkour.log("Removing spectator %s from session".formatted(spectator.getName()));
-
             for (ParkourPlayer player : getPlayers()) {
                 player.sendTranslated("play.spectator.other_leave", spectator.getName());
             }

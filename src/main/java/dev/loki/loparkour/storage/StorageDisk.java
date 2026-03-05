@@ -81,6 +81,12 @@ class StorageDisk {
         try (FileReader reader = new FileReader(getPlayerFile(player))) {
             ParkourPlayer from = LoParkour.getGson().fromJson(reader, ParkourPlayer.class);
 
+            if (from == null) {
+                LoParkour.getPlugin().getLogger().warning("Player data file for %s is empty or corrupted, using defaults".formatted(player.getName()));
+                player.setSettings(new HashMap<>());
+                return;
+            }
+
             Map<String, Object> settings = new HashMap<>();
 
             settings.put("style", from.style);

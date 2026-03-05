@@ -1,17 +1,11 @@
 package dev.loki.loparkour.config;
 
-import org.bukkit.Bukkit;
-
-import java.util.ArrayList;
-
-import dev.loki.loparkour.util.ParticleData;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.style.RandomStyle;
 import dev.loki.loparkour.style.Style;
-
+import dev.loki.loparkour.util.ParticleData;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,303 +15,198 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 /**
- * Class for variables required in generating without accessing the file a lot (constants)
+ * Top-level config constants used throughout the plugin.
+ *
+ * Heavy sub-sections are delegated to focused classes:
+ * <ul>
+ *   <li>{@link SqlOptions}         – SQL connection settings</li>
+ *   <li>{@link ParticleOptions}    – particle &amp; sound settings</li>
+ *   <li>{@link GenerationOptions}  – generation &amp; jump-validation settings</li>
+ * </ul>
+ *
+ * Those classes expose their own static fields. Option re-exports the most
+ * commonly accessed ones via forwarding fields so existing call-sites compile
+ * without changes.
  */
 public class Option {
 
+    // ── General ───────────────────────────────────────────────────────────────
+
     public static double BORDER_SIZE;
     public static List<Integer> POSSIBLE_LEADS;
-
-    // Advanced settings
     public static BlockFace HEADING;
 
     public static Map<ParkourOption, Boolean> OPTIONS_ENABLED;
-    public static Map<ParkourOption, String> OPTIONS_DEFAULTS;
+    public static Map<ParkourOption, String>  OPTIONS_DEFAULTS;
 
     public static Location GO_BACK_LOC;
 
-    public static void init(boolean firstLoad) {
-        initSql();
-        initEnums();
-        initGeneration();
-        initStyles("styles.list", Config.CONFIG.fileConfiguration, RandomStyle::new)
-                .forEach(Registry::register);
+    // ── Forwarded from sub-classes (backwards compat) ─────────────────────────
 
+    /** @see SqlOptions#SQL */
+    public static boolean SQL;
+
+    /** @see ParticleOptions#SHAPE */
+    public static ParticleShape PARTICLE_SHAPE;
+    /** @see ParticleOptions#SOUND_TYPE */
+    public static Sound SOUND_TYPE;
+    /** @see ParticleOptions#SOUND_PITCH */
+    public static int SOUND_PITCH;
+    /** @see ParticleOptions#SOUND_VOLUME */
+    public static int SOUND_VOLUME;
+    /** @see ParticleOptions#PARTICLE_TYPE */
+    public static Particle PARTICLE_TYPE;
+    /** @see ParticleOptions#PARTICLE_DATA */
+    public static ParticleData<?> PARTICLE_DATA;
+
+    /** @see GenerationOptions */
+    public static double TYPE_NORMAL, TYPE_SPECIAL, TYPE_SCHEMATICS;
+    public static double SPECIAL_ICE, SPECIAL_SLAB, SPECIAL_PANE, SPECIAL_FENCE;
+    public static double NORMAL_DISTANCE_1, NORMAL_DISTANCE_2, NORMAL_DISTANCE_3, NORMAL_DISTANCE_4;
+    public static double NORMAL_HEIGHT_1, NORMAL_HEIGHT_0, NORMAL_HEIGHT_NEG1, NORMAL_HEIGHT_NEG2;
+    public static int    MAX_Y, MIN_Y;
+    public static int    BLOCK_CLEANUP_DISTANCE, CLEANUP_INTERVAL;
+    public static boolean GHOST_MODE_ENABLED;
+    public static int     GHOST_SHOW_TOP;
+    public static double  GHOST_TRANSPARENCY;
+
+    // ── init ──────────────────────────────────────────────────────────────────
+
+    public static void init(boolean firstLoad) {
+        SqlOptions.init();
+        ParticleOptions.init();
+        GenerationOptions.init();
+
+        syncForwardedFields();
+        initGeneral(firstLoad);
+        initOptions();
+
+        initStyles("styles.list", Config.CONFIG.fileConfiguration, RandomStyle::new)
+            .forEach(Registry::register);
+    }
+
+    /** Copy sub-class fields to this class so existing code still compiles. */
+    private static void syncForwardedFields() {
+        SQL = SqlOptions.SQL;
+
+        PARTICLE_SHAPE = ParticleOptions.SHAPE;
+        SOUND_TYPE     = ParticleOptions.SOUND_TYPE;
+        SOUND_PITCH    = ParticleOptions.SOUND_PITCH;
+        SOUND_VOLUME   = ParticleOptions.SOUND_VOLUME;
+        PARTICLE_TYPE  = ParticleOptions.PARTICLE_TYPE;
+        PARTICLE_DATA  = ParticleOptions.PARTICLE_DATA;
+
+        TYPE_NORMAL     = GenerationOptions.TYPE_NORMAL;
+        TYPE_SPECIAL    = GenerationOptions.TYPE_SPECIAL;
+        TYPE_SCHEMATICS = GenerationOptions.TYPE_SCHEMATICS;
+
+        SPECIAL_ICE   = GenerationOptions.SPECIAL_ICE;
+        SPECIAL_SLAB  = GenerationOptions.SPECIAL_SLAB;
+        SPECIAL_PANE  = GenerationOptions.SPECIAL_PANE;
+        SPECIAL_FENCE = GenerationOptions.SPECIAL_FENCE;
+
+        NORMAL_DISTANCE_1 = GenerationOptions.NORMAL_DISTANCE_1;
+        NORMAL_DISTANCE_2 = GenerationOptions.NORMAL_DISTANCE_2;
+        NORMAL_DISTANCE_3 = GenerationOptions.NORMAL_DISTANCE_3;
+        NORMAL_DISTANCE_4 = GenerationOptions.NORMAL_DISTANCE_4;
+
+        NORMAL_HEIGHT_1    = GenerationOptions.NORMAL_HEIGHT_1;
+        NORMAL_HEIGHT_0    = GenerationOptions.NORMAL_HEIGHT_0;
+        NORMAL_HEIGHT_NEG1 = GenerationOptions.NORMAL_HEIGHT_NEG1;
+        NORMAL_HEIGHT_NEG2 = GenerationOptions.NORMAL_HEIGHT_NEG2;
+
+        MAX_Y = GenerationOptions.MAX_Y;
+        MIN_Y = GenerationOptions.MIN_Y;
+
+        BLOCK_CLEANUP_DISTANCE = GenerationOptions.BLOCK_CLEANUP_DISTANCE;
+        CLEANUP_INTERVAL       = GenerationOptions.CLEANUP_INTERVAL;
+
+        GHOST_MODE_ENABLED = GenerationOptions.GHOST_MODE_ENABLED;
+        GHOST_SHOW_TOP     = GenerationOptions.GHOST_SHOW_TOP;
+        GHOST_TRANSPARENCY = GenerationOptions.GHOST_TRANSPARENCY;
+    }
+
+    // ── General init ──────────────────────────────────────────────────────────
+
+    private static void initGeneral(boolean firstLoad) {
         GO_BACK_LOC = parseLocation(Config.CONFIG.getString("bungeecord.go-back"));
         String[] axes = Config.CONFIG.getString("bungeecord.go-back-axes").split(",");
         GO_BACK_LOC.setPitch(Float.parseFloat(axes[0]));
         GO_BACK_LOC.setYaw(Float.parseFloat(axes[1]));
 
-        // General settings
-
-        // Options
-
-        List<ParkourOption> options = new ArrayList<>(Arrays.asList(ParkourOption.values()));
-
-        // exceptions
-        options.remove(ParkourOption.JOIN);
-        options.remove(ParkourOption.ADMIN);
-
-        // =====================================
-
-        OPTIONS_DEFAULTS = new HashMap<>();
-        OPTIONS_ENABLED = new HashMap<>();
-
-        String prefix = "default-values";
-        for (ParkourOption option : options) {
-            String parent = "%s.%s".formatted(prefix, option.path);
-
-            // register enabled value
-            OPTIONS_ENABLED.put(option, Config.CONFIG.getBoolean("%s.enabled".formatted(parent)));
-
-            // register default value
-            if (!Config.CONFIG.isPath("%s.default".formatted(parent))) {
-                continue;
-            }
-
-            Object value = Config.CONFIG.get("%s.default".formatted(parent));
-
-            if (value != null) {
-                OPTIONS_DEFAULTS.put(option, String.valueOf(value));
-            }
-        }
-
-        // =====================================
-
-        // Config stuff
-
         POSSIBLE_LEADS = Config.CONFIG.getIntList("options.leads.amount");
         for (int lead : new ArrayList<>(POSSIBLE_LEADS)) {
             if (lead < 1 || lead > 128) {
-                LoParkour.getPlugin().getLogger().severe("Invalid lead: %d. Should be above 1 and below 128.".formatted(lead));
+                LoParkour.getPlugin().getLogger().severe("Invalid lead: %d. Must be 1–128.".formatted(lead));
                 POSSIBLE_LEADS.remove((Object) lead);
             }
         }
 
-        // Generation
         String heading = Config.GENERATION.getString("advanced.island.parkour.heading");
-
-        switch (heading.toLowerCase()) {
-            case "north" -> HEADING = BlockFace.NORTH;
-            case "south" -> HEADING = BlockFace.SOUTH;
-            case "west" -> HEADING = BlockFace.WEST;
-            case "east" -> HEADING = BlockFace.EAST;
-            default -> LoParkour.getPlugin().getLogger().severe("Invalid heading: %s".formatted(heading));
-        }
-
-        // Scoring
+        HEADING = switch (heading.toLowerCase()) {
+            case "north" -> BlockFace.NORTH;
+            case "south" -> BlockFace.SOUTH;
+            case "west"  -> BlockFace.WEST;
+            case "east"  -> BlockFace.EAST;
+            default -> {
+                LoParkour.getPlugin().getLogger().severe("Invalid heading: " + heading);
+                yield BlockFace.NORTH;
+            }
+        };
 
         if (firstLoad) {
             BORDER_SIZE = Config.GENERATION.getDouble("advanced.border-size");
-            SQL = Config.CONFIG.getBoolean("sql.enabled");
         }
     }
 
-    private static Vector stringToVector(String direction) {
-        return switch (direction.toLowerCase()) {
-            case "north" -> new Vector(0, 0, -1);
-            case "south" -> new Vector(0, 0, 1);
-            case "west" -> new Vector(-1, 0, 0);
-            default -> new Vector(1, 0, 0); // east
-        };
+    private static void initOptions() {
+        List<ParkourOption> options = new ArrayList<>(Arrays.asList(ParkourOption.values()));
+        options.remove(ParkourOption.JOIN);
+        options.remove(ParkourOption.ADMIN);
+
+        OPTIONS_DEFAULTS = new HashMap<>();
+        OPTIONS_ENABLED  = new HashMap<>();
+
+        for (ParkourOption option : options) {
+            String parent = "default-values." + option.path;
+            OPTIONS_ENABLED.put(option, Config.CONFIG.getBoolean(parent + ".enabled"));
+
+            if (Config.CONFIG.isPath(parent + ".default")) {
+                Object value = Config.CONFIG.get(parent + ".default");
+                if (value != null) OPTIONS_DEFAULTS.put(option, String.valueOf(value));
+            }
+        }
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static Location parseLocation(String location) {
         String[] values = location.replaceAll("[()]", "").replaceAll("[, ]", " ").split(" ");
-
         World world = Bukkit.getWorld(values[3]);
-
-        if (world == null) {
-            world = Bukkit.getWorlds().get(0);
-        }
-
-        return new Location(world, Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]));
+        if (world == null) world = Bukkit.getWorlds().get(0);
+        return new Location(world, Double.parseDouble(values[0]),
+                Double.parseDouble(values[1]), Double.parseDouble(values[2]));
     }
-
-    public static ParticleShape PARTICLE_SHAPE;
-    public static Sound SOUND_TYPE;
-    public static int SOUND_PITCH;
-    public static int SOUND_VOLUME;
-    public static Particle PARTICLE_TYPE;
-    public static ParticleData<?> PARTICLE_DATA;
-
-    private static void initEnums() {
-        String value = Config.CONFIG.getString("particles.sound-type").toUpperCase();
-
-        try {
-            SOUND_TYPE = Sound.valueOf(value);
-        } catch (IllegalArgumentException ex) {
-            SOUND_TYPE = Sound.valueOf("BLOCK_NOTE_PLING");
-            LoParkour.getPlugin().getLogger().severe("Invalid sound: %s".formatted(value));
-        }
-
-        value = Config.CONFIG.getString("particles.particle-type");
-        try {
-            PARTICLE_TYPE = Particle.valueOf(value);
-        } catch (IllegalArgumentException ex) {
-            PARTICLE_TYPE = Particle.valueOf("SPELL_INSTANT");
-            LoParkour.getPlugin().getLogger().severe("Invalid particle type: %s".formatted(value));
-        }
-
-        SOUND_PITCH = Config.CONFIG.getInt("particles.sound-pitch");
-        SOUND_VOLUME = Config.CONFIG.getInt("particles.sound-volume");
-        PARTICLE_SHAPE = ParticleShape.valueOf(Config.CONFIG.getString("particles.particle-shape").toUpperCase());
-        PARTICLE_DATA = new ParticleData<>(PARTICLE_TYPE, null, 10);
-    }
-
-    public enum ParticleShape {
-        DOT, CIRCLE, BOX
-    }
-
-    // --------------------------------------------------------------
-    // MySQL
-    public static boolean SQL;
-    public static int SQL_PORT;
-    public static String SQL_URL;
-    public static String SQL_DB;
-    public static String SQL_USERNAME;
-    public static String SQL_PASSWORD;
-    public static String SQL_PREFIX;
-
-    private static void initSql() {
-        SQL_PORT = Config.CONFIG.getInt("sql.port");
-        SQL_DB = Config.CONFIG.getString("sql.database");
-        SQL_URL = Config.CONFIG.getString("sql.url");
-        SQL_USERNAME = Config.CONFIG.getString("sql.username");
-        SQL_PASSWORD = Config.CONFIG.getString("sql.password");
-        SQL_PREFIX = Config.CONFIG.getString("sql.prefix");
-    }
-
-    // --------------------------------------------------------------
-    // Jump Validation
-
-    public static boolean JUMP_VALIDATION_ENABLED;
-    public static double MAX_JUMP_DISTANCE;
-    public static double MAX_HORIZONTAL_DISTANCE;
-    public static double MAX_VERTICAL_UP;
-    public static double MAX_VERTICAL_DOWN;
-
-    // Jump Types
-
-    public static boolean JUMP_TYPES_ENABLED;
-    public static Map<String, Boolean> JUMP_TYPE_ENABLED;
-    public static Map<String, Double> JUMP_TYPE_CHANCE;
-
-    // Memory Optimization
-
-    public static int BLOCK_CLEANUP_DISTANCE;
-    public static int CLEANUP_INTERVAL;
-
-    // Ghost Mode
-
-    public static boolean GHOST_MODE_ENABLED;
-    public static int GHOST_SHOW_TOP;
-    public static double GHOST_TRANSPARENCY;
-
-    // --------------------------------------------------------------
-    // Generation
-
-    public static double TYPE_NORMAL;
-    public static double TYPE_SPECIAL;
-    public static double TYPE_SCHEMATICS;
-
-    public static double SPECIAL_ICE;
-    public static double SPECIAL_SLAB;
-    public static double SPECIAL_PANE;
-    public static double SPECIAL_FENCE;
-
-    public static double NORMAL_DISTANCE_1;
-    public static double NORMAL_DISTANCE_2;
-    public static double NORMAL_DISTANCE_3;
-    public static double NORMAL_DISTANCE_4;
-
-    public static double NORMAL_HEIGHT_1;
-    public static double NORMAL_HEIGHT_0;
-    public static double NORMAL_HEIGHT_NEG1;
-    public static double NORMAL_HEIGHT_NEG2;
-
-    public static int MAX_Y;
-    public static int MIN_Y;
-
-    private static void initGeneration() {
-        // Jump validation
-        JUMP_VALIDATION_ENABLED = Config.CONFIG.getBoolean("jump-validation.enabled");
-        MAX_JUMP_DISTANCE = Config.CONFIG.getDouble("jump-validation.max-distance");
-        MAX_HORIZONTAL_DISTANCE = Config.CONFIG.getDouble("jump-validation.max-horizontal");
-        MAX_VERTICAL_UP = Config.CONFIG.getDouble("jump-validation.max-vertical-up");
-        MAX_VERTICAL_DOWN = Config.CONFIG.getDouble("jump-validation.max-vertical-down");
-
-        // Jump types
-        JUMP_TYPES_ENABLED = Config.CONFIG.getBoolean("jump-types.enabled");
-        JUMP_TYPE_ENABLED = new HashMap<>();
-        JUMP_TYPE_CHANCE = new HashMap<>();
-
-        for (String type : Config.CONFIG.getChildren("jump-types.types")) {
-            String path = "jump-types.types." + type;
-            JUMP_TYPE_ENABLED.put(type, Config.CONFIG.getBoolean(path + ".enabled"));
-            JUMP_TYPE_CHANCE.put(type, Config.CONFIG.getDouble(path + ".chance"));
-        }
-
-        // Memory optimization
-        BLOCK_CLEANUP_DISTANCE = Config.CONFIG.getInt("memory.block-cleanup-distance");
-        CLEANUP_INTERVAL = Config.CONFIG.getInt("memory.cleanup-interval");
-
-        // Ghost mode
-        GHOST_MODE_ENABLED = Config.CONFIG.getBoolean("ghost-mode.enabled");
-        GHOST_SHOW_TOP = Config.CONFIG.getInt("ghost-mode.show-top");
-        GHOST_TRANSPARENCY = Config.CONFIG.getDouble("ghost-mode.transparency");
-
-        TYPE_NORMAL = Config.GENERATION.getInt("generation.type.normal") / 100.0;
-        TYPE_SPECIAL = Config.GENERATION.getInt("generation.type.schematic") / 100.0;
-        TYPE_SCHEMATICS = Config.GENERATION.getInt("generation.type.special") / 100.0;
-
-        SPECIAL_ICE = Config.GENERATION.getInt("generation.special.ice") / 100.0;
-        SPECIAL_SLAB = Config.GENERATION.getInt("generation.special.slab") / 100.0;
-        SPECIAL_PANE = Config.GENERATION.getInt("generation.special.pane") / 100.0;
-        SPECIAL_FENCE = Config.GENERATION.getInt("generation.special.fence") / 100.0;
-
-        NORMAL_DISTANCE_1 = Config.GENERATION.getInt("generation.normal.distance.1") / 100.0;
-        NORMAL_DISTANCE_2 = Config.GENERATION.getInt("generation.normal.distance.2") / 100.0;
-        NORMAL_DISTANCE_3 = Config.GENERATION.getInt("generation.normal.distance.3") / 100.0;
-        NORMAL_DISTANCE_4 = Config.GENERATION.getInt("generation.normal.distance.4") / 100.0;
-
-        NORMAL_HEIGHT_1 = Config.GENERATION.getInt("generation.normal.height.1") / 100.0;
-        NORMAL_HEIGHT_0 = Config.GENERATION.getInt("generation.normal.height.0") / 100.0;
-        NORMAL_HEIGHT_NEG1 = Config.GENERATION.getInt("generation.normal.height.-1") / 100.0;
-        NORMAL_HEIGHT_NEG2 = Config.GENERATION.getInt("generation.normal.height.-2") / 100.0;
-
-        MAX_Y = Config.GENERATION.getInt("generation.settings.max-y");
-        MIN_Y = Config.GENERATION.getInt("generation.settings.min-y");
-
-        if (MIN_Y >= MAX_Y) {
-            MIN_Y = 100;
-            MAX_Y = 200;
-
-            LoParkour.getPlugin().getLogger().severe("Provided minimum y is the same or larger than maximum y! - check your generation.yml file");
-        }
-    }
-
-    // --------------------------------------------------------------
 
     public static Set<Style> initStyles(String path, FileConfiguration config, BiFunction<String, List<Material>, Style> fn) {
         var styles = new HashSet<Style>();
-
         for (String style : Locales.getChildren(config, path, false)) {
             styles.add(fn.apply(style,
-                    config.getStringList("%s.%s".formatted(path, style)).stream()
-                            .map(name -> {
-                                var material = Material.getMaterial(name.toUpperCase());
-
-                                if (material == null) {
-                                    LoParkour.getPlugin().getLogger().severe("Invalid material %s in style %s".formatted(name, style));
-                                    return Material.STONE;
-                                }
-
-                                return material;
-                            })
-                            .toList()));
+                config.getStringList("%s.%s".formatted(path, style)).stream()
+                    .map(name -> {
+                        Material m = Material.getMaterial(name.toUpperCase());
+                        if (m == null) {
+                            LoParkour.getPlugin().getLogger().severe("Invalid material %s in style %s".formatted(name, style));
+                            return Material.STONE;
+                        }
+                        return m;
+                    })
+                    .toList()));
         }
-
         return styles;
     }
+
+    // ── Inner types ───────────────────────────────────────────────────────────
+
+    public enum ParticleShape { DOT, CIRCLE, BOX }
 }

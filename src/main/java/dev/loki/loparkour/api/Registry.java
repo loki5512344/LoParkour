@@ -27,14 +27,10 @@ public final class Registry {
      */
     public static void register(@NotNull Mode mode) {
         modes.add(mode);
-
-        LoParkour.log("Registered mode %s".formatted(mode.getName()));
     }
 
     public static void register(@NotNull Style style) {
         styles.add(style);
-      
-        LoParkour.log("Registered style %s".formatted(style.getName()));
     }
 
     /**

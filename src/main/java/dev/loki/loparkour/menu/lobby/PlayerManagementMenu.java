@@ -1,116 +1,78 @@
 package dev.loki.loparkour.menu.lobby;
 
 import dev.loki.loparkour.config.Locales;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.session.Session;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-/**
- * Menu for managing players
- */
-public class PlayerManagementMenu {
+public class PlayerManagementMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(Player p) {
-        if (p == null) {
-            return;
-        }
-        // ParkourPlayer viewer = ParkourPlayer.getPlayer(p);
-        // if (viewer == null) {
-        // return;
-        // }
-        // Session session = viewer.session;
-        // PagedMenu menu = new PagedMenu(3, Locales.getString(viewer.locale, "lobby.player_management.name"));
-        // add(menu, viewer, session.getPlayers().stream().map(player -> (ParkourUser) player).toList());
-        // add(menu, viewer, session.getSpectators().stream().map(player -> (ParkourUser) player).toList());
-        // menu.displayRows(0, 1)
-        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
-        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
-        // .item(22, Locales.getItem(viewer.locale, "other.close").click(event -> Menus.LOBBY.open(event.getPlayer())))
-        // .open(p);
-    }
-    */
+    @Override
+    public void open(@NotNull Player player) {
+        ParkourPlayer viewer = ParkourPlayer.getPlayer(player);
+        if (viewer == null) return;
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    private void add(PagedMenu menu, ParkourUser viewer, Collection<ParkourUser> users) {
-        Session session = viewer.session;
+        var session = viewer.session;
+        String locale = viewer.locale;
+        String title = Locales.getString(locale, "lobby.player_management.name");
 
-        for (ParkourUser other : users) {
-            if (other == viewer) {
-                continue;
+        List<ParkourUser> others = new ArrayList<>();
+        others.addAll(session.getPlayers().stream().filter(p -> p != viewer).toList());
+        others.addAll(session.getSpectators());
+
+        InventoryGUI gui = baseGui(title, 3)
+                .setItem(22, closeButton(player), e -> Menus.LOBBY.open(player));
+
+        for (int i = 0; i < Math.min(others.size(), 7); i++) {
+            final int idx = i;
+            final ParkourUser other = others.get(i);
+
+            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+            if (!ParkourUser.isBedrockPlayer(other.player)
+                    && other.getName() != null && !other.getName().startsWith(".")) {
+                SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                if (meta != null) { meta.setOwningPlayer(other.player); skull.setItemMeta(meta); }
             }
-
-            Item item = Locales.getItem(viewer.locale, "lobby.player_management.head", other.getName());
-            item.material(Material.PLAYER_HEAD);
 
             boolean muted = session.isMuted(other);
-
-            List<String> lore = new ArrayList<>();
-            if (muted) {
-                // add top
-                lore.addAll(List.of(Locales.getString(viewer.locale, "lobby.player_management.head.top").split("\\|\\|")));
+            ItemMeta displayMeta = skull.getItemMeta();
+            if (displayMeta != null) {
+                displayMeta.setDisplayName(ColorUtil.color("<yellow>" + other.getName() + (muted ? " §c[muted]" : "")));
+                displayMeta.setLore(List.of(
+                        ColorUtil.color("§7Left-click §fto kick"),
+                        ColorUtil.color("§7Right-click §f" + (muted ? "to unmute" : "to mute"))
+                ));
+                skull.setItemMeta(displayMeta);
             }
 
-            // add bottom
-            lore.addAll(List.of(Locales.getString(viewer.locale, "lobby.player_management.head.bottom").split("\\|\\|")));
-
-            // Player head gathering
-            item.material(Material.PLAYER_HEAD).lore(lore).click(event -> {
-                ClickType click = event.event().getClick();
-
-                switch (click) {
-                    case LEFT -> {
-                        Modes.DEFAULT.create(other.player);
-
-                        other.sendTranslated("lobby.player_management.kicked");
-
-                        viewer.sendTranslated("lobby.player_management.advice");
-                        open(viewer.player);
-                    }
-                    case RIGHT -> {
-                        session.toggleMute(other);
-
-                        if (!muted) {
-                            other.sendTranslated("lobby.player_management.muted");
-                        } else {
-                            other.sendTranslated("lobby.player_management.unmuted");
-                        }
-
-                        open(viewer.player);
-                    }
+            gui = gui.setItem(10 + idx, skull, e -> {
+                if (e.getClick() == ClickType.LEFT) {
+                    Modes.DEFAULT.create(other.player);
+                    other.sendTranslated("lobby.player_management.kicked");
+                    viewer.sendTranslated("lobby.player_management.advice");
+                } else if (e.getClick() == ClickType.RIGHT) {
+                    session.toggleMute(other);
+                    boolean nowMuted = session.isMuted(other);
+                    other.sendTranslated(nowMuted ? "lobby.player_management.muted" : "lobby.player_management.unmuted");
                 }
+                open(player);
             });
-
-            ItemStack stack = item.build(); // Updating meta requires building
-            stack.setType(Material.PLAYER_HEAD);
-
-            // bedrock has no player skull support
-            if (menu.getTotalToDisplay().size() <= 36 && !ParkourUser.isBedrockPlayer(other.player)) {
-                if (other.getName() != null && !other.getName().startsWith(".")) { // bedrock players' names with geyser start with a .
-                    SkullMeta meta = (SkullMeta) stack.getItemMeta();
-
-                    if (meta != null) {
-                        SkullSetter.setPlayerHead(other.player, meta);
-                        item.meta(meta);
-                    }
-                }
-            }
-
-            menu.addToDisplay(List.of(item));
         }
+
+        gui.open(player);
     }
-    */
 }

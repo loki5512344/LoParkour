@@ -1,116 +1,84 @@
 package dev.loki.loparkour.menu.community;
 
-import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.leaderboard.Score;
-import dev.loki.loparkour.menu.Menus;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.mode.Mode;
 import dev.loki.loparkour.player.ParkourUser;
-import org.bukkit.Bukkit;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.ScrollableGUI;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Menu for a single leaderboard
- */
-public class SingleLeaderboardMenu {
+public class SingleLeaderboardMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(Player player, Mode mode, Leaderboard.Sort sort) {
+    public void open(@NotNull Player player, @NotNull Mode mode, @NotNull Leaderboard.Sort sort) {
         Leaderboard leaderboard = mode.getLeaderboard();
+        if (leaderboard == null) return;
 
-        if (leaderboard == null) {
-            return;
+        String locale = locale(player);
+        String title = Locales.getString(locale, ParkourOption.LEADERBOARDS.path + ".name");
+
+        List<ItemStack> items = new ArrayList<>();
+        int rank = 0;
+
+        for (Map.Entry<UUID, Score> entry : leaderboard.sort(sort).entrySet()) {
+            rank++;
+            Score score = entry.getValue();
+            if (score == null) continue;
+
+            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+            if (rank <= 20 && !ParkourUser.isBedrockPlayer(player)) {
+                OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(entry.getKey());
+                if (op.getName() != null && !op.getName().startsWith(".")) {
+                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                    if (meta != null) { meta.setOwningPlayer(op); skull.setItemMeta(meta); }
+                }
+            }
+
+            var base = Locales.getItem(locale, ParkourOption.LEADERBOARDS.path + ".head");
+            int r = rank;
+            base.modifyName(n -> n.replace("%r", String.valueOf(r))
+                    .replace("%s", String.valueOf(score.score()))
+                    .replace("%p", score.name())
+                    .replace("%t", score.time())
+                    .replace("%d", score.difficulty()))
+               .modifyLore(l -> l.replace("%r", String.valueOf(r))
+                    .replace("%s", String.valueOf(score.score()))
+                    .replace("%p", score.name())
+                    .replace("%t", score.time())
+                    .replace("%d", score.difficulty()));
+            ItemMeta built = base.build().getItemMeta();
+            if (built != null) skull.setItemMeta(built);
+
+            items.add(skull);
         }
-        // init vars
-        // var user = ParkourUser.getUser(player);
-        // var locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
-        // var menu = new PagedMenu(3, Locales.getString(player, "%s.name".formatted(ParkourOption.LEADERBOARDS.path)));
-        // var items = new ArrayList<MenuItem>();
-        // var base = Locales.getItem(player, "%s.head".formatted(ParkourOption.LEADERBOARDS.path));
-        // for (Map.Entry<UUID, Score> entry : leaderboard.sort(sort).entrySet()) {
-        // int rank = items.size() + 1;
-        // var uuid = entry.getKey();
-        // var score = entry.getValue();
-        // if (score == null) {
-        // continue;
-        // }
-        // Item item = base.clone().material(Material.PLAYER_HEAD)
-        // .modifyName(name -> name.replace("%r", Integer.toString(rank))
-        // .replace("%s", Integer.toString(score.score()))
-        // .replace("%p", score.name())
-        // .replace("%t", score.time())
-        // .replace("%d", score.difficulty()))
-        // .modifyLore(line -> line.replace("%r", Integer.toString(rank))
-        // .replace("%s", Integer.toString(score.score()))
-        // .replace("%p", score.name())
-        // .replace("%t", score.time())
-        // .replace("%d", score.difficulty()));
-            // Player head gathering
-        // ItemStack stack = item.build();
-            // if there are more than 36 players, don't show the heads to avoid server crashing
-            // and bedrock has no player skull support
-        // if (rank <= 20 && !ParkourUser.isBedrockPlayer(player)) {
-        // OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
-        // if (op.getName() != null && !op.getName().startsWith(".")) { // bedrock players' names with geyser start with a .
-        // SkullMeta meta = (SkullMeta) stack.getItemMeta();
-        // if (meta != null) {
-        // SkullSetter.setPlayerHead(op, meta);
-        // item.meta(meta);
-        // }
-        // }
-        // }
-        // if (uuid.equals(player.getUniqueId())) {
-        // menu.item(21, item.clone());
-        // }
-        // items.add(item);
-        // }
-        // List<String> values = Locales.getStringList(locale, "%s.sort.values".formatted(ParkourOption.LEADERBOARDS.path));
-        // if (values.size() != 3) {
-        // LoParkour.logging().stack("Error while trying to get locales for sort values: not enough sort values present",
-        // "check your %s locale file".formatted(locale), new IllegalArgumentException());
-        // }
-        // String name = switch (sort) {
-        // case SCORE -> values.get(0);
-        // case TIME -> values.get(1);
-        // case DIFFICULTY -> values.get(2);
-        // };
-        // get next sorting type
-        // var next = switch (sort) {
-        // case SCORE -> Leaderboard.Sort.TIME;
-        // case TIME -> Leaderboard.Sort.DIFFICULTY;
-        // default -> Leaderboard.Sort.SCORE;
-        // };
-        // menu.displayRows(0, 1)
-        // .addToDisplay(items)
-        // .nextPage(26, new Item(Material.LIME_DYE, "<#0DCB07><bold>»").click(event -> menu.page(1)))
-        // .prevPage(18, new Item(Material.RED_DYE, "<#DE1F1F><bold>«").click(event -> menu.page(-1)))
-        // .item(22, Locales.getItem(player, ParkourOption.LEADERBOARDS.path + ".sort", name.toLowerCase()).click(event -> open(player, mode, next)))
-        // .item(23, Locales.getItem(player, "other.close").click(event -> {
-        // List<Mode> modes = Registry.getModes()
-        // .stream()
-        // .filter(m -> m.getLeaderboard() != null && m.getItem(locale) != null)
-        // .toList();
-        // if (modes.size() == 1) {
-        // Menus.COMMUNITY.open(player);
-        // return;
-        // }
-        // Menus.LEADERBOARDS.open(event.getPlayer());
-        // }))
-        // .open(player);
+
+        ScrollableGUI gui = ScrollableGUI.create()
+                .title(ColorUtil.color(title))
+                .rows(3)
+                .scrollUpButton(backItem(), 0)
+                .scrollDownButton(nextItem(), 8);
+
+        for (ItemStack item : items) {
+            gui = gui.addItem(item, e -> { /* view only */ });
+        }
+
+        gui.open(player);
     }
-    */
+
+    @Override
+    public void open(@NotNull Player player) { /* use open(player, mode, sort) */ }
 }

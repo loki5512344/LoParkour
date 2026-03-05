@@ -69,9 +69,6 @@ public class Locales {
             if (files != null && files.length == 0) {
                 plugin.saveResource("locales/en.yml", false);
                 plugin.saveResource("locales/ru.yml", false);
-                plugin.saveResource("locales/nl.yml", false);
-                plugin.saveResource("locales/fr.yml", false);
-                plugin.saveResource("locales/zh_cn.yml", false);
             }
 
             // get all files in locales folder
@@ -241,7 +238,13 @@ public class Locales {
             idx++;
         }
 
-        Item item = new Item(Material.getMaterial(material.toUpperCase()), name);
+        Material mat = Material.getMaterial(material.toUpperCase());
+        if (mat == null) {
+            LoParkour.getPlugin().getLogger().warning("Invalid material '%s' for locale path '%s', using STONE as fallback".formatted(material, path));
+            mat = Material.STONE;
+        }
+
+        Item item = new Item(mat, name);
 
         if (!lore.isEmpty()) {
             item.lore(lore.split("\\|\\|"));

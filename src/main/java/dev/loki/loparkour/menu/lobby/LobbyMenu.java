@@ -1,83 +1,77 @@
 package dev.loki.loparkour.menu.lobby;
 
 import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.menu.DynamicMenu;
+import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.menu.ParkourOption;
-import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
+import dev.loki.loparkour.util.ColorUtil;
+import dev.lolib.gui.InventoryGUI;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LobbyMenu extends DynamicMenu {
+public class LobbyMenu extends LPMenu {
 
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public LobbyMenu() {
-        registerMainItem(1, 0, (player, user) -> Locales.getItem(player, "lobby.player_management.item").click(event -> Menus.PLAYER_MANAGEMENT.open(player)), player -> {
-            ParkourUser user = ParkourUser.getUser(player);
+    @Override
+    public void open(@NotNull Player player) {
+        ParkourUser user = ParkourUser.getUser(player);
+        if (user == null) return;
 
-            return ParkourOption.PLAYER_MANAGEMENT.mayPerform(player) && user instanceof ParkourPlayer && user.session.getPlayers().get(0) == user;
-        });
+        String locale = user.locale;
+        String title = Locales.getString(locale, "lobby.name");
 
-        registerMainItem(1, 1, (player, user) -> {
-            if (user == null) {
-                return null;
-            }
+        boolean isHost = !user.session.getPlayers().isEmpty()
+                && user.session.getPlayers().get(0) == user;
 
-            List<String> values = Locales.getStringList(user.locale, "lobby.visibility.values");
+        InventoryGUI gui = baseGui(title, 3);
 
-            return new SliderItem().initial(switch (user.session.getVisibility()) {
-                case PUBLIC -> 0;
-                case ID_ONLY -> 1;
-                case PRIVATE -> 2;
-            }).add(0, Locales.getItem(player, "lobby.visibility").modifyLore(lore -> lore.replace("%s", values.get(2))), event -> { // public
-                ParkourUser u = ParkourUser.getUser(event.getPlayer());
+        if (ParkourOption.PLAYER_MANAGEMENT.mayPerform(player) && isHost) {
+            gui = gui.setItem(11, localeItem(player, "lobby.player_management.item"),
+                    e -> Menus.PLAYER_MANAGEMENT.open(player));
+        }
 
-                if (u != null) {
-                    u.session.setVisibility(Session.Visibility.PUBLIC);
-                }
-
-                return true;
-            }).add(1, Locales.getItem(player, "lobby.visibility").modifyLore(lore -> lore.replace("%s", values.get(1))), event -> { // id only
-                ParkourUser u = ParkourUser.getUser(event.getPlayer());
-
-                if (u != null) {
-                    u.session.setVisibility(Session.Visibility.ID_ONLY);
-                }
-
-                return true;
-            }).add(2, Locales.getItem(player, "lobby.visibility").modifyLore(lore -> lore.replace("%s", values.get(0))), event -> { // private
-                ParkourUser u = ParkourUser.getUser(event.getPlayer());
-
-                if (u != null) {
-                    u.session.setVisibility(Session.Visibility.PRIVATE);
-                }
-
-                return true;
+        if (ParkourOption.VISIBILITY.mayPerform(player) && isHost) {
+            gui = gui.setItem(13, visibilityItem(user), e -> {
+                Session.Visibility next = switch (user.session.getVisibility()) {
+                    case PUBLIC  -> Session.Visibility.ID_ONLY;
+                    case ID_ONLY -> Session.Visibility.PRIVATE;
+                    case PRIVATE -> Session.Visibility.PUBLIC;
+                };
+                user.session.setVisibility(next);
+                open(player);
             });
-        }, player -> {
-            ParkourUser user = ParkourUser.getUser(player);
+        }
 
-            return ParkourOption.VISIBILITY.mayPerform(player) && user instanceof ParkourPlayer && user.session.getPlayers().get(0) == user;
-        });
-
-        registerMainItem(2, 10, (player, user) -> Locales.getItem(player, "other.close").click(event -> event.getPlayer().closeInventory()), player -> true);
+        gui.setItem(22, closeButton(player), e -> player.closeInventory())
+           .open(player);
     }
-    */
 
-    /**
-     * Opens the main menu.
-     *
-     * @param player The player to open the menu to
-     */
-    // TODO: Migrate to LoLib GUI system
-    /*
-    public void open(Player player) {
-        display(player, new Menu(3, Locales.getString(player, "lobby.name"))
-                .distributeRowsEvenly());
+    private ItemStack visibilityItem(ParkourUser user) {
+        String locale = user.locale;
+        List<String> values = Locales.getStringList(locale, "lobby.visibility.values");
+        String label = switch (user.session.getVisibility()) {
+            case PUBLIC  -> values.size() > 2 ? values.get(2) : "Public";
+            case ID_ONLY -> values.size() > 1 ? values.get(1) : "ID Only";
+            case PRIVATE -> !values.isEmpty() ? values.get(0) : "Private";
+        };
+        Material mat = switch (user.session.getVisibility()) {
+            case PUBLIC  -> Material.LIME_STAINED_GLASS_PANE;
+            case ID_ONLY -> Material.YELLOW_STAINED_GLASS_PANE;
+            case PRIVATE -> Material.RED_STAINED_GLASS_PANE;
+        };
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ColorUtil.color(
+                    Locales.getString(locale, "lobby.visibility") + " §7» §f" + label));
+            item.setItemMeta(meta);
+        }
+        return item;
     }
-    */
 }

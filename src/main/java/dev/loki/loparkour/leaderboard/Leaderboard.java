@@ -39,8 +39,9 @@ public class Leaderboard {
 
         Storage.init(mode);
 
-        // read all data
-        read(true);
+        // Defer initial read until storage is ready (SQL connects async — reading before
+        // connection is established would return empty results and lose all scores).
+        Storage.runWhenReady(() -> read(true));
 
         var interval = Config.CONFIG.getInt("storage-update-interval");
 
@@ -48,10 +49,8 @@ public class Leaderboard {
         // read/write all data every x seconds after x seconds to allow time for reading/writing
         Scheduler.get(LoParkour.getPlugin()).runTimerAsync(() -> {
             if (Config.CONFIG.getBoolean("joining")) {
-                LoParkour.log("Periodic saving of leaderboard data of %s".formatted(mode));
                 write(true);
             } else {
-                LoParkour.log("Periodic reading of leaderboard data of %s".formatted(mode));
                 read(true);
             }
         }, interval * 20, interval * 20);
@@ -61,8 +60,6 @@ public class Leaderboard {
      * Writes all scores to the leaderboard file associated with this leaderboard
      */
     public void write(boolean async) {
-        LoParkour.log("Saving leaderboard data of %s".formatted(mode));
-
         run(() -> Storage.writeScores(mode, scores), async);
     }
 
@@ -70,8 +67,6 @@ public class Leaderboard {
      * Reads all scores from the leaderboard file
      */
     public void read(boolean async) {
-        LoParkour.log("Reading leaderboard data of %s".formatted(mode));
-
         run(() -> {
             scores.clear();
             scores.putAll(Storage.readScores(mode));
