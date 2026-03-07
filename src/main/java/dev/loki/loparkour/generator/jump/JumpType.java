@@ -1,4 +1,4 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.jump;
 
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;

@@ -3,6 +3,9 @@ package dev.loki.loparkour.generator;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Option;
+import dev.loki.loparkour.generator.effect.EffectManager;
+import dev.loki.loparkour.generator.jump.BlockPlacer;
+import dev.loki.loparkour.generator.lifecycle.GeneratorLifecycle;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.leaderboard.Score;
 import dev.loki.loparkour.menu.Menus;
@@ -80,7 +83,7 @@ public class ParkourGenerator {
     protected void calculateChances() {
         state.defaultChances.clear();
         state.defaultChances.put(BlockGenerationType.DEFAULT, Option.TYPE_NORMAL);
-        state.defaultChances.put(BlockGenerationType.SCHEMATIC, Option.TYPE_SCHEMATICS);
+        // Schematics disabled - only normal and special blocks
         state.defaultChances.put(BlockGenerationType.SPECIAL, Option.TYPE_SPECIAL);
 
         state.heightChances.clear();

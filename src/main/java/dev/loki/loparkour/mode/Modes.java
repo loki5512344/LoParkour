@@ -10,6 +10,8 @@ public class Modes {
     public static GravityShiftMode GRAVITY_SHIFT;
     public static HardcoreMode HARDCORE;
     public static ElytraMode ELYTRA;
+    public static RaceMode RACE;
+    public static CoopMode COOP;
 
     public static void init() {
         DEFAULT = (DefaultMode) Registry.getMode("default");
@@ -18,5 +20,7 @@ public class Modes {
         GRAVITY_SHIFT = (GravityShiftMode) Registry.getMode("gravity-shift");
         HARDCORE = (HardcoreMode) Registry.getMode("hardcore");
         ELYTRA = (ElytraMode) Registry.getMode("elytra");
+        RACE = (RaceMode) Registry.getMode("race");
+        COOP = (CoopMode) Registry.getMode("coop");
     }
 }

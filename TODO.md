@@ -20,9 +20,9 @@
 | ✅ | ~~`PlayerSettingsManager.OptionContainer` не public~~ | `PlayerSettingsManager.java` | ✅ Сделан public |
 | ✅ | ~~`Option.PARTICLE_DATA.data()` не существует~~ | `EffectManager.java` | ✅ Убран `.data()` |
 | ✅ | ~~`ParticleUtil.circle()` неправильные параметры~~ | `EffectManager.java` | ✅ Исправлено на (Location, Particle, int, int) |
-| 1 | `PotionEffectType.JUMP` и `SLOW` удалены в Paper 1.20.5+ | `GravityShiftMode.java` | Заменить на `JUMP_BOOST` и `SLOWNESS` |
-| 2 | `ElytraMode` создаёт обычный `ParkourGenerator` → `getMode()` возвращает DEFAULT | `ElytraMode.java` | Создать `ElytraGenerator extends ParkourGenerator` |
-| 3 | `SpeedrunMode`: таймеры `runLater` продолжают тикать после `reset()` — гонка с генератором | `SpeedrunMode.java` | Хранить `ScheduledTask`, отменять в `reset()` |
+| ✅ | ~~`PotionEffectType.JUMP` и `SLOW` удалены в Paper 1.20.5+~~ | `GravityShiftMode.java` | ✅ Оставлены старые названия для 1.20.4 (JUMP, SLOW) |
+| ✅ | ~~`ElytraMode` создаёт обычный `ParkourGenerator`~~ | `ElytraMode.java` | ✅ Создан `ElytraGenerator extends ParkourGenerator` |
+| ✅ | ~~`SpeedrunMode`: таймеры `runLater` продолжают тикать после `reset()`~~ | `SpeedrunMode.java` | ✅ Хранятся `ScheduledTask`, отменяются в `reset()` |
 
 ---
 
@@ -30,11 +30,11 @@
 
 | # | Фича | Файл | Что сделать |
 |---|------|------|-------------|
-| 4 | `HardcoreMode`: `collectedRewards` не очищается при падении | `HardcoreMode.java` | Добавить `player.collectedRewards.clear()` в `fall()` |
-| 5 | `JumpValidator` создан но нигде не вызывается | `BlockPlacer.java` | Добавить retry-loop в `selectNext()` (до 10 попыток) |
-| 6 | `JumpType` enum создан но не интегрирован в генератор | `BlockPlacer.java` | Добавить выбор JumpType по шансу из конфига |
+| ✅ | ~~`HardcoreMode`: `collectedRewards` не очищается при падении~~ | `HardcoreMode.java` | ✅ Добавлен `player.collectedRewards.clear()` в `fall()` |
+| ✅ | ~~`JumpValidator` создан но нигде не вызывается~~ | `BlockPlacer.java` | ✅ Добавлен retry-loop в `selectNext()` (до 10 попыток) |
+| ✅ | ~~`JumpType` enum создан но не интегрирован в генератор~~ | `BlockPlacer.java` | ✅ Добавлен выбор JumpType по шансу (70% normal, 30% special) |
 | 7 | ~~`ConfigUpdater` закомментирован~~ | `Config.java` | ✅ Написан `ConfigUpdater.java`, подключён в `Config.update()` |
-| 8 | `GravityShiftMode`: нет визуала при смене эффекта | `GravityShiftMode.java` | Добавить Title + Sound + партиклы `PORTAL` |
+| ✅ | ~~`GravityShiftMode`: нет визуала при смене эффекта~~ | `GravityShiftMode.java` | ✅ Добавлены Title + Sound + партиклы `PORTAL` |
 
 ---
 
@@ -58,12 +58,12 @@
 
 | # | Фича | Файл | Что сделать |
 |---|------|------|-------------|
-| 9 | Ghost система не интегрирована | `ghost/` | Подключить `GhostRecorder` к `GeneratorLifecycle` |
+| ✅ | ~~Ghost система не интегрирована~~ | `ghost/` | ✅ Подключен `GhostRecorder` к `GeneratorLifecycle` |
 | ✅ | ~~Удалить мёртвые stub-файлы~~ | `generator/`, корень | ✅ Удалены: `Command.java`, `Events.java`, `BlockSelector.java`, `ScoreManager.java`, `GeneratorTick.java` |
-| 11 | ElytraMode: кольца из партиклов + детекция пролёта | `ElytraMode.java` | BoundingBox check в `tick()` |
-| 12 | ElytraMode: cooldown на фейерверки | `ElytraMode.java` | Счётчик + сообщение |
-| 13 | RaceMode | новый файл | Кто первый наберёт N очков |
-| 14 | CoopMode | новый файл | Общий счёт нескольких игроков |
+| ✅ | ~~ElytraMode: кольца из партиклов + детекция пролёта~~ | `ElytraMode.java` | ✅ BoundingBox check в `tick()`, +2 очка за пролёт |
+| ✅ | ~~ElytraMode: cooldown на фейерверки~~ | `ElytraMode.java` | ✅ Счётчик + ActionBar сообщение |
+| ✅ | ~~RaceMode~~ | `RaceMode.java` | ✅ Кто первый наберёт N очков, time-based leaderboard |
+| ✅ | ~~CoopMode~~ | `CoopMode.java` | ✅ Общий счёт нескольких игроков, трекинг вклада |
 | ✅ | ~~Реорганизация `generator/` по подпакетам~~ | `generator/` | ✅ Создана структура: `jump/`, `lifecycle/`, `effect/` |
 
 ---

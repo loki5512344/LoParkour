@@ -13,6 +13,8 @@ import dev.loki.loparkour.mode.HardcoreMode;
 import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.mode.SpectatorMode;
 import dev.loki.loparkour.mode.SpeedrunMode;
+import dev.loki.loparkour.mode.RaceMode;
+import dev.loki.loparkour.mode.CoopMode;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.player.UserRegistry;
 import dev.loki.loparkour.reward.Rewards;
@@ -191,6 +193,8 @@ public final class LoParkour extends LoPlugin {
         Registry.register(new GravityShiftMode());
         Registry.register(new HardcoreMode());
         Registry.register(new ElytraMode());
+        Registry.register(new RaceMode());
+        Registry.register(new CoopMode());
         Modes.init();
     }
 

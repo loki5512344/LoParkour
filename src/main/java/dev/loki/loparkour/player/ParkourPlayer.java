@@ -165,18 +165,26 @@ public class ParkourPlayer extends ParkourUser {
             Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 player.getInventory().clear();
 
-                List<dev.loki.loparkour.util.Item> items = new ArrayList<>();
-
-                if (ParkourOption.PLAY.mayPerform(player)) items.add(Locales.getItem(locale, "play.item"));
-                if (ParkourOption.COMMUNITY.mayPerform(player)) items.add(Locales.getItem(locale, "community.item"));
-                if (ParkourOption.SETTINGS.mayPerform(player)) items.add(Locales.getItem(locale, "settings.item"));
-                if (ParkourOption.LOBBY.mayPerform(player)) items.add(Locales.getItem(locale, "lobby.item"));
-
-                if (ParkourOption.QUIT.mayPerform(player)) items.add(Locales.getItem(locale, "other.quit"));
-
-                List<Integer> slots = getEvenlyDistributedSlots(items.size());
-                for (int idx = 0; idx < items.size(); idx++) {
-                    player.getInventory().setItem(slots.get(idx), items.get(idx).build());
+                // Load hotbar slots from config
+                if (ParkourOption.PLAY.mayPerform(player)) {
+                    int slot = Config.CONFIG.getInt("options.hotbar-slots.play");
+                    player.getInventory().setItem(slot, Locales.getItem(locale, "play.item").build());
+                }
+                if (ParkourOption.COMMUNITY.mayPerform(player)) {
+                    int slot = Config.CONFIG.getInt("options.hotbar-slots.community");
+                    player.getInventory().setItem(slot, Locales.getItem(locale, "community.item").build());
+                }
+                if (ParkourOption.SETTINGS.mayPerform(player)) {
+                    int slot = Config.CONFIG.getInt("options.hotbar-slots.settings");
+                    player.getInventory().setItem(slot, Locales.getItem(locale, "settings.item").build());
+                }
+                if (ParkourOption.LOBBY.mayPerform(player)) {
+                    int slot = Config.CONFIG.getInt("options.hotbar-slots.lobby");
+                    player.getInventory().setItem(slot, Locales.getItem(locale, "lobby.item").build());
+                }
+                if (ParkourOption.QUIT.mayPerform(player)) {
+                    int slot = Config.CONFIG.getInt("options.hotbar-slots.quit");
+                    player.getInventory().setItem(slot, Locales.getItem(locale, "other.quit").build());
                 }
             }, 5);
         } else {
@@ -185,14 +193,5 @@ public class ParkourPlayer extends ParkourUser {
     }
 
     public record OptionContainer(ParkourOption option, BiConsumer<ParkourPlayer, String> consumer) {
-    }
-
-    private List<Integer> getEvenlyDistributedSlots(int count) {
-        List<Integer> slots = new ArrayList<>();
-        int[] positions = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25};
-        for (int i = 0; i < Math.min(count, positions.length); i++) {
-            slots.add(positions[i]);
-        }
-        return slots;
     }
 }

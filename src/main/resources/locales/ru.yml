@@ -278,3 +278,13 @@ modes:
     material: "elytra"
     name: "&#00D4FF&lЭлитры"
     lore: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"
+
+  race:
+    material: "golden_boots"
+    name: "&#FFD700&lГонка"
+    lore: "&#A0A0A0Первый до целевого счёта!||&#A0A0A0Соревнуйся за лучшее время"
+  
+  coop:
+    material: "player_head"
+    name: "&#00FF00&lКооп"
+    lore: "&#A0A0A0Играй с друзьями!||&#A0A0A0Общий счёт и прогресс"

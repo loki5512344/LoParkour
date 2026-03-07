@@ -1,4 +1,4 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.jump;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.event.ParkourBlockGenerateEvent;
@@ -6,6 +6,8 @@ import dev.loki.loparkour.api.event.ParkourSchematicGenerateEvent;
 import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Option;
+import dev.loki.loparkour.generator.GeneratorOption;
+import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.style.Style;
 import dev.loki.loparkour.util.Probs;
 import org.bukkit.Location;
@@ -112,7 +114,28 @@ public class BlockPlacer {
         else                    offset.setZ(randomOffset);
 
         offset.rotateAroundY(angleInY(g.state.heading, Option.HEADING.getDirection()));
-        return current.getLocation().add(offset).getBlock();
+        
+        Block candidate = current.getLocation().add(offset).getBlock();
+        
+        // Retry with JumpValidator if jump is impossible (up to 10 attempts)
+        JumpValidator validator = new JumpValidator();
+        int attempts = 0;
+        while (!validator.canJump(current.getLocation(), candidate.getLocation()) && attempts < 10) {
+            // Reduce distance and height to make jump easier
+            distance = Math.max(1, distance - 1);
+            height = Math.max(-1, height - 1);
+            
+            randomOffset = new JumpOffsetGenerator(height, distance).getRandomOffset(0, sd);
+            offset = g.state.heading.clone().multiply(distance + 1).setY(height);
+            if (offset.getX() == 0) offset.setX(randomOffset);
+            else                    offset.setZ(randomOffset);
+            offset.rotateAroundY(angleInY(g.state.heading, Option.HEADING.getDirection()));
+            
+            candidate = current.getLocation().add(offset).getBlock();
+            attempts++;
+        }
+        
+        return candidate;
     }
 
     protected BlockData selectBlockData() {
@@ -135,10 +158,20 @@ public class BlockPlacer {
 
         List<Block> placed = new ArrayList<>();
         for (Block block : blocks) {
-            BlockData data = (jump == ParkourGenerator.BlockGenerationType.SPECIAL
-                    && !g.generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL))
-                    ? Probs.random(g.state.specialChances)
-                    : selectBlockData();
+            BlockData data;
+            
+            // Select JumpType based on chances (70% normal, 30% special types)
+            JumpType jumpType = selectJumpType();
+            
+            if (jumpType != JumpType.NORMAL && !g.generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL)) {
+                // Use JumpType material
+                data = jumpType.getRandomMaterial().createBlockData();
+            } else if (jump == ParkourGenerator.BlockGenerationType.SPECIAL
+                    && !g.generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL)) {
+                data = Probs.random(g.state.specialChances);
+            } else {
+                data = selectBlockData();
+            }
 
             if (data instanceof Fence) block = block.getLocation().subtract(0, 1, 0).getBlock();
             block.setBlockData(data, data instanceof Fence || data instanceof GlassPane);
@@ -150,6 +183,19 @@ public class BlockPlacer {
         g.effects.sound(placed);
         g.state.history.addAll(placed);
         g.state.schematicCooldown--;
+    }
+    
+    private JumpType selectJumpType() {
+        // Simple chances: 70% normal, 5% each for special types
+        Map<JumpType, Double> chances = new HashMap<>();
+        chances.put(JumpType.NORMAL, 70.0);
+        chances.put(JumpType.NEO_JUMP, 5.0);
+        chances.put(JumpType.HEAD_HITTER, 5.0);
+        chances.put(JumpType.FENCE_JUMP, 10.0);
+        chances.put(JumpType.TRAPDOOR_JUMP, 5.0);
+        chances.put(JumpType.LADDER_JUMP, 5.0);
+        
+        return Probs.random(chances);
     }
 
     private boolean tryGenerateSchematic() {

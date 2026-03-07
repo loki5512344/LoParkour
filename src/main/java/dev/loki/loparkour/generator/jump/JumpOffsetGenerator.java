@@ -1,4 +1,4 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.jump;
 
 import dev.loki.loparkour.util.Probs;
 

@@ -279,3 +279,13 @@ modes:
     material: "elytra"
     name: "&#00D4FF&lElytra"
     lore: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"
+
+  race:
+    material: "golden_boots"
+    name: "&#FFD700&lRace"
+    lore: "&#A0A0A0First to reach target score!||&#A0A0A0Compete for fastest time"
+  
+  coop:
+    material: "player_head"
+    name: "&#00FF00&lCo-op"
+    lore: "&#A0A0A0Team up with friends!||&#A0A0A0Shared score and progress"

@@ -1,4 +1,4 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.jump;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;

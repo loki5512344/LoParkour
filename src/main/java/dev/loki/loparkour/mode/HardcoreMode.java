@@ -63,6 +63,7 @@ public class HardcoreMode implements Mode {
             boolean resetRewards = Config.CONFIG.getBoolean("modes.hardcore.reset-rewards");
             
             if (resetRewards) {
+                player.collectedRewards.clear();
                 player.sendTranslated("modes.hardcore.rewards-lost");
             }
 

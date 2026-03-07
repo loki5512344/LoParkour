@@ -9,12 +9,15 @@ import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.session.Session;
 
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 /**
  * Elytra Parkour Mode - Flying parkour with rings and boost
@@ -56,8 +59,17 @@ public class ElytraMode implements Mode {
         player.closeInventory();
 
         // Create session with elytra setup
-        Session.create(session -> {
-            ParkourGenerator generator = new ParkourGenerator(session);
+        Session.create(session -> new ElytraGenerator(session), null, null, player);
+    }
+
+    private static class ElytraGenerator extends ParkourGenerator {
+        private final List<RingCheckpoint> rings = new ArrayList<>();
+        private final Map<UUID, Long> fireworkCooldowns = new HashMap<>();
+        private final Map<UUID, Integer> ringsCollected = new HashMap<>();
+        private int tickCounter = 0;
+
+        public ElytraGenerator(@NotNull Session session) {
+            super(session);
             
             // Give elytra and fireworks to all players in session
             for (ParkourPlayer parkourPlayer : session.getPlayers()) {
@@ -67,9 +79,117 @@ public class ElytraMode implements Mode {
                 
                 int fireworks = Config.CONFIG.getInt("modes.elytra.starting-fireworks");
                 p.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET, fireworks));
+                
+                ringsCollected.put(p.getUniqueId(), 0);
+            }
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            tickCounter++;
+            
+            // Spawn rings every 5 blocks
+            if (tickCounter % 100 == 0 && !state.history.isEmpty()) {
+                Location ringLoc = getLatest().getLocation().clone().add(0, 3, 0);
+                rings.add(new RingCheckpoint(ringLoc));
             }
             
-            return generator;
-        }, null, null, player);
+            // Display rings and check for player passing through
+            Iterator<RingCheckpoint> it = rings.iterator();
+            while (it.hasNext()) {
+                RingCheckpoint ring = it.next();
+                
+                // Display ring particles
+                displayRing(ring.location);
+                
+                // Check if any player passed through
+                for (ParkourPlayer pp : getPlayers()) {
+                    if (ring.collected) continue;
+                    
+                    BoundingBox playerBox = pp.player.getBoundingBox();
+                    if (ring.getBoundingBox().overlaps(playerBox)) {
+                        ring.collected = true;
+                        int count = ringsCollected.getOrDefault(pp.getUUID(), 0) + 1;
+                        ringsCollected.put(pp.getUUID(), count);
+                        
+                        // Bonus points for passing through ring
+                        lifecycle.score();
+                        lifecycle.score();
+                        
+                        pp.player.playSound(pp.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
+                        pp.player.spawnParticle(Particle.TOTEM, ring.location, 20, 0.5, 0.5, 0.5, 0.1);
+                    }
+                }
+                
+                // Remove old rings
+                if (ring.location.distance(player.getLocation()) > 50) {
+                    it.remove();
+                }
+            }
+            
+            // Check firework cooldown
+            checkFireworkCooldown();
+        }
+        
+        private void displayRing(Location center) {
+            World world = center.getWorld();
+            if (world == null) return;
+            
+            double radius = 2.0;
+            int points = 30;
+            
+            for (int i = 0; i < points; i++) {
+                double angle = 2 * Math.PI * i / points;
+                double x = center.getX() + radius * Math.cos(angle);
+                double z = center.getZ() + radius * Math.sin(angle);
+                
+                Location particleLoc = new Location(world, x, center.getY(), z);
+                world.spawnParticle(Particle.END_ROD, particleLoc, 1, 0, 0, 0, 0);
+            }
+        }
+        
+        private void checkFireworkCooldown() {
+            long now = System.currentTimeMillis();
+            int cooldownMs = Config.CONFIG.getInt("modes.elytra.firework-cooldown-ms");
+            
+            for (ParkourPlayer pp : getPlayers()) {
+                UUID uuid = pp.getUUID();
+                ItemStack mainHand = pp.player.getInventory().getItemInMainHand();
+                ItemStack offHand = pp.player.getInventory().getItemInOffHand();
+                
+                boolean usingFirework = (mainHand.getType() == Material.FIREWORK_ROCKET && pp.player.isGliding())
+                                     || (offHand.getType() == Material.FIREWORK_ROCKET && pp.player.isGliding());
+                
+                if (usingFirework) {
+                    Long lastUse = fireworkCooldowns.get(uuid);
+                    if (lastUse != null && now - lastUse < cooldownMs) {
+                        long remaining = (cooldownMs - (now - lastUse)) / 1000;
+                        pp.player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, 
+                            net.md_5.bungee.api.chat.TextComponent.fromLegacyText("§cFirework cooldown: " + remaining + "s"));
+                        continue;
+                    }
+                    fireworkCooldowns.put(uuid, now);
+                }
+            }
+        }
+
+        @Override
+        public Mode getMode() {
+            return Modes.ELYTRA;
+        }
+        
+        private static class RingCheckpoint {
+            final Location location;
+            boolean collected = false;
+            
+            RingCheckpoint(Location location) {
+                this.location = location;
+            }
+            
+            BoundingBox getBoundingBox() {
+                return BoundingBox.of(location, 2.5, 2.5, 2.5);
+            }
+        }
     }
 }

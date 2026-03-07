@@ -3,6 +3,7 @@ package dev.loki.loparkour.mode;
 import dev.loki.loparkour.util.Item;
 
 import dev.lolib.scheduler.Scheduler;
+import dev.lolib.scheduler.ScheduledTask;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
@@ -12,7 +13,6 @@ import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.session.Session;
 
-import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -27,7 +27,6 @@ import java.util.Map;
 public class SpeedrunMode implements Mode {
 
     private final Leaderboard leaderboard = new Leaderboard(getName(), Leaderboard.Sort.SCORE);
-    private final Map<Block, Long> blockTimestamps = new HashMap<>();
 
     @Override
     @NotNull
@@ -64,42 +63,58 @@ public class SpeedrunMode implements Mode {
         Session.create(session -> new SpeedrunGenerator(session), null, null, player);
     }
 
-    public void onBlockTouch(@NotNull Block block, @NotNull ParkourPlayer player) {
-        if (!blockTimestamps.containsKey(block)) {
-            blockTimestamps.put(block, System.currentTimeMillis());
-            scheduleBlockRemoval(player, block);
-        }
-    }
-
-    private void scheduleBlockRemoval(@NotNull ParkourPlayer player, @NotNull Block block) {
-        double blockLifetime = Config.CONFIG.getDouble("modes.speedrun.block-lifetime");
-        double warningTime = Config.CONFIG.getDouble("modes.speedrun.warning-time");
-
-        long removalTime = (long) (blockLifetime * 1000);
-        long warningTimeMs = (long) (warningTime * 1000);
-
-        Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
-                if (block.getType() != Material.AIR) {
-                    player.player.playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
-                    player.player.spawnParticle(Particle.FLAME, block.getLocation().add(0.5, 1, 0.5), 10, 0.3, 0.3, 0.3, 0.01);
-                }
-            }, warningTimeMs / 50);
-
-        Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
-                if (block.getType() != Material.AIR) {
-                    block.setType(Material.AIR);
-                    blockTimestamps.remove(block);
-                }
-            }, removalTime / 50);
-    }
-
-    public void reset() {
-        blockTimestamps.clear();
-    }
-
     private static class SpeedrunGenerator extends ParkourGenerator {
+        private final Map<Block, Long> blockTimestamps = new HashMap<>();
+        private final Map<Block, ScheduledTask> scheduledTasks = new HashMap<>();
+
         public SpeedrunGenerator(@NotNull Session session) {
             super(session);
+        }
+
+        public void onBlockTouch(@NotNull Block block) {
+            if (!blockTimestamps.containsKey(block)) {
+                blockTimestamps.put(block, System.currentTimeMillis());
+                scheduleBlockRemoval(block);
+            }
+        }
+
+        private void scheduleBlockRemoval(@NotNull Block block) {
+            double blockLifetime = Config.CONFIG.getDouble("modes.speedrun.block-lifetime");
+            double warningTime = Config.CONFIG.getDouble("modes.speedrun.warning-time");
+
+            long removalTime = (long) (blockLifetime * 1000);
+            long warningTimeMs = (long) (warningTime * 1000);
+
+            ScheduledTask warningTask = Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
+                    if (block.getType() != Material.AIR) {
+                        player.player.playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+                        player.player.spawnParticle(Particle.FLAME, block.getLocation().add(0.5, 1, 0.5), 10, 0.3, 0.3, 0.3, 0.01);
+                    }
+                }, warningTimeMs / 50);
+
+            ScheduledTask removalTask = Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
+                    if (block.getType() != Material.AIR) {
+                        block.setType(Material.AIR);
+                        blockTimestamps.remove(block);
+                        scheduledTasks.remove(block);
+                    }
+                }, removalTime / 50);
+
+            scheduledTasks.put(block, removalTask);
+        }
+
+        @Override
+        public void reset(boolean regenerate) {
+            // Cancel all scheduled tasks
+            for (ScheduledTask task : scheduledTasks.values()) {
+                if (task != null) {
+                    task.cancel();
+                }
+            }
+            scheduledTasks.clear();
+            blockTimestamps.clear();
+            
+            super.reset(regenerate);
         }
 
         @Override

@@ -140,6 +140,12 @@ public class GravityShiftMode implements Mode {
             );
 
             player.player.addPotionEffect(currentEffect);
+            
+            // Visual feedback
+            player.player.sendTitle("§6⚡", "§e" + selected.name, 5, 20, 10);
+            player.player.playSound(player.player.getLocation(), org.bukkit.Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
+            player.player.spawnParticle(org.bukkit.Particle.PORTAL, player.player.getLocation().add(0, 1, 0), 50, 0.5, 0.5, 0.5, 0.5);
+            
             player.sendTranslated("modes.gravity-shift.effect-applied", selected.name);
         }
 

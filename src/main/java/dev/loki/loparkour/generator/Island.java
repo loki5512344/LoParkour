@@ -55,13 +55,22 @@ public final class Island {
 
         Material playerMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.spawn.player-block").toUpperCase());
         Material parkourMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.parkour.begin-block").toUpperCase());
+        
+        // Fallback for first-block-material if not present in config
+        String firstBlockStr = "stone";
+        try {
+            firstBlockStr = Config.GENERATION.getString("advanced.island.parkour.first-block-material");
+        } catch (NoSuchElementException ex) {
+            LoParkour.getPlugin().getLogger().warning("Config key 'advanced.island.parkour.first-block-material' not found, using 'stone' as default");
+        }
+        Material firstBlockMaterial = Material.getMaterial(firstBlockStr.toUpperCase());
 
         try {
             Block player = blocks.stream().filter(block -> block.getType() == playerMaterial).findAny().orElseThrow();
             Block parkour = blocks.stream().filter(block -> block.getType() == parkourMaterial).findAny().orElseThrow();
 
-            player.setType(Material.STONE);
-            parkour.setType(Material.STONE);
+            player.setType(firstBlockMaterial);
+            parkour.setType(firstBlockMaterial);
 
             Location ps = player.getLocation().add(0.5, 1.0, 0.5);
             ps.setYaw(Config.GENERATION.getInt("advanced.island.spawn.yaw"));

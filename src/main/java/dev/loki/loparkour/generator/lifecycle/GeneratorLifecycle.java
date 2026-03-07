@@ -1,4 +1,4 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.lifecycle;
 
 import dev.lolib.scheduler.Scheduler;
 import dev.loki.loparkour.LoParkour;
@@ -6,6 +6,10 @@ import dev.loki.loparkour.api.event.ParkourFallEvent;
 import dev.loki.loparkour.api.event.ParkourScoreEvent;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Option;
+import dev.loki.loparkour.generator.ParkourGenerator;
+import dev.loki.loparkour.ghost.GhostData;
+import dev.loki.loparkour.ghost.GhostManager;
+import dev.loki.loparkour.ghost.GhostRecorder;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.leaderboard.Score;
 import dev.loki.loparkour.mode.Modes;
@@ -27,20 +31,43 @@ public class GeneratorLifecycle {
 
     private final ParkourGenerator generator;
     private dev.lolib.scheduler.ScheduledTask cleanupTask;
+    private GhostRecorder ghostRecorder;
+    private GhostManager ghostManager;
 
     public GeneratorLifecycle(ParkourGenerator generator) {
         this.generator = generator;
+        
+        if (Config.CONFIG.getBoolean("ghost-mode.enabled")) {
+            this.ghostRecorder = new GhostRecorder();
+            this.ghostManager = new GhostManager();
+            this.ghostManager.loadGhosts(generator.getMode().getName());
+        }
     }
 
     public void startTick() {
         generator.task = Scheduler.get(LoParkour.getPlugin()).runTimer(this::tick, 0, 1);
         cleanupTask = Scheduler.get(LoParkour.getPlugin()).runTimer(this::cleanupDistantBlocks, 0, Option.CLEANUP_INTERVAL);
+        
+        // Start ghost recording if enabled
+        if (ghostRecorder != null && ghostManager != null) {
+            ghostRecorder.startRecording(generator.player.getLocation());
+            
+            // Spawn top ghosts
+            if (generator.state.playerSpawn != null) {
+                ghostManager.spawnGhosts(
+                    generator.getMode().getName(),
+                    generator.state.playerSpawn,
+                    generator.player.player.getWorld()
+                );
+            }
+        }
     }
 
     public void tick() {
         if (generator.state.stopped) {
             generator.task.cancel();
             if (cleanupTask != null) cleanupTask.cancel();
+            if (ghostManager != null) ghostManager.stopAllGhosts();
             return;
         }
 
@@ -48,6 +75,11 @@ public class GeneratorLifecycle {
             updateVisualTime(p, p.selectedTime);
             p.updateScoreboard(generator);
             p.player.setSaturation(20);
+            
+            // Record ghost frame
+            if (ghostRecorder != null && ghostRecorder.isRecording()) {
+                ghostRecorder.recordFrame(p.getLocation());
+            }
         });
         generator.getSpectators().forEach(ParkourSpectator::update);
 
@@ -61,6 +93,36 @@ public class GeneratorLifecycle {
         if (below == null) return;
 
         handleSchematicEndBlock(below);
+        
+        // Clean up schematic blocks that are behind the player
+        if (!generator.state.schematicBlocks.isEmpty()) {
+            int currentIdx = generator.state.history.indexOf(below);
+            if (currentIdx > 0) {
+                generator.state.schematicBlocks.removeIf(b -> {
+                    int blockIdx = generator.state.history.indexOf(b);
+                    if (blockIdx >= 0 && blockIdx < currentIdx - 5) {
+                        b.setType(Material.AIR);
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+        
+        // Reset schematic wait if player is far from schematic blocks
+        if (generator.state.waitForSchematicCompletion && !generator.state.schematicBlocks.isEmpty()) {
+            boolean nearSchematic = generator.state.schematicBlocks.stream()
+                .anyMatch(b -> b.getLocation().distance(generator.player.getLocation()) < 15);
+            if (!nearSchematic) {
+                generator.state.waitForSchematicCompletion = false;
+                // Force delete schematic blocks
+                generator.state.schematicBlocks.forEach(b -> b.setType(Material.AIR));
+                generator.state.schematicBlocks.clear();
+                generator.state.deleteSchematic = false;
+                generator.state.schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
+            }
+        }
+        
         if (!generator.state.history.contains(below)) return;
 
         int idx = generator.state.history.indexOf(below);
@@ -122,7 +184,7 @@ public class GeneratorLifecycle {
         p.player.setPlayerTime(t, false);
     }
 
-    protected void score() {
+    public void score() {
         generator.state.score++;
         generator.state.totalScore++;
         checkRewards();
@@ -154,8 +216,28 @@ public class GeneratorLifecycle {
         }
     }
 
-    protected void fall() {
+    public void fall() {
         new ParkourFallEvent(generator.player).call();
+        
+        // Save ghost if score is good enough
+        if (ghostRecorder != null && ghostManager != null && ghostRecorder.isRecording()) {
+            String modeName = generator.getMode().getName();
+            int score = generator.state.score;
+            
+            if (ghostManager.shouldRecordGhost(modeName, score)) {
+                GhostData ghostData = ghostRecorder.stopRecording(
+                    generator.player.getName(),
+                    score
+                );
+                ghostManager.saveGhost(modeName, ghostData);
+                generator.player.sendTranslated("ghost.saved", Integer.toString(score));
+            }
+        }
+        
+        if (ghostManager != null) {
+            ghostManager.stopAllGhosts();
+        }
+        
         generator.reset(true);
     }
 

@@ -1,6 +1,7 @@
-package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator.effect;
 
 import dev.loki.loparkour.config.Option;
+import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.util.ParticleUtil;

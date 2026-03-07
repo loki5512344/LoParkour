@@ -162,6 +162,16 @@ options:
   # Disables the ability for a player to open blocks with an inventory.
   disable-inventory-blocks: false
 
+  # -= Hotbar slots =-
+  # Configure which hotbar slots (0-8) to use for parkour items
+  # Items will be placed in these slots in order: play, community, settings, lobby, quit
+  hotbar-slots:
+    play: 1
+    community: 3
+    settings: 4
+    lobby: 5
+    quit: 7
+
 # -= Permissions options =-
 # These permissions are used to determine which things the player can change.
 # Find them at https://efnilite.dev/projects/ip/wiki
@@ -354,11 +364,24 @@ modes:
     ring-size: 5
     # Firework boost power
     boost-power: 1.5
-    # Firework cooldown in seconds
-    firework-cooldown: 3
+    # Firework cooldown in milliseconds
+    firework-cooldown-ms: 3000
     # Starting fireworks amount
     starting-fireworks: 64
 
+  # -= Race mode =-
+  race:
+    # Enable race mode
+    enabled: true
+    # Target score to win
+    target-score: 100
+
+  # -= Co-op mode =-
+  coop:
+    # Enable co-op mode
+    enabled: true
+    # Maximum players in co-op session
+    max-players: 4
 
 
 # -= Scoring options =-

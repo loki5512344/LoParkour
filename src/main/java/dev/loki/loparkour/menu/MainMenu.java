@@ -23,27 +23,47 @@ public class MainMenu extends LPMenu {
         List<Runnable> actions = new ArrayList<>();
 
         if (ParkourOption.PLAY.mayPerform(player) && Config.CONFIG.getBoolean("joining")) {
-            visibleItems.add(localeItem(player, "play.item"));
-            actions.add(() -> Menus.PLAY.open(player));
+            ItemStack item = localeItem(player, "play.item");
+            if (item != null) {
+                visibleItems.add(item);
+                actions.add(() -> Menus.PLAY.open(player));
+            }
         }
         if (ParkourOption.COMMUNITY.mayPerform(player)) {
-            visibleItems.add(localeItem(player, "community.item"));
-            actions.add(() -> Menus.COMMUNITY.open(player));
+            ItemStack item = localeItem(player, "community.item");
+            if (item != null) {
+                visibleItems.add(item);
+                actions.add(() -> Menus.COMMUNITY.open(player));
+            }
         }
         if (ParkourOption.SETTINGS.mayPerform(player) && ParkourUser.isUser(player)) {
-            visibleItems.add(localeItem(player, "settings.item"));
-            actions.add(() -> Menus.SETTINGS.open(player));
+            ItemStack item = localeItem(player, "settings.item");
+            if (item != null) {
+                visibleItems.add(item);
+                actions.add(() -> Menus.SETTINGS.open(player));
+            }
         }
         if (ParkourOption.LOBBY.mayPerform(player) && ParkourUser.isUser(player)) {
-            visibleItems.add(localeItem(player, "lobby.item"));
-            actions.add(() -> Menus.LOBBY.open(player));
+            ItemStack item = localeItem(player, "lobby.item");
+            if (item != null) {
+                visibleItems.add(item);
+                actions.add(() -> Menus.LOBBY.open(player));
+            }
         }
         if (ParkourOption.QUIT.mayPerform(player) && ParkourUser.isUser(player)) {
-            visibleItems.add(localeItem(player, "other.quit"));
-            actions.add(() -> ParkourUser.leave(player));
+            ItemStack item = localeItem(player, "other.quit");
+            if (item != null) {
+                visibleItems.add(item);
+                actions.add(() -> ParkourUser.leave(player));
+            }
         }
 
         int count = visibleItems.size();
+        if (count == 0) {
+            player.sendMessage("§cNo menu items available. Check your permissions and locale files.");
+            return;
+        }
+        
         int[] slots = distributeEvenly(count, 9, 17);
 
         InventoryGUI gui = baseGui(title, 3);
