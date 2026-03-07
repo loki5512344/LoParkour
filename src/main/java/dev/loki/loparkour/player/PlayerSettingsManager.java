@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
  *
  * @since 5.0.0
  */
-class PlayerSettingsManager {
+public class PlayerSettingsManager {
 
     private static final Map<String, OptionContainer> COLUMN_MAPPINGS = new HashMap<>();
 

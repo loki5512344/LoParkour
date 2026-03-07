@@ -46,7 +46,7 @@ public class ParkourSettingsMenu extends LPMenu {
                     open(pp);
                 })
                 .setItem(12, toggleItem(locale, "special_blocks", pp.useSpecialBlocks), e -> {
-                    if (pp.session.generator.score == 0) {
+                    if (pp.session.generator.state.score == 0) {
                         pp.useSpecialBlocks = !pp.useSpecialBlocks;
                         pp.updateGeneratorSettings(pp.session.generator);
                     }
@@ -65,7 +65,7 @@ public class ParkourSettingsMenu extends LPMenu {
                 .setItem(19, localeItem(player, "settings.parkour_settings.styles.item"),
                         e -> openStyleMenu(pp))
                 .setItem(20, schemDiffItem(pp), e -> {
-                    if (pp.session.generator.score == 0) {
+                    if (pp.session.generator.state.score == 0) {
                         List<Double> diffs = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
                         int idx = diffs.indexOf(pp.schematicDifficulty);
                         pp.schematicDifficulty = diffs.get((idx + 1) % diffs.size());

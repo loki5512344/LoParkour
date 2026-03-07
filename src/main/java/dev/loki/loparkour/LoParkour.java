@@ -14,6 +14,7 @@ import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.mode.SpectatorMode;
 import dev.loki.loparkour.mode.SpeedrunMode;
 import dev.loki.loparkour.player.ParkourUser;
+import dev.loki.loparkour.player.UserRegistry;
 import dev.loki.loparkour.reward.Rewards;
 import dev.loki.loparkour.schematic.lpschem.LPSchematicManager;
 import dev.loki.loparkour.storage.Storage;
@@ -243,8 +244,7 @@ public final class LoParkour extends LoPlugin {
         metrics.addCustomChart(new SimplePie("using_rewards", () -> Boolean.toString(Rewards.REWARDS_ENABLED)));
         metrics.addCustomChart(new SimplePie("locale_count", () -> Integer.toString(Locales.locales.size())));
         metrics.addCustomChart(new SingleLineChart("player_joins", () -> {
-            int joins = ParkourUser.joinCount;
-            ParkourUser.joinCount = 0;
+            int joins = UserRegistry.getJoinCount();
             return joins;
         }));
     }

@@ -54,12 +54,11 @@ public class EffectManager {
                 );
                 viewers.forEach(p -> p.player.spawnParticle(
                     Option.PARTICLE_TYPE, center, 5, 0.1, 0.1, 0.1, 0,
-                    Option.PARTICLE_DATA != null ? Option.PARTICLE_DATA.data() : null
+                    Option.PARTICLE_DATA
                 ));
             }
             case CIRCLE -> ParticleUtil.circle(
-                min.clone().add(0.5, 0.5, 0.5), max.getWorld(), Option.PARTICLE_TYPE,
-                viewers.stream().map(p -> p.player).toList(), 0.5, 8
+                min.clone().add(0.5, 0.5, 0.5), Option.PARTICLE_TYPE, 8, 1
             );
             case BOX -> ParticleUtil.box(
                 org.bukkit.util.BoundingBox.of(min, max), max.getWorld(), Option.PARTICLE_TYPE,

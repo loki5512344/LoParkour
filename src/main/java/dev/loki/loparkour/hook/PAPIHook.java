@@ -106,7 +106,7 @@ public class PAPIHook extends PlaceholderExpansion {
             ParkourGenerator generator = pp.session.generator;
             switch (params) {
                 case "score", "current_score" -> {
-                    return Integer.toString(generator.score);
+                    return Integer.toString(generator.state.score);
                 }
                 case "time", "current_time" -> {
                     return generator.getFormattedTime();
@@ -134,7 +134,7 @@ public class PAPIHook extends PlaceholderExpansion {
                         String replaced = params.replace("score_until_", "");
                         int interval = Integer.parseInt(replaced);
                         if (interval > 0) {
-                            return Integer.toString(interval - (generator.totalScore % interval)); // 100 - (5 % 100) = 95
+                            return Integer.toString(interval - (generator.state.score % interval));
                         } else {
                             return "0";
                         }

@@ -1,4 +1,4 @@
-﻿package dev.loki.loparkour.generator;
+package dev.loki.loparkour.generator;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;

@@ -87,10 +87,12 @@ public enum Config {
 
     /**
      * Updates the file so all keys are present.
+     * Any key that exists in the bundled default but is missing on disk
+     * will be appended to the correct section automatically.
      */
     public void update() {
         try {
-            // TODO: ConfigUpdater.update(LoParkour.getPlugin(), fileName, path, ignoredSections);
+            ConfigUpdater.update(LoParkour.getPlugin(), fileName, path, ignoredSections);
         } catch (Exception ex) {
             LoParkour.getPlugin().getLogger().log(java.util.logging.Level.SEVERE,
                     "Error while trying to update config file: " + fileName, ex);

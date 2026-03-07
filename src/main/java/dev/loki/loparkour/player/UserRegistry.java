@@ -92,7 +92,9 @@ public class UserRegistry {
     }
 
     public static int getJoinCount() {
-        return joinCount;
+        int count = joinCount;
+        joinCount = 0;
+        return count;
     }
 
     private static void resetScoreboard(ParkourUser user) {

@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
  */
 public class ParkourPlayer extends ParkourUser {
 
-    public static final Map<String, OptionContainer> PLAYER_COLUMNS = PlayerSettingsManager.getColumnMappings();
+    public static final Map<String, PlayerSettingsManager.OptionContainer> PLAYER_COLUMNS = PlayerSettingsManager.getColumnMappings();
 
     public @Expose Double schematicDifficulty;
     public @Expose Integer blockLead;
