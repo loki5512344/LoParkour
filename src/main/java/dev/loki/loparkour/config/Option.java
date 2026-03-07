@@ -45,6 +45,12 @@ public class Option {
 
     /** @see SqlOptions#SQL */
     public static boolean SQL;
+    public static String  SQL_URL;
+    public static int     SQL_PORT;
+    public static String  SQL_DB;
+    public static String  SQL_USERNAME;
+    public static String  SQL_PASSWORD;
+    public static String  SQL_PREFIX;
 
     /** @see ParticleOptions#SHAPE */
     public static ParticleShape PARTICLE_SHAPE;
@@ -87,7 +93,13 @@ public class Option {
 
     /** Copy sub-class fields to this class so existing code still compiles. */
     private static void syncForwardedFields() {
-        SQL = SqlOptions.SQL;
+        SQL          = SqlOptions.SQL;
+        SQL_URL      = SqlOptions.URL;
+        SQL_PORT     = SqlOptions.PORT;
+        SQL_DB       = SqlOptions.DB;
+        SQL_USERNAME = SqlOptions.USERNAME;
+        SQL_PASSWORD = SqlOptions.PASSWORD;
+        SQL_PREFIX   = SqlOptions.PREFIX;
 
         PARTICLE_SHAPE = ParticleOptions.SHAPE;
         SOUND_TYPE     = ParticleOptions.SOUND_TYPE;

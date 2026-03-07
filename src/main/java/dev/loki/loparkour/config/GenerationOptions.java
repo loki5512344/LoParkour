@@ -57,30 +57,32 @@ public final class GenerationOptions {
 
     static void init() {
         // Jump validation
-        JUMP_VALIDATION_ENABLED  = Config.CONFIG.getBoolean("jump-validation.enabled");
-        MAX_JUMP_DISTANCE        = Config.CONFIG.getDouble("jump-validation.max-distance");
-        MAX_HORIZONTAL_DISTANCE  = Config.CONFIG.getDouble("jump-validation.max-horizontal");
-        MAX_VERTICAL_UP          = Config.CONFIG.getDouble("jump-validation.max-vertical-up");
-        MAX_VERTICAL_DOWN        = Config.CONFIG.getDouble("jump-validation.max-vertical-down");
+        JUMP_VALIDATION_ENABLED  = Config.CONFIG.isPath("jump-validation.enabled") && Config.CONFIG.getBoolean("jump-validation.enabled");
+        MAX_JUMP_DISTANCE        = Config.CONFIG.isPath("jump-validation.max-distance")    ? Config.CONFIG.getDouble("jump-validation.max-distance")    : 5.0;
+        MAX_HORIZONTAL_DISTANCE  = Config.CONFIG.isPath("jump-validation.max-horizontal")  ? Config.CONFIG.getDouble("jump-validation.max-horizontal")  : 4.0;
+        MAX_VERTICAL_UP          = Config.CONFIG.isPath("jump-validation.max-vertical-up") ? Config.CONFIG.getDouble("jump-validation.max-vertical-up") : 1.0;
+        MAX_VERTICAL_DOWN        = Config.CONFIG.isPath("jump-validation.max-vertical-down") ? Config.CONFIG.getDouble("jump-validation.max-vertical-down") : 3.0;
 
         // Jump types
-        JUMP_TYPES_ENABLED = Config.CONFIG.getBoolean("jump-types.enabled");
+        JUMP_TYPES_ENABLED = Config.CONFIG.isPath("jump-types.enabled") && Config.CONFIG.getBoolean("jump-types.enabled");
         JUMP_TYPE_ENABLED  = new java.util.HashMap<>();
         JUMP_TYPE_CHANCE   = new java.util.HashMap<>();
-        for (String type : Config.CONFIG.getChildren("jump-types.types")) {
-            String path = "jump-types.types." + type;
-            JUMP_TYPE_ENABLED.put(type, Config.CONFIG.getBoolean(path + ".enabled"));
-            JUMP_TYPE_CHANCE.put(type,  Config.CONFIG.getDouble(path + ".chance"));
+        if (Config.CONFIG.isPath("jump-types.types")) {
+            for (String type : Config.CONFIG.getChildren("jump-types.types")) {
+                String path = "jump-types.types." + type;
+                JUMP_TYPE_ENABLED.put(type, Config.CONFIG.isPath(path + ".enabled") && Config.CONFIG.getBoolean(path + ".enabled"));
+                JUMP_TYPE_CHANCE.put(type,  Config.CONFIG.isPath(path + ".chance")  ? Config.CONFIG.getDouble(path + ".chance") : 0.0);
+            }
         }
 
         // Memory
-        BLOCK_CLEANUP_DISTANCE = Config.CONFIG.getInt("memory.block-cleanup-distance");
-        CLEANUP_INTERVAL       = Config.CONFIG.getInt("memory.cleanup-interval");
+        BLOCK_CLEANUP_DISTANCE = Config.CONFIG.isPath("memory.block-cleanup-distance") ? Config.CONFIG.getInt("memory.block-cleanup-distance") : 100;
+        CLEANUP_INTERVAL       = Config.CONFIG.isPath("memory.cleanup-interval")       ? Config.CONFIG.getInt("memory.cleanup-interval")       : 100;
 
         // Ghost
-        GHOST_MODE_ENABLED  = Config.CONFIG.getBoolean("ghost-mode.enabled");
-        GHOST_SHOW_TOP      = Config.CONFIG.getInt("ghost-mode.show-top");
-        GHOST_TRANSPARENCY  = Config.CONFIG.getDouble("ghost-mode.transparency");
+        GHOST_MODE_ENABLED  = Config.CONFIG.isPath("ghost-mode.enabled")      && Config.CONFIG.getBoolean("ghost-mode.enabled");
+        GHOST_SHOW_TOP      = Config.CONFIG.isPath("ghost-mode.show-top")      ? Config.CONFIG.getInt("ghost-mode.show-top")      : 3;
+        GHOST_TRANSPARENCY  = Config.CONFIG.isPath("ghost-mode.transparency")  ? Config.CONFIG.getDouble("ghost-mode.transparency") : 0.5;
 
         // Generation chances
         TYPE_NORMAL      = Config.GENERATION.getInt("generation.type.normal")    / 100.0;

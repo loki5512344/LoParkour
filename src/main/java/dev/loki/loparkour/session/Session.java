@@ -42,14 +42,9 @@ public class Session {
     private Visibility visibility = Visibility.PUBLIC;
 
     /**
-     * List of muted users.
+     * Manages users (players and spectators) in this session.
      */
-    private final List<ParkourUser> muted = new ArrayList<>();
-
-    /**
-     * List of users.
-     */
-    private final Map<UUID, ParkourUser> users = new HashMap<>();
+    private final SessionUserManager userManager = new SessionUserManager(this);
 
     /**
      * Function that takes the current session and returns whether new players should be accepted.
@@ -121,13 +116,7 @@ public class Session {
      * @param toAdd The players to add.
      */
     public void addPlayers(ParkourPlayer... toAdd) {
-        for (ParkourPlayer player : toAdd) {
-            for (ParkourPlayer to : getPlayers()) {
-                to.send(Locales.getString(player.locale, "lobby.other_join").formatted(player.getName()));
-            }
-
-            users.put(player.getUUID(), player);
-        }
+        userManager.addPlayers(toAdd);
     }
 
     /**
@@ -136,31 +125,14 @@ public class Session {
      * @param toRemove The players to remove.
      */
     public void removePlayers(ParkourPlayer... toRemove) {
-        for (ParkourPlayer player : toRemove) {
-            users.remove(player.getUUID());
-        }
-
-        List<ParkourPlayer> players = getPlayers();
-        for (ParkourPlayer player : toRemove) {
-            for (ParkourPlayer to : players) {
-                to.send(Locales.getString(player.locale, "lobby.other_leave").formatted(player.getName()));
-            }
-        }
-
-        if (toRemove.length > 0 && players.isEmpty()) {
-            generator.reset(false);
-            Divider.remove(this);
-        }
+        userManager.removePlayers(toRemove);
     }
 
     /**
      * @return The players.
      */
     public List<ParkourPlayer> getPlayers() {
-        return users.values().stream()
-                .filter(user -> user instanceof ParkourPlayer)
-                .map(user -> (ParkourPlayer) user)
-                .toList();
+        return userManager.getPlayers();
     }
 
     /**
@@ -169,13 +141,7 @@ public class Session {
      * @param spectators The spectators to add.
      */
     public void addSpectators(ParkourSpectator... spectators) {
-        for (ParkourSpectator spectator : spectators) {
-            for (ParkourPlayer player : getPlayers()) {
-                player.sendTranslated("play.spectator.other_join", spectator.getName());
-            }
-
-            users.put(spectator.getUUID(), spectator);
-        }
+        userManager.addSpectators(spectators);
     }
 
     /**
@@ -184,30 +150,21 @@ public class Session {
      * @param spectators The spectators to remove.
      */
     public void removeSpectators(ParkourSpectator... spectators) {
-        for (ParkourSpectator spectator : spectators) {
-            for (ParkourPlayer player : getPlayers()) {
-                player.sendTranslated("play.spectator.other_leave", spectator.getName());
-            }
-
-            users.remove(spectator.getUUID());
-        }
+        userManager.removeSpectators(spectators);
     }
 
     /**
      * @return The spectators.
      */
     public List<ParkourSpectator> getSpectators() {
-        return users.values().stream()
-                .filter(user -> user instanceof ParkourSpectator)
-                .map(user -> (ParkourSpectator) user)
-                .toList();
+        return userManager.getSpectators();
     }
 
     /**
      * @return The users.
      */
     public List<ParkourUser> getUsers() {
-        return new ArrayList<>(users.values());
+        return userManager.getUsers();
     }
 
     /**
@@ -224,9 +181,7 @@ public class Session {
      * @param user The user to (un)mute.
      */
     public void toggleMute(@NotNull ParkourUser user) {
-        if (!muted.remove(user)) {
-            muted.add(user);
-        }
+        userManager.toggleMute(user);
     }
 
     /**
@@ -234,7 +189,15 @@ public class Session {
      * @return True when the user is muted, false if not.
      */
     public boolean isMuted(@NotNull ParkourUser user) {
-        return muted.contains(user);
+        return userManager.isMuted(user);
+    }
+
+    /**
+     * Called when all players have left the session.
+     */
+    void onAllPlayersLeft() {
+        generator.reset(false);
+        Divider.remove(this);
     }
 
     /**

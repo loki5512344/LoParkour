@@ -40,13 +40,13 @@ public class BlockPlacer {
 
     /** Generates one block or schematic ahead. */
     public void generate() {
-        if (g.waitForSchematicCompletion) return;
+        if (g.state.waitForSchematicCompletion) return;
 
-        Map<ParkourGenerator.BlockGenerationType, Double> chances = new HashMap<>(g.defaultChances);
-        if (g.schematicCooldown > 0
+        Map<ParkourGenerator.BlockGenerationType, Double> chances = new HashMap<>(g.state.defaultChances);
+        if (g.state.schematicCooldown > 0
                 || g.generatorOptions.contains(GeneratorOption.DISABLE_SCHEMATICS)
                 || g.profile.get("schematicDifficulty").asDouble() == 0.0
-                || !g.schematicBlocks.isEmpty()) {
+                || !g.state.schematicBlocks.isEmpty()) {
             chances.remove(ParkourGenerator.BlockGenerationType.SCHEMATIC);
         }
         if (!g.profile.get("useSpecialBlocks").asBoolean()) {
@@ -67,27 +67,27 @@ public class BlockPlacer {
 
     /** Seeds the history and generates the initial lead. */
     public void generateFirst(Location spawn, Location blockSpawn) {
-        g.playerSpawn = spawn;
-        g.lastStandingPlayerLocation = spawn;
-        g.blockSpawn = blockSpawn;
-        g.history.add(blockSpawn.getBlock());
+        g.state.playerSpawn = spawn;
+        g.state.lastStandingPlayerLocation = spawn;
+        g.state.blockSpawn = blockSpawn;
+        g.state.history.add(blockSpawn.getBlock());
         generate(g.profile.get("blockLead").asInt());
     }
 
     /** Clears schematic blocks and resets cooldown. */
     public void deleteSchematic() {
-        if (!g.deleteSchematic) return;
-        g.schematicBlocks.forEach(b -> b.setType(Material.AIR));
-        g.schematicBlocks.clear();
-        g.deleteSchematic = false;
-        g.schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
+        if (!g.state.deleteSchematic) return;
+        g.state.schematicBlocks.forEach(b -> b.setType(Material.AIR));
+        g.state.schematicBlocks.clear();
+        g.state.deleteSchematic = false;
+        g.state.schematicCooldown = Config.GENERATION.getInt("advanced.schematic-cooldown");
     }
 
     // ── Block selection ────────────────────────────────────────────────────────
 
     protected List<Block> selectBlocks() {
-        int height   = Probs.random(g.heightChances);
-        int distance = Probs.random(g.distanceChances);
+        int height   = Probs.random(g.state.heightChances);
+        int distance = Probs.random(g.state.distanceChances);
         return List.of(selectNext(g.getLatest(), distance, height));
     }
 
@@ -95,7 +95,7 @@ public class BlockPlacer {
         JumpDirector director = new JumpDirector(
             BoundingBox.of(g.zone[0], g.zone[1]), g.getLatest().getLocation().toVector());
 
-        g.heading = director.getRecommendedHeading(g.heading);
+        g.state.heading = director.getRecommendedHeading(g.state.heading);
         height    = director.getRecommendedHeight(height);
 
         switch (g.getLatest().getType()) {
@@ -107,11 +107,11 @@ public class BlockPlacer {
         double sd = g.generatorOptions.contains(GeneratorOption.REDUCE_RANDOM_BLOCK_SELECTION_ANGLE) ? 0.5 : 1;
         int randomOffset = new JumpOffsetGenerator(height, distance).getRandomOffset(0, sd);
 
-        Vector offset = g.heading.clone().multiply(distance + 1).setY(height);
+        Vector offset = g.state.heading.clone().multiply(distance + 1).setY(height);
         if (offset.getX() == 0) offset.setX(randomOffset);
         else                    offset.setZ(randomOffset);
 
-        offset.rotateAroundY(angleInY(g.heading, Option.HEADING.getDirection()));
+        offset.rotateAroundY(angleInY(g.state.heading, Option.HEADING.getDirection()));
         return current.getLocation().add(offset).getBlock();
     }
 
@@ -137,7 +137,7 @@ public class BlockPlacer {
         for (Block block : blocks) {
             BlockData data = (jump == ParkourGenerator.BlockGenerationType.SPECIAL
                     && !g.generatorOptions.contains(GeneratorOption.DISABLE_SPECIAL))
-                    ? Probs.random(g.specialChances)
+                    ? Probs.random(g.state.specialChances)
                     : selectBlockData();
 
             if (data instanceof Fence) block = block.getLocation().subtract(0, 1, 0).getBlock();
@@ -148,8 +148,8 @@ public class BlockPlacer {
         new ParkourBlockGenerateEvent(placed, g, g.player).call();
         g.effects.particles(placed);
         g.effects.sound(placed);
-        g.history.addAll(placed);
-        g.schematicCooldown--;
+        g.state.history.addAll(placed);
+        g.state.schematicCooldown--;
     }
 
     private boolean tryGenerateSchematic() {
@@ -166,14 +166,14 @@ public class BlockPlacer {
         var pool = candidates.isEmpty() ? new ArrayList<>(all.values()) : candidates;
         var schematic = pool.get(new java.util.Random().nextInt(pool.size()));
 
-        Location origin = g.getLatest().getLocation().add(g.heading.clone().multiply(2));
+        Location origin = g.getLatest().getLocation().add(g.state.heading.clone().multiply(2));
         List<Block> placed = rotatedPaste(schematic, origin);
         if (placed.isEmpty()) return false;
 
-        g.schematicBlocks.addAll(placed);
-        g.history.addAll(placed);
-        g.waitForSchematicCompletion = true;
-        g.deleteSchematic = false;
+        g.state.schematicBlocks.addAll(placed);
+        g.state.history.addAll(placed);
+        g.state.waitForSchematicCompletion = true;
+        g.state.deleteSchematic = false;
 
         new ParkourSchematicGenerateEvent(schematic, g, g.player).call();
         return true;

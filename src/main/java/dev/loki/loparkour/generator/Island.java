@@ -69,7 +69,7 @@ public final class Island {
 
             // First parkour block should be generated FROM the parkour start block
             // in the direction of heading, not AT the parkour start block
-            Location parkourStart = parkour.getLocation().add(session.generator.heading);
+            Location parkourStart = parkour.getLocation().add(session.generator.state.heading);
             
             session.generator.generateFirst(ps, parkourStart);
             session.generator.startTick();
