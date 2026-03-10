@@ -76,9 +76,14 @@ public final class Island {
             ps.setYaw(Config.GENERATION.getInt("advanced.island.spawn.yaw"));
             ps.setPitch(Config.GENERATION.getInt("advanced.island.spawn.pitch"));
 
-            // First parkour block should be generated FROM the parkour start block
-            // in the direction of heading, not AT the parkour start block
-            Location parkourStart = parkour.getLocation().add(session.generator.state.heading);
+            // First parkour block position - fixed offset from parkour marker
+            // Always 4 blocks in the direction of heading from center
+            Location parkourStart = parkour.getLocation().clone();
+            parkourStart.add(
+                session.generator.state.heading.getX() * 4,
+                0,
+                session.generator.state.heading.getZ() * 4
+            );
             
             session.generator.generateFirst(ps, parkourStart);
             session.generator.startTick();

@@ -61,15 +61,18 @@ public class GhostManager {
         ghosts.add(data);
         ghosts.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
 
+        // Remove old ghosts beyond MAX limit
         while (ghosts.size() > MAX_GHOSTS_PER_MODE) {
             GhostData removed = ghosts.remove(ghosts.size() - 1);
-            File file = new File(modeFolder, removed.getPlayerName() + ".ghost");
+            // Use UUID for filename to avoid collisions and path traversal
+            File file = new File(modeFolder, removed.getPlayerUUID() + ".ghost");
             file.delete();
         }
 
         ghostsByMode.put(mode, ghosts);
 
-        File file = new File(modeFolder, data.getPlayerName() + ".ghost");
+        // Use UUID for filename instead of player name
+        File file = new File(modeFolder, data.getPlayerUUID() + ".ghost");
         try {
             data.saveToFile(file);
         } catch (IOException e) {

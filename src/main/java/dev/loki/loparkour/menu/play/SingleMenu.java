@@ -28,11 +28,19 @@ public class SingleMenu extends LPMenu {
         List<ItemStack> items = new ArrayList<>();
 
         for (Mode mode : Registry.getModes()) {
+            // Skip spectator mode in single menu
+            if (mode.getName().equals("spectator")) continue;
+            
+            // Check if mode is enabled in config
+            if (!Config.CONFIG.getBoolean("modes." + mode.getName() + ".enabled")) continue;
+            
             boolean blocked = Config.CONFIG.getBoolean("permissions.enabled")
                     && !player.hasPermission("LoParkour.gamemode." + mode.getName());
-            if (blocked || mode instanceof MultiMode) continue;
+            if (blocked) continue;
+            
             var item = mode.getItem(locale);
             if (item == null) continue;
+            
             availableModes.add(mode);
             items.add(item.build());
         }

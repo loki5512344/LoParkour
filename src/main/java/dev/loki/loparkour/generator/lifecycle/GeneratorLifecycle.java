@@ -13,6 +13,7 @@ import dev.loki.loparkour.ghost.GhostRecorder;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.leaderboard.Score;
 import dev.loki.loparkour.mode.Modes;
+import dev.loki.loparkour.mode.SpeedrunMode;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.reward.Rewards;
@@ -28,6 +29,10 @@ import java.util.Iterator;
  * Handles parkour lifecycle: tick, fall, reset, cleanup.
  */
 public class GeneratorLifecycle {
+
+    private static final int FALL_DISTANCE_THRESHOLD = -10;
+    private static final int SCHEMATIC_CLEANUP_OFFSET = 5;
+    private static final int SCHEMATIC_PROXIMITY_DISTANCE = 15;
 
     private final ParkourGenerator generator;
     private dev.lolib.scheduler.ScheduledTask cleanupTask;
@@ -84,13 +89,18 @@ public class GeneratorLifecycle {
         generator.getSpectators().forEach(ParkourSpectator::update);
 
         if (generator.player.getLocation().getWorld() != generator.state.lastStandingPlayerLocation.getWorld()) return;
-        if (generator.player.getLocation().subtract(generator.state.lastStandingPlayerLocation).getY() < -10) {
+        if (generator.player.getLocation().subtract(generator.state.lastStandingPlayerLocation).getY() < FALL_DISTANCE_THRESHOLD) {
             fall();
             return;
         }
 
         Block below = blockBelow();
         if (below == null) return;
+
+        // Speedrun mode: trigger block disappearing (only for parkour blocks, not spawn platform)
+        if (generator.getMode() instanceof SpeedrunMode && generator.state.history.contains(below)) {
+            ((SpeedrunMode.SpeedrunGenerator) generator).onBlockTouch(below);
+        }
 
         handleSchematicEndBlock(below);
         
@@ -100,7 +110,7 @@ public class GeneratorLifecycle {
             if (currentIdx > 0) {
                 generator.state.schematicBlocks.removeIf(b -> {
                     int blockIdx = generator.state.history.indexOf(b);
-                    if (blockIdx >= 0 && blockIdx < currentIdx - 5) {
+                    if (blockIdx >= 0 && blockIdx < currentIdx - SCHEMATIC_CLEANUP_OFFSET) {
                         b.setType(Material.AIR);
                         return true;
                     }
@@ -112,7 +122,7 @@ public class GeneratorLifecycle {
         // Reset schematic wait if player is far from schematic blocks
         if (generator.state.waitForSchematicCompletion && !generator.state.schematicBlocks.isEmpty()) {
             boolean nearSchematic = generator.state.schematicBlocks.stream()
-                .anyMatch(b -> b.getLocation().distance(generator.player.getLocation()) < 15);
+                .anyMatch(b -> b.getLocation().distance(generator.player.getLocation()) < SCHEMATIC_PROXIMITY_DISTANCE);
             if (!nearSchematic) {
                 generator.state.waitForSchematicCompletion = false;
                 // Force delete schematic blocks
@@ -138,7 +148,7 @@ public class GeneratorLifecycle {
         generator.state.lastPositionIndexPlayer = idx;
 
         removeTrailBlocks(idx);
-        cleanupDistantBlocks();
+        // cleanupDistantBlocks is called by cleanupTask timer, no need to call here
         generator.placer.deleteSchematic();
 
         int pts = Config.CONFIG.getBoolean("scoring.all-points") ? delta : 1;
@@ -163,7 +173,16 @@ public class GeneratorLifecycle {
     }
 
     private @Nullable Block blockBelow() {
-        Location loc = generator.player.getLocation().subtract(0, 1, 0);
+        Location loc = generator.player.getLocation();
+        
+        // Check current block first (for fences, walls, etc with height > 1)
+        Block current = loc.getBlock();
+        if (current.getType().isSolid() && !current.getType().isAir()) {
+            return current;
+        }
+        
+        // Check block below
+        loc = loc.subtract(0, 1, 0);
         Block b = loc.getBlock();
         if (b.getType() == Material.AIR) {
             if (loc.subtract(0, 0.5, 0).getBlock().getType() == Material.AIR) return null;
@@ -227,6 +246,7 @@ public class GeneratorLifecycle {
             if (ghostManager.shouldRecordGhost(modeName, score)) {
                 GhostData ghostData = ghostRecorder.stopRecording(
                     generator.player.getName(),
+                    generator.player.getUUID().toString(),
                     score
                 );
                 ghostManager.saveGhost(modeName, ghostData);

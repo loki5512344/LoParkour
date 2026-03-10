@@ -9,7 +9,7 @@ import java.util.List;
 public enum JumpType {
 
     NORMAL(1.0, "Normal jump", Material.STONE),
-    NEO_JUMP(2.5, "Jump around fence/wall", Material.OAK_FENCE, Material.COBBLESTONE_WALL, Material.NETHER_BRICK_FENCE),
+    NEO_JUMP(2.5, "Jump around fence", Material.OAK_FENCE, Material.NETHER_BRICK_FENCE),
     HEAD_HITTER(2.0, "Jump with block overhead", Material.STONE_SLAB),
     FENCE_JUMP(1.8, "Jump onto fence", Material.OAK_FENCE, Material.BIRCH_FENCE, Material.SPRUCE_FENCE),
     TRAPDOOR_JUMP(1.5, "Jump onto trapdoor", Material.OAK_TRAPDOOR, Material.IRON_TRAPDOOR),

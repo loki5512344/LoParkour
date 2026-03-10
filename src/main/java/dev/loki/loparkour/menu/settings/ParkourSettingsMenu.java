@@ -62,8 +62,7 @@ public class ParkourSettingsMenu extends LPMenu {
                     pp.updateGeneratorSettings(pp.session.generator);
                     open(pp);
                 })
-                .setItem(19, localeItem(player, "settings.parkour_settings.styles.item"),
-                        e -> openStyleMenu(pp))
+                .setItem(19, styleItem(pp), e -> openStyleMenu(pp))
                 .setItem(20, schemDiffItem(pp), e -> {
                     if (pp.session.generator.state.score == 0) {
                         List<Double> diffs = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
@@ -80,11 +79,20 @@ public class ParkourSettingsMenu extends LPMenu {
     private ItemStack toggleItem(String locale, String key, boolean value) {
         Material mat = value ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
         String symbol = Locales.getString(locale, "settings.parkour_settings." + (value ? "enabled" : "disabled"));
-        String label = Locales.getString(locale, "settings.parkour_settings." + key + ".item");
+        String name = Locales.getString(locale, "settings.parkour_settings.items." + key + ".name");
+        String lore = Locales.getString(locale, "settings.parkour_settings.items." + key + ".lore");
+        
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorUtil.color(label + " §7[" + symbol + "§7]"));
+            meta.setDisplayName(ColorUtil.color(name + " §7[" + symbol + "§7]"));
+            if (lore != null && !lore.isEmpty()) {
+                List<String> loreLines = new ArrayList<>();
+                for (String line : lore.split("\\|\\|")) {
+                    loreLines.add(ColorUtil.color(line.replace("%s", symbol)));
+                }
+                meta.setLore(loreLines);
+            }
             item.setItemMeta(meta);
         }
         return item;
@@ -92,7 +100,7 @@ public class ParkourSettingsMenu extends LPMenu {
 
     private ItemStack schemDiffItem(ParkourPlayer pp) {
         List<Double> diffs = List.of(0.0, 0.25, 0.5, 0.75, 1.0);
-        List<String> values = Locales.getStringList(pp.locale, "settings.parkour_settings.schematics.values");
+        List<String> values = Locales.getStringList(pp.locale, "settings.parkour_settings.items.schematics.values");
         int idx = Math.max(0, diffs.indexOf(pp.schematicDifficulty));
         String label = idx < values.size() ? values.get(idx) : String.valueOf(pp.schematicDifficulty);
         Material[] mats = {Material.RED_STAINED_GLASS_PANE, Material.LIME_STAINED_GLASS_PANE,
@@ -100,7 +108,35 @@ public class ParkourSettingsMenu extends LPMenu {
         ItemStack item = new ItemStack(idx < mats.length ? mats[idx] : Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorUtil.color("§eSchematics §7» §f" + label));
+            String name = Locales.getString(pp.locale, "settings.parkour_settings.items.schematics.name");
+            String lore = Locales.getString(pp.locale, "settings.parkour_settings.items.schematics.lore");
+            meta.setDisplayName(ColorUtil.color(name.replace("%s", label)));
+            if (lore != null && !lore.isEmpty()) {
+                List<String> loreLines = new ArrayList<>();
+                for (String line : lore.split("\\|\\|")) {
+                    loreLines.add(ColorUtil.color(line.replace("%s", label)));
+                }
+                meta.setLore(loreLines);
+            }
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack styleItem(ParkourPlayer pp) {
+        String name = Locales.getString(pp.locale, "settings.parkour_settings.items.styles.item.name");
+        String lore = Locales.getString(pp.locale, "settings.parkour_settings.items.styles.item.lore");
+        ItemStack item = new ItemStack(Material.CRAFTING_TABLE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ColorUtil.color(name.replace("%s", pp.style)));
+            if (lore != null && !lore.isEmpty()) {
+                List<String> loreLines = new ArrayList<>();
+                for (String line : lore.split("\\|\\|")) {
+                    loreLines.add(ColorUtil.color(line.replace("%s", pp.style)));
+                }
+                meta.setLore(loreLines);
+            }
             item.setItemMeta(meta);
         }
         return item;

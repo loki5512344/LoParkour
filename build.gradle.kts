@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "dev.loki"
-version = "1.3.0"
+version = "1.3.3"
 description = "LoParkour - Advanced parkour plugin for Minecraft"
 
 java {
@@ -95,6 +95,9 @@ dependencies {
     
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M1")
+    testImplementation("org.mockito:mockito-core:5.10.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.10.0")
+    testImplementation("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

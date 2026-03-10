@@ -1,5 +1,6 @@
 package dev.loki.loparkour.generator.jump;
 
+import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.util.Probs;
 
 import java.util.Map;
@@ -41,7 +42,11 @@ public class JumpOffsetGenerator {
                 case 1, 2 -> 5;
                 default -> 4;
             };
-            default -> throw new IllegalArgumentException("Unknown jump height difference %d".formatted(y));
+            default -> {
+                // Fallback for unexpected values
+                LoParkour.getPlugin().getLogger().warning("Unexpected jump height " + y + ", using default maxOffset=2");
+                yield 2;
+            }
         };
     }
 

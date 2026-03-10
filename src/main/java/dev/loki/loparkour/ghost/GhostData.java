@@ -9,17 +9,23 @@ import java.util.List;
 public class GhostData {
 
     private final String playerName;
+    private final String playerUUID;
     private final int score;
     private final List<GhostFrame> frames;
 
-    public GhostData(@NotNull String playerName, int score, @NotNull List<GhostFrame> frames) {
+    public GhostData(@NotNull String playerName, @NotNull String playerUUID, int score, @NotNull List<GhostFrame> frames) {
         this.playerName = playerName;
+        this.playerUUID = playerUUID;
         this.score = score;
         this.frames = new ArrayList<>(frames);
     }
 
     public String getPlayerName() {
         return playerName;
+    }
+
+    public String getPlayerUUID() {
+        return playerUUID;
     }
 
     public int getScore() {
@@ -33,6 +39,7 @@ public class GhostData {
     public void saveToFile(@NotNull File file) throws IOException {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(file))) {
             out.writeUTF(playerName);
+            out.writeUTF(playerUUID);
             out.writeInt(score);
             out.writeInt(frames.size());
 
@@ -50,6 +57,7 @@ public class GhostData {
     public static GhostData loadFromFile(@NotNull File file) throws IOException {
         try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
             String playerName = in.readUTF();
+            String playerUUID = in.readUTF();
             int score = in.readInt();
             int frameCount = in.readInt();
 
@@ -65,7 +73,7 @@ public class GhostData {
                 frames.add(new GhostFrame(timestamp, x, y, z, yaw, pitch));
             }
 
-            return new GhostData(playerName, score, frames);
+            return new GhostData(playerName, playerUUID, score, frames);
         }
     }
 }

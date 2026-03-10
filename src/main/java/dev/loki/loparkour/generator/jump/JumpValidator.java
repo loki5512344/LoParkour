@@ -28,24 +28,50 @@ public class JumpValidator {
     }
 
     public boolean canJump(@NotNull Location from, @NotNull Location to) {
+        // Null safety check
+        if (from == null || to == null) {
+            return false;
+        }
         return canJump(from.toVector(), to.toVector());
     }
 
-    // Проверка возможности прыжка: sqrt(dx² + dy² + dz²) <= maxDistance
+    // Check if jump is possible: sqrt(dx² + dy² + dz²) <= maxDistance
     public boolean canJump(@NotNull Vector from, @NotNull Vector to) {
+        // Null safety check
+        if (from == null || to == null) {
+            return false;
+        }
+        
         double dx = to.getX() - from.getX();
         double dy = to.getY() - from.getY();
         double dz = to.getZ() - from.getZ();
 
+        // Check if same location (no jump)
         double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+        if (horizontalDistance < 0.01 && Math.abs(dy) < 0.01) {
+            return false; // Same location
+        }
+
+        // Check horizontal distance limit
         if (horizontalDistance > maxHorizontal) {
             return false;
         }
 
+        // Check vertical limits
         if (dy > maxVerticalUp || dy < -maxVerticalDown) {
             return false;
         }
+        
+        // For upward jumps, reduce max horizontal distance
+        // Player can't jump as far when jumping up
+        if (dy > 0) {
+            double adjustedMaxHorizontal = maxHorizontal - (dy * 0.5); // Reduce by 0.5 blocks per block up
+            if (horizontalDistance > adjustedMaxHorizontal) {
+                return false;
+            }
+        }
 
+        // Check total distance
         double totalDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
         return totalDistance <= maxDistance;
     }

@@ -85,7 +85,9 @@ public class ParkourPlayer extends ParkourUser {
      * @return player as a {@link ParkourPlayer}, null if not found.
      */
     public static @Nullable ParkourPlayer getPlayer(@NotNull Player player) {
-        return getPlayers().stream()
+        // Optimized: search directly in sessions without creating intermediate list
+        return Divider.sections.keySet().stream()
+                .flatMap(session -> session.getPlayers().stream())
                 .filter(other -> other.getUUID().equals(player.getUniqueId()))
                 .findAny()
                 .orElse(null);
@@ -166,10 +168,7 @@ public class ParkourPlayer extends ParkourUser {
                 player.getInventory().clear();
 
                 // Load hotbar slots from config
-                if (ParkourOption.PLAY.mayPerform(player)) {
-                    int slot = Config.CONFIG.getInt("options.hotbar-slots.play");
-                    player.getInventory().setItem(slot, Locales.getItem(locale, "play.item").build());
-                }
+                // Don't show Play button when already in parkour
                 if (ParkourOption.COMMUNITY.mayPerform(player)) {
                     int slot = Config.CONFIG.getInt("options.hotbar-slots.community");
                     player.getInventory().setItem(slot, Locales.getItem(locale, "community.item").build());
@@ -189,6 +188,33 @@ public class ParkourPlayer extends ParkourUser {
             }, 5);
         } else {
             sendTranslated("other.customize");
+        }
+    }
+
+    /**
+     * Updates hotbar items with current language
+     */
+    public void updateHotbar() {
+        if (!Config.CONFIG.getBoolean("options.inventory-handling")) return;
+        
+        player.getInventory().clear();
+        
+        // Don't show Play button when already in parkour
+        if (ParkourOption.COMMUNITY.mayPerform(player)) {
+            int slot = Config.CONFIG.getInt("options.hotbar-slots.community");
+            player.getInventory().setItem(slot, Locales.getItem(locale, "community.item").build());
+        }
+        if (ParkourOption.SETTINGS.mayPerform(player)) {
+            int slot = Config.CONFIG.getInt("options.hotbar-slots.settings");
+            player.getInventory().setItem(slot, Locales.getItem(locale, "settings.item").build());
+        }
+        if (ParkourOption.LOBBY.mayPerform(player)) {
+            int slot = Config.CONFIG.getInt("options.hotbar-slots.lobby");
+            player.getInventory().setItem(slot, Locales.getItem(locale, "lobby.item").build());
+        }
+        if (ParkourOption.QUIT.mayPerform(player)) {
+            int slot = Config.CONFIG.getInt("options.hotbar-slots.quit");
+            player.getInventory().setItem(slot, Locales.getItem(locale, "other.quit").build());
         }
     }
 

@@ -43,7 +43,7 @@ public class CoopMode implements Mode {
     @Override
     public void create(Player player) {
         if (!Config.CONFIG.getBoolean("joining")) {
-            player.sendMessage("§cJoining is currently disabled.");
+            player.sendMessage(Locales.getString(player, "other.joining_disabled"));
             return;
         }
 
@@ -66,6 +66,8 @@ public class CoopMode implements Mode {
             // Initialize contributions
             for (ParkourPlayer pp : session.getPlayers()) {
                 playerContributions.put(pp.getUUID(), 0);
+                pp.player.sendTitle("§a§lCOOP MODE", "§7Work together for a shared score!", 10, 70, 20);
+                pp.player.sendMessage("§a§lCoop Mode §7activated! Team score is shared.");
             }
         }
 

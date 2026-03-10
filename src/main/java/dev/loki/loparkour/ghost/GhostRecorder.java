@@ -38,9 +38,9 @@ public class GhostRecorder {
         lastLocation = currentLocation.clone();
     }
 
-    public GhostData stopRecording(String playerName, int score) {
+    public GhostData stopRecording(String playerName, String playerUUID, int score) {
         recording = false;
-        return new GhostData(playerName, score, frames);
+        return new GhostData(playerName, playerUUID, score, frames);
     }
 
     public boolean isRecording() {

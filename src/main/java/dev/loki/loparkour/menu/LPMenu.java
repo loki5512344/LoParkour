@@ -43,7 +43,7 @@ public abstract class LPMenu {
         ItemStack item = new ItemStack(Material.RED_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorUtil.color("<#DE1F1F><bold>«"));
+            meta.setDisplayName(ColorUtil.color("<#DE1F1F><bold>Назад"));
             item.setItemMeta(meta);
         }
         return item;
@@ -53,7 +53,7 @@ public abstract class LPMenu {
         ItemStack item = new ItemStack(Material.LIME_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorUtil.color("<#0DCB07><bold>»"));
+            meta.setDisplayName(ColorUtil.color("<#0DCB07><bold>Далее"));
             item.setItemMeta(meta);
         }
         return item;

@@ -68,8 +68,8 @@ public class LobbyMenu extends LPMenu {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorUtil.color(
-                    Locales.getString(locale, "lobby.visibility") + " §7» §f" + label));
+            String visibilityName = Locales.getString(locale, "lobby.visibility.name");
+            meta.setDisplayName(ColorUtil.color(visibilityName + " §7» §f" + label));
             item.setItemMeta(meta);
         }
         return item;

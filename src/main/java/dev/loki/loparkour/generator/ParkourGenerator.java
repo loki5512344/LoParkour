@@ -68,12 +68,30 @@ public class ParkourGenerator {
 
     private static LPSchematic loadIslandSchematic() {
         String name = Config.GENERATION.getString("advanced.island.schematic-name");
-        if (name == null || name.isEmpty()) return null;
+        if (name == null || name.isEmpty()) {
+            name = "island"; // Default fallback
+        }
+        
         var manager = LoParkour.getSchematicManager();
-        if (manager == null) return null;
+        if (manager == null) {
+            LoParkour.getPlugin().getLogger().warning("Schematic manager not initialized, using null island");
+            return null;
+        }
+        
         LPSchematic s = manager.getSchematic(name);
         if (s == null) {
             LoParkour.getPlugin().getLogger().warning("Island schematic '%s' not found!".formatted(name));
+            
+            // Try fallback to default "island" schematic
+            if (!"island".equals(name)) {
+                LoParkour.getPlugin().getLogger().info("Attempting to load default 'island' schematic as fallback...");
+                s = manager.getSchematic("island");
+                if (s != null) {
+                    LoParkour.getPlugin().getLogger().info("Successfully loaded fallback 'island' schematic");
+                } else {
+                    LoParkour.getPlugin().getLogger().severe("Fallback 'island' schematic also not found! Island generation will be disabled.");
+                }
+            }
         }
         return s;
     }
@@ -121,8 +139,10 @@ public class ParkourGenerator {
         }
         state.lastPositionIndexPlayer = 0;
         if (!state.history.isEmpty()) {
-            state.history.remove(0);
-            state.history.forEach(b -> b.setType(Material.AIR, false));
+            Block first = state.history.remove(0);
+            // Create a copy to avoid ConcurrentModificationException
+            List<Block> historySnapshot = new ArrayList<>(state.history);
+            historySnapshot.forEach(b -> b.setType(Material.AIR, false));
             state.history.clear();
         }
         state.resetSchematicState();

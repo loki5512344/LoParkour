@@ -39,7 +39,7 @@ public class RaceMode implements Mode {
     @Override
     public void create(Player player) {
         if (!Config.CONFIG.getBoolean("joining")) {
-            player.sendMessage("§cJoining is currently disabled.");
+            player.sendMessage(Locales.getString(player, "other.joining_disabled"));
             return;
         }
 
@@ -59,6 +59,12 @@ public class RaceMode implements Mode {
         public RaceGenerator(@NotNull Session session) {
             super(session);
             this.targetScore = Config.CONFIG.getInt("modes.race.target-score");
+            
+            // Notify players
+            for (ParkourPlayer pp : session.getPlayers()) {
+                pp.player.sendTitle("§6§lRACE MODE", "§7First to " + targetScore + " points wins!", 10, 70, 20);
+                pp.player.sendMessage("§6§lRace Mode §7activated! Target: §e" + targetScore + " §7points.");
+            }
         }
 
         @Override

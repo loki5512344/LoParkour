@@ -60,7 +60,7 @@ public class MainMenu extends LPMenu {
 
         int count = visibleItems.size();
         if (count == 0) {
-            player.sendMessage("§cNo menu items available. Check your permissions and locale files.");
+            player.sendMessage(Locales.getString(player, "other.no_menu_items"));
             return;
         }
         

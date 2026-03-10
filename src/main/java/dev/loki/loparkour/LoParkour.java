@@ -8,8 +8,6 @@ import dev.loki.loparkour.hook.HoloHook;
 import dev.loki.loparkour.hook.PAPIHook;
 import dev.loki.loparkour.mode.DefaultMode;
 import dev.loki.loparkour.mode.ElytraMode;
-import dev.loki.loparkour.mode.GravityShiftMode;
-import dev.loki.loparkour.mode.HardcoreMode;
 import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.mode.SpectatorMode;
 import dev.loki.loparkour.mode.SpeedrunMode;
@@ -190,8 +188,6 @@ public final class LoParkour extends LoPlugin {
         Registry.register(new DefaultMode());
         Registry.register(new SpectatorMode());
         Registry.register(new SpeedrunMode());
-        Registry.register(new GravityShiftMode());
-        Registry.register(new HardcoreMode());
         Registry.register(new ElytraMode());
         Registry.register(new RaceMode());
         Registry.register(new CoopMode());
@@ -260,13 +256,29 @@ public final class LoParkour extends LoPlugin {
                 ParkourUser.leave(user);
             }
 
-            // write all LoParkour gamemodes
-            Modes.DEFAULT.getLeaderboard().write(false);
+            // Save leaderboards for all modes
+            if (Modes.DEFAULT != null && Modes.DEFAULT.getLeaderboard() != null) {
+                Modes.DEFAULT.getLeaderboard().write(false);
+            }
+            if (Modes.SPEEDRUN != null && Modes.SPEEDRUN.getLeaderboard() != null) {
+                Modes.SPEEDRUN.getLeaderboard().write(false);
+            }
+            if (Modes.ELYTRA != null && Modes.ELYTRA.getLeaderboard() != null) {
+                Modes.ELYTRA.getLeaderboard().write(false);
+            }
+            if (Modes.RACE != null && Modes.RACE.getLeaderboard() != null) {
+                Modes.RACE.getLeaderboard().write(false);
+            }
+            if (Modes.COOP != null && Modes.COOP.getLeaderboard() != null) {
+                Modes.COOP.getLeaderboard().write(false);
+            }
 
             Storage.close();
             World.delete();
-        } catch (Throwable ignored) {
-
+        } catch (Throwable ex) {
+            // Log errors instead of silently ignoring them
+            getLogger().severe("Error during plugin disable: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

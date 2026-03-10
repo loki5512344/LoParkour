@@ -318,8 +318,13 @@ ghost-mode:
 # -= Game modes options =-
 modes:
 
+  # -= Default mode =-
+  default:
+    enabled: true
+
   # -= Speedrun mode =-
   speedrun:
+    enabled: true
     # Block lifetime in seconds before disappearing
     block-lifetime: 1.5
     # Warning time in seconds before block disappears
@@ -327,6 +332,7 @@ modes:
 
   # -= Gravity shift mode =-
   gravity-shift:
+    enabled: true
     # Interval in jumps before effect changes
     interval: 10
     
@@ -350,13 +356,14 @@ modes:
 
   # -= Hardcore mode =-
   hardcore:
+    enabled: false
     # Reset all rewards on fall
     reset-rewards: true
 
   # -= Elytra mode =-
   elytra:
     # Enable elytra mode
-    enabled: true
+    enabled: false
     # Distance between rings
     ring-distance-min: 20
     ring-distance-max: 40
@@ -379,7 +386,7 @@ modes:
   # -= Co-op mode =-
   coop:
     # Enable co-op mode
-    enabled: true
+    enabled: false
     # Maximum players in co-op session
     max-players: 4
 

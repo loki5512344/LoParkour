@@ -158,21 +158,20 @@ settings:
         lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0Your current visual time."
 
       schematics:
-        material: ""
+        material: "paper"
         name: "&#00D4FF&lSchematic difficulty"
         lore: "&#00D4FFCurrently: &#A0A0A0%s||&#A0A0A0The difficulty of schematics"
         values: ["&#FF4444off", "&#00D4FFeasy", "&#FFFF00medium", "&#00D4FFhard", "&#8B0000very hard"]
 
       scoreboard:
-        material: ""
+        material: "oak_sign"
         name: "Show scoreboard"
         lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows the scoreboard."
 
       fall_message:
-        item:
-          material: ""
-          name: "Show fall message"
-          lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows a message when you fall||&#A0A0A0with extra info."
+        material: "feather"
+        name: "Show fall message"
+        lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled shows a message when you fall||&#A0A0A0with extra info."
 
         divider: "&#404040&m-----------------------------------"
         score: "&#00D4FF&lScore &r&#FFFFFF%s"
@@ -185,22 +184,22 @@ settings:
           tied: "&#A0A0A0You tied your high score!"
 
       particles:
-        material: ""
+        material: "blaze_powder"
         name: "Show particles"
         lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, every generated block||&#A0A0A0will show particles."
 
       sound:
-        material: ""
+        material: "note_block"
         name: "Play sounds"
         lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, every generated block||&#A0A0A0will play a sound."
 
       special_blocks:
-        material: ""
+        material: "ice"
         name: "Use special blocks"
         lore: "&#A0A0A0Currently: %s||&#A0A0A0If enabled, uses special blocks like ice and slabs."
 
       score_difficulty:
-        material: ""
+        material: "experience_bottle"
         name: "Score difficulty"
         lore: "&#A0A0A0Currently: %s||&#A0A0A0When enabled, the higher score you have,||&#A0A0A0the more difficult it gets."
 
@@ -258,6 +257,8 @@ other:
   no_do: "&#A0A0A0You can't do this right now."
   no_teleporting: "&#FFFFFFYou can't enter the parkour world by teleporting!"
   customize: "&#A0A0A0Customize your parkour experience by using \"/parkour\""
+  joining_disabled: "&#FF6464Joining is currently disabled."
+  no_menu_items: "&#FF6464No menu items available. Check your permissions and locale files."
 
   quit:
     material: "barrier"
@@ -277,8 +278,8 @@ other:
 modes:
   elytra:
     material: "elytra"
-    name: "&#00D4FF&lElytra"
-    lore: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"
+    name: "&#00D4FF&lElytra &#FF6464&l[BETA]"
+    lore: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost||&#FF6464Mode in development"
 
   race:
     material: "golden_boots"

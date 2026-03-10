@@ -5,8 +5,11 @@ import dev.loki.loparkour.util.Item;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;
+import dev.loki.loparkour.ghost.GhostManager;
+import dev.loki.loparkour.ghost.GhostRecorder;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.player.ParkourPlayer;
+import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.session.Session;
 
 import org.bukkit.*;
@@ -17,6 +20,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -47,7 +51,7 @@ public class ElytraMode implements Mode {
     @Override
     public void create(Player player) {
         if (!Config.CONFIG.getBoolean("joining")) {
-            player.sendMessage("§cJoining is currently disabled.");
+            player.sendMessage(Locales.getString(player, "other.joining_disabled"));
             return;
         }
 
@@ -81,18 +85,30 @@ public class ElytraMode implements Mode {
                 p.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET, fireworks));
                 
                 ringsCollected.put(p.getUniqueId(), 0);
+                
+                // Notify player
+                p.sendTitle("§b§lELYTRA MODE", "§7Fly through rings for bonus points!", 10, 70, 20);
+                p.sendMessage("§b§lElytra Mode §7activated! Use fireworks to boost.");
             }
         }
 
         @Override
         public void tick() {
-            super.tick();
+            // Don't call super.tick() - we don't want normal block generation
             tickCounter++;
             
-            // Spawn rings every 5 blocks
-            if (tickCounter % 100 == 0 && !state.history.isEmpty()) {
-                Location ringLoc = getLatest().getLocation().clone().add(0, 3, 0);
-                rings.add(new RingCheckpoint(ringLoc));
+            // Update spectators
+            getSpectators().forEach(ParkourSpectator::update);
+            
+            // Check for fall (much lower threshold for elytra)
+            if (player.getLocation().getY() < state.lastStandingPlayerLocation.getY() - 50) {
+                lifecycle.fall();
+                return;
+            }
+            
+            // Spawn rings every 2 seconds
+            if (tickCounter % 40 == 0) {
+                spawnNextRing();
             }
             
             // Display rings and check for player passing through
@@ -116,20 +132,40 @@ public class ElytraMode implements Mode {
                         // Bonus points for passing through ring
                         lifecycle.score();
                         lifecycle.score();
+                        lifecycle.score(); // 3 points per ring
                         
                         pp.player.playSound(pp.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
                         pp.player.spawnParticle(Particle.TOTEM, ring.location, 20, 0.5, 0.5, 0.5, 0.1);
+                        
+                        // Update last standing location to ring location
+                        state.lastStandingPlayerLocation = ring.location.clone();
                     }
                 }
                 
                 // Remove old rings
-                if (ring.location.distance(player.getLocation()) > 50) {
+                if (ring.location.distance(player.getLocation()) > 100) {
                     it.remove();
                 }
             }
             
             // Check firework cooldown
             checkFireworkCooldown();
+            
+            // Start timer if not started
+            if (state.start == null) state.start = Instant.now();
+        }
+        
+        private void spawnNextRing() {
+            Location playerLoc = player.getLocation();
+            
+            // Spawn ring ahead of player in flight direction
+            Vector direction = player.getLocation().getDirection();
+            Location ringLoc = playerLoc.clone().add(direction.multiply(20)).add(0, 5, 0);
+            
+            // Add some randomness
+            ringLoc.add((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 10);
+            
+            rings.add(new RingCheckpoint(ringLoc));
         }
         
         private void displayRing(Location center) {

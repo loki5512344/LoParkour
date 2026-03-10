@@ -85,16 +85,30 @@ class StorageSQL {
     }
 
     public static void writeScores(@NotNull String mode, @NotNull Map<UUID, Score> scores) {
-        new HashMap<>(scores).forEach((uuid, score) -> queryExecutor.executeUpdate("""
+        String sql = """
                 INSERT INTO `%s`
                     (uuid, name, time, difficulty, score)
-                VALUES ('%s', '%s', '%s', '%s', %d)
-                ON DUPLICATE KEY UPDATE name       = '%s',
-                                        time       = '%s',
-                                        difficulty = '%s',
-                                        score      = %d;
-                """.formatted(getTableName(mode), uuid, score.name(), score.time(), score.difficulty(), score.score(),
-                score.name(), score.time(), score.difficulty(), score.score())));
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE name       = VALUES(name),
+                                        time       = VALUES(time),
+                                        difficulty = VALUES(difficulty),
+                                        score      = VALUES(score);
+                """.formatted(getTableName(mode));
+        
+        new HashMap<>(scores).forEach((uuid, score) -> {
+            try (PreparedStatement stmt = queryExecutor.prepareStatement(sql)) {
+                if (stmt == null) return;
+                stmt.setString(1, uuid.toString());
+                stmt.setString(2, score.name());
+                stmt.setString(3, score.time());
+                stmt.setString(4, score.difficulty());
+                stmt.setInt(5, score.score());
+                stmt.executeUpdate();
+            } catch (SQLException ex) {
+                LoParkour.getPlugin().getLogger().severe(
+                        "Error writing score for %s in mode %s - %s".formatted(uuid, mode, ex.getMessage()));
+            }
+        });
     }
 
     private static String getTableName(String mode) {
@@ -135,31 +149,43 @@ class StorageSQL {
         DecimalFormat df = new DecimalFormat("#.######", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         String schematicDifficulty = df.format(player.schematicDifficulty);
 
-        queryExecutor.executeUpdate("""
+        String sql = """
             INSERT INTO `%soptions`
             (uuid, style, blockLead, useParticles, useSpecial, showFallMsg, showScoreboard,
              selectedTime, collectedRewards, locale, schematicDifficulty, sound)
-            VALUES ('%s', '%s', %d, %b, %b, %b, %b, %d, '%s', '%s', %s, %b)
-            ON DUPLICATE KEY UPDATE style               = '%s',
-                                    blockLead           = %d,
-                                    useParticles        = %b,
-                                    useSpecial          = %b,
-                                    showFallMsg         = %b,
-                                    showScoreboard      = %b,
-                                    selectedTime        = %d,
-                                    collectedRewards    = '%s',
-                                    locale              = '%s',
-                                    schematicDifficulty = %s,
-                                    sound               = %b;
-                """.formatted(Option.SQL_PREFIX,
-                player.getUUID(), player.style, player.blockLead,
-                player.particles, player.useSpecialBlocks, player.showFallMessage,
-                player.showScoreboard, player.selectedTime, String.join(",", player.collectedRewards),
-                player.locale, schematicDifficulty, player.sound,
-                player.style, player.blockLead,
-                player.particles, player.useSpecialBlocks, player.showFallMessage,
-                player.showScoreboard, player.selectedTime, String.join(",", player.collectedRewards),
-                player.locale, schematicDifficulty, player.sound));
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE style               = VALUES(style),
+                                    blockLead           = VALUES(blockLead),
+                                    useParticles        = VALUES(useParticles),
+                                    useSpecial          = VALUES(useSpecial),
+                                    showFallMsg         = VALUES(showFallMsg),
+                                    showScoreboard      = VALUES(showScoreboard),
+                                    selectedTime        = VALUES(selectedTime),
+                                    collectedRewards    = VALUES(collectedRewards),
+                                    locale              = VALUES(locale),
+                                    schematicDifficulty = VALUES(schematicDifficulty),
+                                    sound               = VALUES(sound);
+                """.formatted(Option.SQL_PREFIX);
+        
+        try (PreparedStatement stmt = queryExecutor.prepareStatement(sql)) {
+            if (stmt == null) return;
+            stmt.setString(1, player.getUUID().toString());
+            stmt.setString(2, player.style);
+            stmt.setInt(3, player.blockLead);
+            stmt.setBoolean(4, player.particles);
+            stmt.setBoolean(5, player.useSpecialBlocks);
+            stmt.setBoolean(6, player.showFallMessage);
+            stmt.setBoolean(7, player.showScoreboard);
+            stmt.setInt(8, player.selectedTime);
+            stmt.setString(9, String.join(",", player.collectedRewards));
+            stmt.setString(10, player.locale);
+            stmt.setString(11, schematicDifficulty);
+            stmt.setBoolean(12, player.sound);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error writing player data for %s - %s".formatted(player.getName(), ex.getMessage()));
+        }
     }
 
     private static void connect() {

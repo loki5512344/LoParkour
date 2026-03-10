@@ -34,6 +34,17 @@ generation:
     pane: 10
     fence: 10
 
+  # -= Jump type variations =-
+  # Chances for different jump types within normal blocks
+  # These add variety to the parkour generation
+  jump-types:
+    normal: 70
+    neo: 5
+    head-hitter: 5
+    fence: 10
+    trapdoor: 5
+    ladder: 5
+
   # -= Jump settings =-
   settings:
 

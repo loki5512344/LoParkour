@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
 /**
@@ -31,6 +32,8 @@ import java.util.logging.Level;
  * Extracted from {@link ParkourGenerator}.
  */
 public class BlockPlacer {
+
+    private static final int MAX_JUMP_VALIDATION_RETRIES = 10;
 
     private final ParkourGenerator g;
 
@@ -72,7 +75,29 @@ public class BlockPlacer {
         g.state.playerSpawn = spawn;
         g.state.lastStandingPlayerLocation = spawn;
         g.state.blockSpawn = blockSpawn;
-        g.state.history.add(blockSpawn.getBlock());
+        
+        // Place first block - always a full block from config
+        Block firstBlock = blockSpawn.getBlock();
+        
+        // Get first block material from config, fallback to stone
+        String firstBlockStr = "stone";
+        try {
+            firstBlockStr = Config.GENERATION.getString("advanced.island.parkour.first-block-material");
+        } catch (Exception ex) {
+            LoParkour.getPlugin().getLogger().warning("Config key 'advanced.island.parkour.first-block-material' not found, using 'stone'");
+        }
+        
+        Material firstBlockMaterial = Material.getMaterial(firstBlockStr.toUpperCase());
+        if (firstBlockMaterial == null) {
+            LoParkour.getPlugin().getLogger().warning("Invalid first-block-material: " + firstBlockStr + ", using STONE");
+            firstBlockMaterial = Material.STONE;
+        }
+        
+        // Set first block
+        firstBlock.setType(firstBlockMaterial);
+        g.state.history.add(firstBlock);
+        
+        // Generate remaining blocks
         generate(g.profile.get("blockLead").asInt());
     }
 
@@ -100,10 +125,42 @@ public class BlockPlacer {
         g.state.heading = director.getRecommendedHeading(g.state.heading);
         height    = director.getRecommendedHeight(height);
 
-        switch (g.getLatest().getType()) {
-            case SMOOTH_QUARTZ_SLAB -> height   = Math.min(height, 0);
-            case GLASS_PANE         -> distance = Math.min(distance, 3);
+        // Restrict jumps after special blocks to prevent impossible jumps
+        Material lastType = g.getLatest().getType();
+        switch (lastType) {
+            case SMOOTH_QUARTZ_SLAB -> {
+                height = Math.min(height, 0);  // Can't jump up from slab
+                distance = Math.min(distance, 3);  // Limit distance
+            }
+            case GLASS_PANE -> {
+                height = Math.min(height, 0);  // Can't jump up from pane
+                distance = Math.min(distance, 3);  // Limit distance
+            }
+            case OAK_FENCE, BIRCH_FENCE, SPRUCE_FENCE, DARK_OAK_FENCE, 
+                 JUNGLE_FENCE, ACACIA_FENCE, MANGROVE_FENCE, CHERRY_FENCE,
+                 CRIMSON_FENCE, WARPED_FENCE, NETHER_BRICK_FENCE -> {
+                height = Math.min(height, 0);  // Can't jump up from fence
+                distance = Math.min(distance, 3);  // Limit distance
+            }
+            case PACKED_ICE -> {
+                distance = Math.min(distance, 3);  // Ice is slippery, limit distance
+            }
+            case OAK_TRAPDOOR, BIRCH_TRAPDOOR, SPRUCE_TRAPDOOR, DARK_OAK_TRAPDOOR,
+                 JUNGLE_TRAPDOOR, ACACIA_TRAPDOOR, MANGROVE_TRAPDOOR, CHERRY_TRAPDOOR,
+                 CRIMSON_TRAPDOOR, WARPED_TRAPDOOR, IRON_TRAPDOOR -> {
+                height = Math.min(height, 0);  // Can't jump up from trapdoor
+                distance = Math.min(distance, 2);  // Very limited distance
+            }
+            case LADDER -> {
+                height = Math.min(height, 1);  // Limited height from ladder
+                distance = Math.min(distance, 2);  // Very limited distance
+            }
         }
+        
+        // Clamp values to valid ranges for JumpOffsetGenerator
+        height = Math.max(-2, Math.min(1, height));
+        distance = Math.max(1, Math.min(4, distance));
+        
         if (height > 0) distance = Math.max(distance - height, 1);
 
         double sd = g.generatorOptions.contains(GeneratorOption.REDUCE_RANDOM_BLOCK_SELECTION_ANGLE) ? 0.5 : 1;
@@ -117,10 +174,10 @@ public class BlockPlacer {
         
         Block candidate = current.getLocation().add(offset).getBlock();
         
-        // Retry with JumpValidator if jump is impossible (up to 10 attempts)
+        // Retry with JumpValidator if jump is impossible (up to MAX_JUMP_VALIDATION_RETRIES attempts)
         JumpValidator validator = new JumpValidator();
         int attempts = 0;
-        while (!validator.canJump(current.getLocation(), candidate.getLocation()) && attempts < 10) {
+        while (!validator.canJump(current.getLocation(), candidate.getLocation()) && attempts < MAX_JUMP_VALIDATION_RETRIES) {
             // Reduce distance and height to make jump easier
             distance = Math.max(1, distance - 1);
             height = Math.max(-1, height - 1);
@@ -186,14 +243,14 @@ public class BlockPlacer {
     }
     
     private JumpType selectJumpType() {
-        // Simple chances: 70% normal, 5% each for special types
+        // Read chances from config
         Map<JumpType, Double> chances = new HashMap<>();
-        chances.put(JumpType.NORMAL, 70.0);
-        chances.put(JumpType.NEO_JUMP, 5.0);
-        chances.put(JumpType.HEAD_HITTER, 5.0);
-        chances.put(JumpType.FENCE_JUMP, 10.0);
-        chances.put(JumpType.TRAPDOOR_JUMP, 5.0);
-        chances.put(JumpType.LADDER_JUMP, 5.0);
+        chances.put(JumpType.NORMAL, Config.GENERATION.getDouble("generation.jump-types.normal"));
+        chances.put(JumpType.NEO_JUMP, Config.GENERATION.getDouble("generation.jump-types.neo"));
+        chances.put(JumpType.HEAD_HITTER, Config.GENERATION.getDouble("generation.jump-types.head-hitter"));
+        chances.put(JumpType.FENCE_JUMP, Config.GENERATION.getDouble("generation.jump-types.fence"));
+        chances.put(JumpType.TRAPDOOR_JUMP, Config.GENERATION.getDouble("generation.jump-types.trapdoor"));
+        chances.put(JumpType.LADDER_JUMP, Config.GENERATION.getDouble("generation.jump-types.ladder"));
         
         return Probs.random(chances);
     }
@@ -210,7 +267,7 @@ public class BlockPlacer {
                 .filter(s -> s.getMetadata() != null && Math.abs(s.getMetadata().getDifficulty() - diff) <= 0.26)
                 .toList();
         var pool = candidates.isEmpty() ? new ArrayList<>(all.values()) : candidates;
-        var schematic = pool.get(new java.util.Random().nextInt(pool.size()));
+        var schematic = pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
 
         Location origin = g.getLatest().getLocation().add(g.state.heading.clone().multiply(2));
         List<Block> placed = rotatedPaste(schematic, origin);
@@ -228,7 +285,7 @@ public class BlockPlacer {
     private @NotNull List<Block> rotatedPaste(
             dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, Location location) {
         int[] rotations = {0, 90, 180, 270};
-        int rotation = rotations[new java.util.Random().nextInt(rotations.length)];
+        int rotation = rotations[ThreadLocalRandom.current().nextInt(rotations.length)];
         org.bukkit.World world = location.getWorld();
         if (world == null) return List.of();
 

@@ -6,7 +6,23 @@ Advanced infinitely generating parkour plugin for Minecraft
 by <a href="https://github.com/loki">loki</a>
 </strong>
 <br><br>
+
+[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](CHANGELOG.md)
+[![Java](https://img.shields.io/badge/Java-21+-orange.svg)](https://adoptium.net/)
+[![Paper](https://img.shields.io/badge/Paper-1.20.4+-green.svg)](https://papermc.io/)
+
 </div>
+
+## 📢 Latest Release - v1.3.1
+
+**Critical security and stability update!**
+
+- 🔒 **Fixed SQL Injection vulnerability** - All database operations now use PreparedStatement
+- 🐛 **8 critical bugs fixed** - Ghost system, thread safety, data persistence
+- ✅ **Config validation** - Prevents crashes from invalid configuration
+- 🚀 **Performance improvements** - Optimized Random usage and player lookups
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ## 🚀 Building
 

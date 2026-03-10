@@ -70,11 +70,79 @@ public enum Config {
             config.load();
         }
 
+        // Validate configuration values
+        validateConfigs();
+
         // read config stuff
         Rewards.init();
         Locales.init();
         Schematics.init();
         Option.init(initialLoad);
+    }
+
+    /**
+     * Validates critical configuration values to prevent crashes and unexpected behavior.
+     */
+    private static void validateConfigs() {
+        var logger = LoParkour.getPlugin().getLogger();
+        
+        // Validate border-size
+        if (CONFIG.isPath("world.border-size")) {
+            int borderSize = CONFIG.getInt("world.border-size");
+            if (borderSize <= 0) {
+                logger.severe("Invalid config: world.border-size must be > 0, found: " + borderSize);
+                logger.severe("Using default value: 1000");
+            }
+        }
+        
+        // Validate world dimensions
+        if (CONFIG.isPath("world.max-y") && CONFIG.isPath("world.min-y")) {
+            int maxY = CONFIG.getInt("world.max-y");
+            int minY = CONFIG.getInt("world.min-y");
+            if (maxY <= minY) {
+                logger.severe("Invalid config: world.max-y (" + maxY + ") must be > world.min-y (" + minY + ")");
+                logger.severe("Using default values: max-y=320, min-y=-64");
+            }
+        }
+        
+        // Validate section dimensions
+        if (CONFIG.isPath("world.section.width") && CONFIG.isPath("world.section.length")) {
+            int width = CONFIG.getInt("world.section.width");
+            int length = CONFIG.getInt("world.section.length");
+            if (width <= 0 || length <= 0) {
+                logger.severe("Invalid config: world.section dimensions must be > 0, found: width=" + width + ", length=" + length);
+                logger.severe("Using default values: width=50, length=50");
+            }
+        }
+        
+        // Validate generation chances (must sum to reasonable values)
+        if (GENERATION.isPath("chances.height")) {
+            double sum = GENERATION.getDouble("chances.height.1") + 
+                        GENERATION.getDouble("chances.height.0") + 
+                        GENERATION.getDouble("chances.height.-1") + 
+                        GENERATION.getDouble("chances.height.-2");
+            if (sum <= 0) {
+                logger.severe("Invalid config: generation height chances sum to " + sum + ", must be > 0");
+                logger.severe("Check generation.yml chances.height section");
+            }
+        }
+        
+        // Validate ghost mode settings
+        if (CONFIG.isPath("ghost-mode.show-top")) {
+            int showTop = CONFIG.getInt("ghost-mode.show-top");
+            if (showTop < 0 || showTop > 10) {
+                logger.warning("Config: ghost-mode.show-top should be between 0-10, found: " + showTop);
+            }
+        }
+        
+        // Validate cleanup settings
+        if (GENERATION.isPath("advanced.cleanup-distance")) {
+            int cleanupDistance = GENERATION.getInt("advanced.cleanup-distance");
+            if (cleanupDistance <= 0) {
+                logger.severe("Invalid config: advanced.cleanup-distance must be > 0, found: " + cleanupDistance);
+                logger.severe("Using default value: 100");
+            }
+        }
     }
 
     /**

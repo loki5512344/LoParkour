@@ -46,6 +46,7 @@ public class LangMenu extends LPMenu {
             gui = gui.setItem(10 + i, item, e -> {
                 pp.locale = lang;
                 pp._locale = lang;
+                pp.updateHotbar(); // Update hotbar with new language
                 Menus.SETTINGS.open(player);
             });
         }

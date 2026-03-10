@@ -63,12 +63,18 @@ public class SpeedrunMode implements Mode {
         Session.create(session -> new SpeedrunGenerator(session), null, null, player);
     }
 
-    private static class SpeedrunGenerator extends ParkourGenerator {
+    public static class SpeedrunGenerator extends ParkourGenerator {
         private final Map<Block, Long> blockTimestamps = new HashMap<>();
         private final Map<Block, ScheduledTask> scheduledTasks = new HashMap<>();
 
         public SpeedrunGenerator(@NotNull Session session) {
             super(session);
+            
+            // Notify player
+            for (ParkourPlayer pp : session.getPlayers()) {
+                pp.player.sendTitle("§c§lSPEEDRUN MODE", "§7Blocks disappear after you step on them!", 10, 70, 20);
+                pp.player.sendMessage("§c§lSpeedrun Mode §7activated! Don't look back!");
+            }
         }
 
         public void onBlockTouch(@NotNull Block block) {
