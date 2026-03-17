@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,10 +25,11 @@ class GhostDataTest {
         frames.add(new GhostFrame(0, 0, 100, 0, 0, 0));
         frames.add(new GhostFrame(1000, 1, 100, 0, 90, 0));
         
-        GhostData data = new GhostData("TestPlayer", "uuid-123", 42, frames);
+        UUID uuid = UUID.randomUUID();
+        GhostData data = new GhostData(uuid, "TestPlayer", 42, frames);
         
         assertEquals("TestPlayer", data.getPlayerName());
-        assertEquals("uuid-123", data.getPlayerUUID());
+        assertEquals(uuid, data.getPlayerUuid());
         assertEquals(42, data.getScore());
         assertEquals(2, data.getFrames().size());
     }
@@ -40,7 +42,8 @@ class GhostDataTest {
         frames.add(new GhostFrame(500, 1, 100, 0, 45, 0));
         frames.add(new GhostFrame(1000, 2, 100, 0, 90, 0));
         
-        GhostData original = new GhostData("Player1", "uuid-456", 100, frames);
+        UUID uuid = UUID.randomUUID();
+        GhostData original = new GhostData(uuid, "Player1", 100, frames);
         
         // Save to file
         File file = tempDir.resolve("test.ghost").toFile();
@@ -54,7 +57,7 @@ class GhostDataTest {
         
         // Verify data
         assertEquals(original.getPlayerName(), loaded.getPlayerName());
-        assertEquals(original.getPlayerUUID(), loaded.getPlayerUUID());
+        assertEquals(original.getPlayerUuid(), loaded.getPlayerUuid());
         assertEquals(original.getScore(), loaded.getScore());
         assertEquals(original.getFrames().size(), loaded.getFrames().size());
         
@@ -75,7 +78,8 @@ class GhostDataTest {
     @Test
     void testEmptyFrames(@TempDir Path tempDir) throws IOException {
         // Test with no frames
-        GhostData data = new GhostData("EmptyPlayer", "uuid-789", 0, new ArrayList<>());
+        UUID uuid = UUID.randomUUID();
+        GhostData data = new GhostData(uuid, "EmptyPlayer", 0, new ArrayList<>());
         
         File file = tempDir.resolve("empty.ghost").toFile();
         data.saveToFile(file);
@@ -101,7 +105,8 @@ class GhostDataTest {
             ));
         }
         
-        GhostData data = new GhostData("LongRunner", "uuid-long", 1200, frames);
+        UUID uuid = UUID.randomUUID();
+        GhostData data = new GhostData(uuid, "LongRunner", 1200, frames);
         
         File file = tempDir.resolve("large.ghost").toFile();
         data.saveToFile(file);
@@ -115,9 +120,10 @@ class GhostDataTest {
     @Test
     void testSpecialCharactersInName(@TempDir Path tempDir) throws IOException {
         // Test with special characters in player name
+        UUID uuid = UUID.randomUUID();
         GhostData data = new GhostData(
+            uuid,
             "Player_123-ABC", 
-            "uuid-special", 
             50, 
             List.of(new GhostFrame(0, 0, 100, 0, 0, 0))
         );
@@ -137,7 +143,8 @@ class GhostDataTest {
         frames.add(new GhostFrame(0, -100, 50, -200, -90, -45));
         frames.add(new GhostFrame(1000, -99, 51, -199, -45, 0));
         
-        GhostData data = new GhostData("NegativePlayer", "uuid-neg", 10, frames);
+        UUID uuid = UUID.randomUUID();
+        GhostData data = new GhostData(uuid, "NegativePlayer", 10, frames);
         
         File file = tempDir.resolve("negative.ghost").toFile();
         data.saveToFile(file);
@@ -168,7 +175,8 @@ class GhostDataTest {
         List<GhostFrame> originalFrames = new ArrayList<>();
         originalFrames.add(new GhostFrame(0, 0, 100, 0, 0, 0));
         
-        GhostData data = new GhostData("Player", "uuid", 10, originalFrames);
+        UUID uuid = UUID.randomUUID();
+        GhostData data = new GhostData(uuid, "Player", 10, originalFrames);
         
         // Modify original list
         originalFrames.add(new GhostFrame(1000, 1, 100, 0, 0, 0));

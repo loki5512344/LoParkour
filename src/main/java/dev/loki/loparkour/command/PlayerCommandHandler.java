@@ -78,7 +78,7 @@ public class PlayerCommandHandler {
             return;
         }
         Config.reload(false);
-        send(sender, LoParkour.PREFIX + "Reloaded config files.");
+        send(sender, LoParkour.PREFIX + "Reloading config files... (locales are loading asynchronously)");
     }
 
     public void sendHelp(@NotNull CommandSender sender) {

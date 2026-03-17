@@ -103,28 +103,11 @@ public class BlockPlacer {
 
         // Restrict jumps after special blocks to prevent impossible jumps
         Material lastType = g.getLatest().getType();
-        BlockData lastBlockData = g.getLatest().getBlockData();
-        
-        // Check if it's a slab material
-        if (isSlabMaterial(lastType)) {
-            // Check if it's a bottom slab (height 0.5) or top slab (height 1.0)
-            if (lastBlockData instanceof org.bukkit.block.data.type.Slab slab) {
-                if (slab.getType() == org.bukkit.block.data.type.Slab.Type.BOTTOM) {
-                    // Bottom slab: player is 0.5 blocks lower, can't jump as high
-                    height = Math.min(height, -1);  // Reduce max height due to lower starting position
-                    distance = Math.min(distance, 3);  // Limit distance
-                } else if (slab.getType() == org.bukkit.block.data.type.Slab.Type.TOP) {
-                    // Top slab: normal restrictions
-                    height = Math.min(height, 0);
-                    distance = Math.min(distance, 3);
-                }
-            } else {
-                // Fallback for unknown slab type
-                height = Math.min(height, 0);
-                distance = Math.min(distance, 3);
+        switch (lastType) {
+            case SMOOTH_QUARTZ_SLAB -> {
+                height = Math.min(height, 0);  // Can't jump up from slab
+                distance = Math.min(distance, 3);  // Limit distance
             }
-        } else {
-            switch (lastType) {
             case GLASS_PANE -> {
                 height = Math.min(height, 0);  // Can't jump up from pane
                 distance = Math.min(distance, 3);  // Limit distance
@@ -148,7 +131,6 @@ public class BlockPlacer {
                 height = Math.min(height, 1);  // Limited height from ladder
                 distance = Math.min(distance, 2);  // Very limited distance
             }
-        }
         }
         
         // Clamp values to valid ranges for JumpOffsetGenerator
@@ -187,15 +169,6 @@ public class BlockPlacer {
         }
         
         return candidate;
-    }
-    
-    /**
-     * Check if material is a slab type.
-     */
-    private boolean isSlabMaterial(Material material) {
-        return material == Material.SMOOTH_QUARTZ_SLAB ||
-               material == Material.STONE_SLAB ||
-               material.name().endsWith("_SLAB");
     }
 
     protected BlockData selectBlockData() {

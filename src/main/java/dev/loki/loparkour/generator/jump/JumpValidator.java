@@ -32,7 +32,92 @@ public class JumpValidator {
         if (from == null || to == null) {
             return false;
         }
-        return canJump(from.toVector(), to.toVector());
+        
+        // Check if jumping from a bottom slab - adjust limits accordingly
+        double heightAdjustment = getSlabHeightAdjustment(from);
+        
+        return canJumpWithAdjustment(from.toVector(), to.toVector(), heightAdjustment);
+    }
+    
+    /**
+     * Get height adjustment for slab blocks.
+     * Returns negative value for bottom slabs (player is lower).
+     */
+    private double getSlabHeightAdjustment(@NotNull Location location) {
+        try {
+            org.bukkit.block.Block block = location.getBlock();
+            if (block != null && isSlabMaterial(block.getType())) {
+                org.bukkit.block.data.BlockData blockData = block.getBlockData();
+                if (blockData instanceof org.bukkit.block.data.type.Slab slab) {
+                    if (slab.getType() == org.bukkit.block.data.type.Slab.Type.BOTTOM) {
+                        // Bottom slab: player is 0.5 blocks lower
+                        return -0.5;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // In case of mock objects or other issues, fall back to default behavior
+        }
+        return 0.0; // No adjustment for full blocks
+    }
+    
+    /**
+     * Check if material is a slab type.
+     */
+    private boolean isSlabMaterial(org.bukkit.Material material) {
+        return material == org.bukkit.Material.SMOOTH_QUARTZ_SLAB ||
+               material == org.bukkit.Material.STONE_SLAB ||
+               material.name().endsWith("_SLAB");
+    }
+    
+    private boolean canJumpWithAdjustment(@NotNull Vector from, @NotNull Vector to, double heightAdjustment) {
+        // Null safety check
+        if (from == null || to == null) {
+            return false;
+        }
+        
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double dz = to.getZ() - from.getZ();
+
+        // Check if same location (no jump)
+        double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+        if (horizontalDistance < 0.01 && Math.abs(dy) < 0.01) {
+            return false; // Same location
+        }
+
+        // Check horizontal distance limit
+        if (horizontalDistance > maxHorizontal) {
+            return false;
+        }
+
+        // Adjust vertical limits based on slab height
+        double adjustedMaxVerticalUp = maxVerticalUp;
+        double adjustedMaxVerticalDown = maxVerticalDown;
+        
+        if (heightAdjustment < 0) {
+            // Player is lower (bottom slab), reduce upward jump capability
+            adjustedMaxVerticalUp = maxVerticalUp + heightAdjustment; // Reduce max up jump
+            adjustedMaxVerticalDown = maxVerticalDown - heightAdjustment; // Increase max down jump
+        }
+
+        // Check vertical limits with adjustment
+        if (dy > adjustedMaxVerticalUp || dy < -adjustedMaxVerticalDown) {
+            return false;
+        }
+        
+        // For upward jumps, reduce max horizontal distance
+        // Player can't jump as far when jumping up
+        if (dy > 0) {
+            double adjustedMaxHorizontal = maxHorizontal - (dy * 0.5); // Reduce by 0.5 blocks per block up
+            if (horizontalDistance > adjustedMaxHorizontal) {
+                return false;
+            }
+        }
+
+        // Check total distance
+        double totalDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return totalDistance <= maxDistance;
     }
 
     // Check if jump is possible: sqrt(dx² + dy² + dz²) <= maxDistance

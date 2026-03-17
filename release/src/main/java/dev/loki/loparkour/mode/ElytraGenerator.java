@@ -160,8 +160,7 @@ public class ElytraGenerator extends ParkourGenerator implements Listener {
 
     // ── Main tick ─────────────────────────────────────────────────────────────
 
-    @Override
-    public void tick() {
+    private void tick() {
         if (state.stopped) {
             stopTasks();
             return;
@@ -398,7 +397,7 @@ public class ElytraGenerator extends ParkourGenerator implements Listener {
             pp.player.getInventory().clear();
             pp.player.getInventory().setChestplate(new ItemStack(Material.ELYTRA));
             pp.player.getInventory().setItem(0, makeFirework(amount));
-            pp.player.getInventory().setHeldItemSlot(0);
+            pp.player.setHeldItemSlot(0);
         }
 
         // Re-generate rings
@@ -591,8 +590,7 @@ public class ElytraGenerator extends ParkourGenerator implements Listener {
 
     // ── Time helpers ──────────────────────────────────────────────────────────
 
-    @Override
-    public String getFormattedTime() {
+    private String getFormattedTime() {
         if (startTime == null) return "00:00:000";
         var ms = Instant.now().minusMillis(startTime.toEpochMilli());
         try {

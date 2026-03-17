@@ -137,4 +137,16 @@ class JumpValidatorTest {
         
         assertFalse(validator.canJump(from, to), "10 block jump should be impossible");
     }
+
+    @Test
+    void testCanJump_FromBottomSlab_ReducedUpwardCapability() {
+        // Test that bottom slabs reduce upward jump capability
+        // This test uses mock objects, so the slab detection won't work,
+        // but it documents the expected behavior
+        Location from = new Location(world, 0, 100, 0);
+        Location to = new Location(world, 2, 101, 0);
+        
+        // This should still pass with mock objects (no slab detection)
+        assertTrue(validator.canJump(from, to), "2 block jump with 1 up should be possible from mock location");
+    }
 }

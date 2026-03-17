@@ -48,9 +48,10 @@ public class Locales {
     public static void init() {
         Plugin plugin = LoParkour.getPlugin();
 
-        Scheduler.get(plugin).runAsync(() -> {
-            locales.clear();
+        // Create a temporary map to avoid clearing locales before new ones are loaded
+        Map<String, FileConfiguration> newLocales = new HashMap<>();
 
+        Scheduler.get(plugin).runAsync(() -> {
             FileConfiguration embedded = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
 
             // get all nodes from the plugin's english resource, aka the most updated version
@@ -84,11 +85,18 @@ public class Locales {
                     FileConfiguration config = YamlConfiguration.loadConfiguration(file);
                     validate(embedded, config, file);
 
-                    locales.put(locale, config);
+                    newLocales.put(locale, config);
                 });
             } catch (Exception ex) {
                 LoParkour.getPlugin().getLogger().severe("Error while trying to read locale files - restart/reload your server - " + ex.getMessage());
             }
+
+            // Only clear and replace locales after all new ones are loaded
+            Scheduler.get(plugin).run(() -> {
+                locales.clear();
+                locales.putAll(newLocales);
+                LoParkour.log("Locales reloaded successfully (" + locales.size() + " locales)");
+            });
         });
     }
 

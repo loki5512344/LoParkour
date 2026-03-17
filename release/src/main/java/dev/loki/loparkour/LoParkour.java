@@ -30,6 +30,8 @@ import org.bstats.charts.SingleLineChart;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main class of LoParkour
@@ -110,7 +112,76 @@ public final class LoParkour extends LoPlugin {
 
     private void loadSchematics() {
         schematicManager = new LPSchematicManager();
+        
+        // Create default island schematic if it doesn't exist
+        File schematicsFolder = getInFolder("schematics-new");
+        File islandFile = new File(schematicsFolder, "island.lpschem");
+        
+        if (!islandFile.exists()) {
+            try {
+                createDefaultIslandSchematic(islandFile);
+                getLogger().info("Created default island schematic");
+            } catch (Exception ex) {
+                getLogger().severe("Failed to create default island schematic: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+        
         schematicManager.loadAll();
+    }
+    
+    private void createDefaultIslandSchematic(File file) throws Exception {
+        // Create a larger 9x5x9 island for better visibility and safety
+        List<String> palette = new ArrayList<>();
+        palette.add("minecraft:air");
+        palette.add("minecraft:stone");
+        palette.add("minecraft:diamond_block");
+        palette.add("minecraft:emerald_block");
+        
+        int width = 9, height = 5, length = 9;
+        int[] blocks = new int[width * height * length];
+        
+        // Fill everything with air first
+        for (int i = 0; i < blocks.length; i++) {
+            blocks[i] = 0;
+        }
+        
+        // Create a solid stone platform at y=1 (7x7 platform)
+        for (int z = 1; z < 8; z++) {
+            for (int x = 1; x < 8; x++) {
+                int index = x + (z * width) + (1 * width * length);
+                blocks[index] = 1; // stone
+            }
+        }
+        
+        // Place diamond block (player spawn) at center
+        int centerX = 4, centerZ = 4;
+        int diamondIndex = centerX + (centerZ * width) + (1 * width * length);
+        blocks[diamondIndex] = 2; // diamond_block - player spawns here
+        
+        // Place emerald block (parkour start) to the right of spawn
+        int emeraldIndex = (centerX + 1) + (centerZ * width) + (1 * width * length);
+        blocks[emeraldIndex] = 3; // emerald_block - parkour starts here
+        
+        dev.loki.loparkour.schematic.lpschem.SchematicMetadata metadata = 
+            new dev.loki.loparkour.schematic.lpschem.SchematicMetadata("island", "LoParkour", 0.0);
+        metadata.addTag("spawn");
+        metadata.addTag("island");
+        
+        dev.loki.loparkour.schematic.lpschem.SchematicDimensions dimensions = 
+            new dev.loki.loparkour.schematic.lpschem.SchematicDimensions(width, height, length);
+        
+        // Markers point to the blocks where player spawns and parkour begins
+        dev.loki.loparkour.schematic.lpschem.SchematicMarkers markers = 
+            new dev.loki.loparkour.schematic.lpschem.SchematicMarkers(
+                new dev.loki.loparkour.schematic.lpschem.SchematicMarkers.Vector3i(centerX, 1, centerZ),
+                new dev.loki.loparkour.schematic.lpschem.SchematicMarkers.Vector3i(centerX + 1, 1, centerZ)
+            );
+        
+        dev.loki.loparkour.schematic.lpschem.LPSchematic schematic = 
+            new dev.loki.loparkour.schematic.lpschem.LPSchematic(metadata, dimensions, palette, blocks, markers);
+        
+        schematic.save(file);
     }
 
     private void registerModes() {
