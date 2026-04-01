@@ -293,3 +293,6 @@ modes:
     lore: "&#A0A0A0Team up with friends!||&#A0A0A0Shared score and progress"
     player_joined: "&#00FF00%s &#A0A0Ajoined the co-op session!"
     stats: "&#A0A0ATeam score: &#FFFFFF%s &#A0A0A| Your blocks: &#FFFFFF%s &#A0A0A(&#FFFFFF%s%%&#A0A0A)"
+
+admin:
+  cooldown: "<gray>Please wait before using this again."

@@ -2,6 +2,7 @@ package dev.loki.loparkour.command;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
+import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.mode.Mode;
 import dev.loki.loparkour.mode.Modes;
@@ -56,7 +57,7 @@ public class AdminCommandHandler {
     // ── forcejoin ──────────────────────────────────────────────────────────────
 
     private void handleForceJoin(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "forcejoin", 2500, COOLDOWN_HINT)) return;
+        if (!base.cooldown(sender, "forcejoin", 2500, Locales.getString(sender, "admin.cooldown"))) return;
 
         if (target.equalsIgnoreCase("everyone")) {
             Bukkit.getOnlinePlayers().forEach(p -> Modes.DEFAULT.create(p));
@@ -78,7 +79,7 @@ public class AdminCommandHandler {
     // ── forceleave ─────────────────────────────────────────────────────────────
 
     private void handleForceLeave(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "forceleave", 2500, COOLDOWN_HINT)) return;
+        if (!base.cooldown(sender, "forceleave", 2500, Locales.getString(sender, "admin.cooldown"))) return;
 
         if (target.equalsIgnoreCase("everyone")) {
             ParkourPlayer.getPlayers().forEach(ParkourUser::leave);
@@ -120,7 +121,7 @@ public class AdminCommandHandler {
     // ── recoverinventory ───────────────────────────────────────────────────────
 
     private void handleRecoverInventory(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "recoverinventory", 2500, COOLDOWN_HINT)) return;
+        if (!base.cooldown(sender, "recoverinventory", 2500, Locales.getString(sender, "admin.cooldown"))) return;
         Player other = Bukkit.getPlayer(target);
         if (other == null) { send(sender, LoParkour.PREFIX + "Player not online!"); return; }
 

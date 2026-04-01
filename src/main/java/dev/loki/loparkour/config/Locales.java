@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +44,23 @@ public class Locales {
     @NotNull
     public static String getString(@NotNull Player player, @NotNull String path) {
         return getString(getPlayerLocale(player), path);
+    }
+
+    /**
+     * Player: that player's locale. Console / command blocks: default language from config ({@link Option#OPTIONS_DEFAULTS}), or {@code en}.
+     */
+    @NotNull
+    public static String getString(@NotNull CommandSender sender, @NotNull String path) {
+        if (sender instanceof Player player) {
+            return getString(player, path);
+        }
+        String locale = Option.OPTIONS_DEFAULTS != null
+                ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG)
+                : null;
+        if (locale == null || locale.isBlank()) {
+            locale = "en";
+        }
+        return getString(locale, path);
     }
 
     @NotNull
