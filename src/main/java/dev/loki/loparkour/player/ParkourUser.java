@@ -68,6 +68,7 @@ public abstract class ParkourUser {
     public final Instant joined;
     private ScoreboardManager scoreboardManager;
 
+    @SuppressWarnings("deprecation") // Scoreboard: legacy registerNewObjective(String,String,String)
     public ParkourUser(@NotNull Player player, @NotNull Session session, @Nullable PreviousData previousData) {
         this.player = player;
         this.session = session;

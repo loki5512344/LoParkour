@@ -18,36 +18,29 @@ public class PagedMenu {
     }
     
     public PagedMenu addToDisplay(List<Item> items) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public PagedMenu item(int slot, Item item) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public PagedMenu nextPage(int slot, Item item) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public PagedMenu prevPage(int slot, Item item) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public void page(int direction) {
-        // TODO: Implement with LoLib GUI
     }
     
     public List<Object> getTotalToDisplay() {
-        // TODO: Implement with LoLib GUI
         return new ArrayList<>();
     }
     
     public void open(Player player) {
-        // TODO: Implement with LoLib GUI
-        player.sendMessage("§cМеню временно недоступно во время миграции");
+        player.sendMessage("§c" + title + " (" + rows + " рядов, " + items.size() + " пунктов) — меню временно недоступно.");
     }
 }

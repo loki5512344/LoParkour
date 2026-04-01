@@ -1,6 +1,5 @@
 package dev.loki.loparkour.api;
 
-import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.mode.Mode;
 import dev.loki.loparkour.style.Style;
 import org.jetbrains.annotations.NotNull;

@@ -1,15 +1,12 @@
 package dev.loki.loparkour.world;
 
-import dev.lolib.worlds.VoidGenerator;
-import org.bukkit.Bukkit;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
-
 import dev.lolib.worlds.VoidGenerator;
 import org.bukkit.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -25,6 +22,11 @@ public class World {
      */
     public static void create() {
         name = Config.CONFIG.getString("world.name");
+        if (!isValidWorldFolderName(name)) {
+            LoParkour.getPlugin().getLogger().severe(
+                    "Invalid world.name in config (use only letters, digits, '_' and '-', no path separators).");
+            return;
+        }
 
         var world = Bukkit.getWorld(name);
 
@@ -56,8 +58,9 @@ public class World {
                     .environment(org.bukkit.World.Environment.NORMAL);
 
             world = Bukkit.createWorld(creator);
-        } catch (Exception ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to create the parkour world - delete the parkour world folder and restart the server - " + ex.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while trying to create the parkour world — check world.name — " + ex.getMessage());
         }
     }
 
@@ -93,30 +96,61 @@ public class World {
         }
         LoParkour.log("Deleting world");
 
-        getWorld().getPlayers().forEach(player -> player.kickPlayer("Server is restarting"));
+        org.bukkit.World w = getWorld();
+        if (w != null) {
+            w.getPlayers().forEach(player -> player.kickPlayer("Server is restarting"));
+        }
 
         deleteWorld();
     }
 
     private static void deleteWorld() {
+        if (!isValidWorldFolderName(name)) {
+            LoParkour.getPlugin().getLogger().severe("Refusing to delete world: invalid world name.");
+            return;
+        }
+
         LoParkour.log("Deleting Spigot world");
 
-        File file = new File(name);
-
-        // world has already been deleted
-        if (!file.exists()) {
+        File folder = worldFolder();
+        if (!folder.exists()) {
             return;
         }
 
         Bukkit.unloadWorld(name, false);
 
-        try (Stream<Path> files = Files.walk(file.toPath())) {
+        try (Stream<Path> files = Files.walk(folder.toPath())) {
             files.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-        } catch (Exception ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to delete the parkour world" + " - " + ex.getMessage());
+        } catch (IOException ex) {
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while trying to delete the parkour world — " + ex.getMessage());
         }
+    }
+
+    private static File worldFolder() {
+        return new File(Bukkit.getWorldContainer(), name);
+    }
+
+    /**
+     * Prevents path traversal and accidental deletion outside the server world container.
+     */
+    static boolean isValidWorldFolderName(String n) {
+        if (n == null || n.isBlank() || n.length() > 64) {
+            return false;
+        }
+        if (n.contains("..") || n.contains("/") || n.contains("\\")) {
+            return false;
+        }
+        for (int i = 0; i < n.length(); i++) {
+            char c = n.charAt(i);
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

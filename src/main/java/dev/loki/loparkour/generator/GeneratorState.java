@@ -25,12 +25,13 @@ public class GeneratorState {
     public Location playerSpawn;
     public Location lastStandingPlayerLocation;
     public Vector heading;
+    public Location[] zone; // [min, max] bounding box for generation area
 
     // Time state
     public Instant start;
 
-    // Block history
-    public List<Block> history = new LinkedList<>();
+    // Block history (sync list: all mutations occur on the main thread; avoids accidental CME if extended later)
+    public final List<Block> history = Collections.synchronizedList(new LinkedList<>());
     public int lastPositionIndexPlayer = -1;
 
     // Schematic state

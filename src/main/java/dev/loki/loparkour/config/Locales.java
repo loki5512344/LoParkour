@@ -1,13 +1,10 @@
 package dev.loki.loparkour.config;
 
-import java.util.ArrayList;
-
-import dev.loki.loparkour.util.Item;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.player.ParkourUser;
-
+import dev.loki.loparkour.util.Item;
+import dev.loki.loparkour.util.Materials;
 import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,244 +27,194 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Locale message/item handler.
+ * Locale system: loading, caching, validation, and access.
  */
 public class Locales {
 
-    // a list of all nodes, used to check against missing nodes
-    private static List<String> resourceNodes;
+    private static final Map<String, FileConfiguration> locales = new HashMap<>();
+    private static final Pattern REPLACEMENT_PATTERN = Pattern.compile("%[a-z]");
 
-    /**
-     * A map of all locales with their respective yml trees
-     */
-    public static final Map<String, FileConfiguration> locales = new HashMap<>();
+    // ── public API ────────────────────────────────────────────────────────────
 
-    /**
-     * Initializes this Locale handler.
-     */
     public static void init() {
+        loadLocalesAsync();
+    }
+
+    @NotNull
+    public static String getString(@NotNull Player player, @NotNull String path) {
+        return getString(getPlayerLocale(player), path);
+    }
+
+    @NotNull
+    public static String getString(@NotNull String locale, @NotNull String path) {
+        return cachedValue(locale, c -> c.getString(path), "");
+    }
+
+    @NotNull
+    public static List<String> getStringList(@NotNull String locale, @NotNull String path) {
+        return cachedValue(locale, c -> c.getStringList(path), Collections.emptyList());
+    }
+
+    public static int getLocaleCount() {
+        synchronized (locales) { return locales.size(); }
+    }
+
+    @NotNull
+    public static Set<String> getLocaleKeys() {
+        synchronized (locales) { return new HashSet<>(locales.keySet()); }
+    }
+
+    @NotNull
+    public static Item getItem(@NotNull Player player, @NotNull String path, String... replace) {
+        return getItem(getPlayerLocale(player), path, replace);
+    }
+
+    @NotNull
+    public static Item getItem(@NotNull String locale, @NotNull String path, String... replace) {
+        synchronized (locales) {
+            if (locales.isEmpty()) return new Item(Material.STONE, "");
+            FileConfiguration config = locales.get(locale);
+            if (config == null) return new Item(Material.STONE, "");
+            return buildItem(config, path, replace);
+        }
+    }
+
+    // ── loading (was LocaleLoader) ────────────────────────────────────────────
+
+    private static void loadLocalesAsync() {
         Plugin plugin = LoParkour.getPlugin();
-
-        // Create a temporary map to avoid clearing locales before new ones are loaded
-        Map<String, FileConfiguration> newLocales = new HashMap<>();
-
         Scheduler.get(plugin).runAsync(() -> {
-            FileConfiguration embedded = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
+            try {
+                FileConfiguration embedded = YamlConfiguration.loadConfiguration(
+                        new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
 
-            // get all nodes from the plugin's english resource, aka the most updated version
-            resourceNodes = getChildren(embedded, "", true);
+                Map<String, FileConfiguration> loaded = loadFromDisk(embedded);
 
-            File folder = LoParkour.getInFolder("locales");
-
-            // download files to locales folder
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            String[] files = folder.list();
-
-            // create non-existent files
-            if (files != null && files.length == 0) {
-                plugin.saveResource("locales/en.yml", false);
-                plugin.saveResource("locales/ru.yml", false);
-            }
-
-            // get all files in locales folder
-            try (Stream<Path> stream = Files.list(folder.toPath())) {
-                stream.forEach(path -> {
-                    File file = path.toFile();
-
-                    // get locale from file name
-                    String locale = file.getName().split("\\.")[0];
-
-                    LoParkour.log("Found locale " + locale);
-
-                    FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-                    validate(embedded, config, file);
-
-                    newLocales.put(locale, config);
+                Scheduler.get(plugin).run(() -> {
+                    synchronized (locales) {
+                        locales.clear();
+                        locales.putAll(loaded);
+                    }
+                    LoParkour.log("Locales reloaded successfully (" + loaded.size() + " locales)");
                 });
             } catch (Exception ex) {
-                LoParkour.getPlugin().getLogger().severe("Error while trying to read locale files - restart/reload your server - " + ex.getMessage());
+                plugin.getLogger().severe("Error while loading locale files: " + ex.getMessage());
             }
-
-            // Only clear and replace locales after all new ones are loaded
-            Scheduler.get(plugin).run(() -> {
-                locales.clear();
-                locales.putAll(newLocales);
-                LoParkour.log("Locales reloaded successfully (" + locales.size() + " locales)");
-            });
         });
     }
 
-    // validates whether a lang file contains all required keys.
-    // if it doesn't, automatically add them
-    private static void validate(FileConfiguration provided, FileConfiguration user, File localPath) {
-        List<String> userNodes = getChildren(user, "", true);
-
-        for (String node : resourceNodes) {
-            if (userNodes.contains(node)) {
-                continue;
-            }
-          
-            LoParkour.log("Fixing missing config node %s in %s".formatted(node, localPath.getName()));
-
-            user.set(node, provided.get(node));
-        }
-
-        LoParkour.log("Validated locale " + localPath.getName());
-
-        try {
-            user.save(localPath);
-        } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to save fixed config file %s - delete this file and restart your server - ".formatted(localPath) + ex.getMessage());
-        }
-    }
-
-    /**
-     * Gets a String from the provided path in the provided player's locale.
-     * If the player is a {@link ParkourUser}, their locale value will be used.
-     * If not, the default locale will be used.
-     *
-     * @param player The player
-     * @param path   The path
-     * @return a String
-     */
-    public static String getString(Player player, String path) {
-        ParkourUser user = ParkourUser.getUser(player);
-
-        String locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
-
-        return getString(locale, path);
-    }
-
-    /**
-     * Gets a coloured String from the provided path in the provided locale file
-     *
-     * @param locale The locale
-     * @param path   The path
-     * @return a String
-     */
-    public static String getString(String locale, String path) {
-        return getValue(locale, config -> config.getString(path), "");
-    }
-
-    /**
-     * Gets an uncoloured String list from the provided path in the provided locale file
-     *
-     * @param locale The locale
-     * @param path   The path
-     * @return a String list
-     */
-    public static List<String> getStringList(String locale, String path) {
-        return getValue(locale, config -> config.getStringList(path), Collections.emptyList());
-    }
-
-    private static <T> T getValue(String locale, Function<FileConfiguration, T> f, T def) {
-        if (locales.isEmpty()) {
-            return def;
-        }
-
-        FileConfiguration config = locales.get(locale);
-
-        return config != null ? f.apply(config) : def;
-    }
-
-    /**
-     * Returns an item from a json locale file.
-     * The locale is derived from the player.
-     * If the player is a {@link ParkourUser}, their locale value will be used.
-     * If not, the default locale will be used.
-     *
-     * @param player The player
-     * @param path   The full path of the item in the locale file
-     * @return a non-null {@link Item} instance built from the description in the locale file
-     */
     @NotNull
-    public static Item getItem(@NotNull Player player, String path, String... replace) {
-        ParkourUser user = ParkourUser.getUser(player);
-        String locale = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
+    private static Map<String, FileConfiguration> loadFromDisk(@NotNull FileConfiguration embedded) throws Exception {
+        Map<String, FileConfiguration> result = new HashMap<>();
+        File folder = LoParkour.getInFolder("locales");
+        ensureFolder(folder);
 
-        return getItem(locale, path, replace);
+        try (Stream<Path> stream = Files.list(folder.toPath())) {
+            stream.forEach(path -> {
+                File file = path.toFile();
+                if (!file.getName().endsWith(".yml")) return;
+
+                String locale = file.getName().split("\\.")[0];
+                LoParkour.log("Found locale " + locale);
+
+                FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+                validateAndFix(embedded, config, file);
+                result.put(locale, config);
+            });
+        }
+        return result;
     }
 
-    private static final Pattern pattern = Pattern.compile("%[a-z]");
+    private static void ensureFolder(@NotNull File folder) {
+        if (!folder.exists()) folder.mkdirs();
+        String[] files = folder.list();
+        if (files == null || files.length == 0) {
+            Plugin plugin = LoParkour.getPlugin();
+            plugin.saveResource("locales/en.yml", false);
+            plugin.saveResource("locales/ru.yml", false);
+        }
+    }
 
-    /**
-     * Returns an item from a provided json locale file with possible replacements.
-     *
-     * @param locale  The locale
-     * @param path    The path in the json file
-     * @param replace The Strings that will replace any appearances of a String following the regex "%[a-z]"
-     * @return a non-null {@link Item} instance built from the description in the locale file
-     */
+    // ── validation (was LocaleValidator) ──────────────────────────────────────
+
+    private static void validateAndFix(@NotNull FileConfiguration reference, @NotNull FileConfiguration locale, @NotNull File file) {
+        List<String> refNodes = getChildren(reference);
+        List<String> locNodes = getChildren(locale);
+
+        boolean modified = false;
+        for (String node : refNodes) {
+            if (!locNodes.contains(node)) {
+                LoParkour.log("Fixing missing config node %s in %s".formatted(node, file.getName()));
+                locale.set(node, reference.get(node));
+                modified = true;
+            }
+        }
+        if (modified) {
+            try { locale.save(file); }
+            catch (IOException ex) {
+                LoParkour.getPlugin().getLogger().severe(
+                    "Error saving fixed locale %s — delete and restart — %s".formatted(file.getName(), ex.getMessage()));
+            }
+        }
+        LoParkour.log("Validated locale " + file.getName());
+    }
+
     @NotNull
-    public static Item getItem(String locale, String path, String... replace) {
-        if (locales.isEmpty()) { // during reloading
-            return new Item(Material.STONE, "");
+    private static List<String> getChildren(@NotNull FileConfiguration config) {
+        ConfigurationSection section = config.getConfigurationSection("");
+        return section != null ? new ArrayList<>(section.getKeys(true)) : Collections.emptyList();
+    }
+
+    // ── cache access (was LocaleCache) ────────────────────────────────────────
+
+    @NotNull
+    private static <T> T cachedValue(@NotNull String locale, @NotNull Function<FileConfiguration, T> extractor, @NotNull T defaultValue) {
+        synchronized (locales) {
+            if (locales.isEmpty()) return defaultValue;
+            FileConfiguration config = locales.get(locale);
+            if (config == null) return defaultValue;
+            try {
+                T result = extractor.apply(config);
+                return result != null ? result : defaultValue;
+            } catch (Exception e) { return defaultValue; }
         }
+    }
 
-        FileConfiguration base = locales.get(locale);
+    // ── item builder ──────────────────────────────────────────────────────────
 
-        String material = base.getString("%s.material".formatted(path));
-        String name = base.getString("%s.name".formatted(path));
-        String lore = base.getString("%s.lore".formatted(path));
-        int modelId = base.getInt("%s.model_id".formatted(path), -1);
+    @NotNull
+    private static Item buildItem(@NotNull FileConfiguration config, @NotNull String path, String... replace) {
+        String material = config.getString("%s.material".formatted(path), "STONE");
+        String name     = applyReplacements(config.getString("%s.name".formatted(path), ""), replace);
+        String lore     = applyReplacements(config.getString("%s.lore".formatted(path), ""), replace);
 
-        if (material == null) {
-            material = "";
-        }
-        if (name == null) {
-            name = "";
-        }
-        if (lore == null) {
-            lore = "";
-        }
-
-        int idx = 0;
-        Matcher matcher = pattern.matcher(name);
-        while (matcher.find()) {
-            if (idx == replace.length) {
-                break;
-            }
-
-            name = name.replaceFirst(matcher.group(), replace[idx]);
-            idx++;
-        }
-
-        matcher = pattern.matcher(lore);
-
-        while (matcher.find()) {
-            if (idx == replace.length) {
-                break;
-            }
-
-            lore = lore.replaceFirst(matcher.group(), replace[idx]);
-            idx++;
-        }
-
-        Material mat = Material.getMaterial(material.toUpperCase());
+        Material mat = Materials.parse(material);
         if (mat == null) {
-            LoParkour.getPlugin().getLogger().warning("Invalid material '%s' for locale path '%s', using STONE as fallback".formatted(material, path));
+            LoParkour.getPlugin().getLogger().warning("Invalid material '%s' for locale path '%s', using STONE".formatted(material, path));
             mat = Material.STONE;
         }
 
         Item item = new Item(mat, name);
-
-        if (!lore.isEmpty()) {
-            item.lore(lore.split("\\|\\|"));
-        }
-
-        if (modelId != -1) {
-            // TODO: item.setCustomModelData(modelId);
-        }
-
+        if (!lore.isEmpty()) item.lore(lore.split("\\|\\|"));
         return item;
     }
 
-    public static List<String> getChildren(FileConfiguration file, String path, boolean deep) {
-        ConfigurationSection section = file.getConfigurationSection(path);
+    @NotNull
+    private static String applyReplacements(@NotNull String text, String... replacements) {
+        if (replacements.length == 0) return text;
+        String result = text;
+        int idx = 0;
+        Matcher matcher = REPLACEMENT_PATTERN.matcher(result);
+        while (matcher.find() && idx < replacements.length) {
+            result = result.replaceFirst(matcher.group(), replacements[idx++]);
+        }
+        return result;
+    }
 
-        return section != null ? new ArrayList<>(section.getKeys(deep)) : Collections.emptyList();
+    @NotNull
+    private static String getPlayerLocale(@NotNull Player player) {
+        ParkourUser user = ParkourUser.getUser(player);
+        String loc = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
+        return (loc != null && !loc.isBlank()) ? loc : "en";
     }
 }

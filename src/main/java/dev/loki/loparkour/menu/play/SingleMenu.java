@@ -5,23 +5,27 @@ import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.mode.Mode;
-import dev.loki.loparkour.mode.MultiMode;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.util.ColorUtil;
-import dev.lolib.gui.ScrollableGUI;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SingleMenu extends LPMenu {
 
+    private static final int ITEMS_PER_PAGE = 7; // Slots 10-16 (middle row)
+    private int currentPage = 0;
+
     @Override
     public void open(@NotNull Player player) {
+        open(player, 0);
+    }
+    
+    public void open(@NotNull Player player, int page) {
+        this.currentPage = page;
         String locale = locale(player);
 
         List<Mode> availableModes = new ArrayList<>();
@@ -32,7 +36,7 @@ public class SingleMenu extends LPMenu {
             if (mode.getName().equals("spectator")) continue;
             
             // Check if mode is enabled in config
-            if (!Config.CONFIG.getBoolean("modes." + mode.getName() + ".enabled")) continue;
+            if (!Config.CONFIG.getBoolean("modes." + mode.getName() + ".enabled", true)) continue;
             
             boolean blocked = Config.CONFIG.getBoolean("permissions.enabled")
                     && !player.hasPermission("LoParkour.gamemode." + mode.getName());
@@ -52,15 +56,18 @@ public class SingleMenu extends LPMenu {
 
         String title = Locales.getString(locale, "play.single.name");
 
-        ScrollableGUI gui = ScrollableGUI.create()
-                .title(ColorUtil.color(title))
-                .rows(3)
-                .scrollUpButton(backItem(), 0)
-                .scrollDownButton(nextItem(), 8);
+        // Calculate pagination
+        int totalPages = (int) Math.ceil((double) items.size() / ITEMS_PER_PAGE);
+        int startIndex = currentPage * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
-        for (int i = 0; i < items.size(); i++) {
+        InventoryGUI gui = baseGui(title, 3);
+
+        // Add items for current page
+        for (int i = startIndex; i < endIndex; i++) {
             final Mode mode = availableModes.get(i);
-            gui = gui.addItem(items.get(i), e -> {
+            int slot = 10 + (i - startIndex); // Slots 10-16
+            gui = gui.setItem(slot, items.get(i), e -> {
                 // Prevent multiple clicks - check if player is already in parkour
                 if (ParkourUser.getUser(player) != null) {
                     return; // Already in parkour, ignore click
@@ -69,6 +76,17 @@ public class SingleMenu extends LPMenu {
                 player.closeInventory();
                 mode.create(player);
             });
+        }
+
+        // Add navigation buttons
+        if (currentPage > 0) {
+            // Previous page button
+            gui = gui.setItem(0, backItem(), e -> open(player, currentPage - 1));
+        }
+        
+        if (currentPage < totalPages - 1) {
+            // Next page button
+            gui = gui.setItem(8, nextItem(), e -> open(player, currentPage + 1));
         }
 
         gui.open(player);

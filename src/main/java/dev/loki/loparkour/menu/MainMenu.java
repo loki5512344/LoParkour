@@ -3,7 +3,6 @@ package dev.loki.loparkour.menu;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.util.ColorUtil;
 import dev.lolib.gui.InventoryGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

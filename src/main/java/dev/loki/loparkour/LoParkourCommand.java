@@ -16,6 +16,7 @@ import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.util.ColorUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,13 +29,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Main command router for /LoParkour and /parkour.
  * Delegates to {@link PlayerCommandHandler}, {@link AdminCommandHandler},
  * and {@link SchematicCommandHandler}.
  */
-@SuppressWarnings("deprecation")
 public class LoParkourCommand implements CommandExecutor, TabCompleter {
 
     private final PlayerCommandHandler player = new PlayerCommandHandler();
@@ -43,15 +44,23 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
-        Player p = sender instanceof Player ? (Player) sender : null;
+        try {
+            Player p = sender instanceof Player ? (Player) sender : null;
 
-        switch (args.length) {
-            case 0 -> player.handleNoArgs(sender, p);
-            case 1 -> player.handle(args[0], sender, p);
-            case 2 -> handle2(args[0], args[1], sender, p);
-            case 3 -> handle3(args[0], args[1], args[2], sender, p);
+            switch (args.length) {
+                case 0 -> player.handleNoArgs(sender, p);
+                case 1 -> player.handle(args[0], sender, p);
+                case 2 -> handle2(args[0], args[1], sender, p);
+                case 3 -> handle3(args[0], args[1], args[2], sender, p);
+                default -> sender.sendMessage(ChatColor.GRAY + "Too many arguments. Try /parkour help");
+            }
+            return true;
+        } catch (Throwable t) {
+            LoParkour.getPlugin().getLogger().log(Level.SEVERE,
+                    "LoParkour command failed (" + label + " " + String.join(" ", args) + ")", t);
+            sender.sendMessage(ChatColor.RED + "LoParkour: command error — see server console.");
+            return true;
         }
-        return true;
     }
 
     // ── 2-arg routing ──────────────────────────────────────────────────────────
@@ -108,7 +117,12 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
         if (user != null && user.session == session) return;
 
         if (session.isAcceptingPlayers()) {
-            ((MultiMode) session.generator.getMode()).join(p, session);
+            Mode sessionMode = session.generator.getMode();
+            if (sessionMode instanceof MultiMode mm) {
+                mm.join(p, session);
+            } else {
+                Modes.SPECTATOR.create(p, session);
+            }
         } else {
             Modes.SPECTATOR.create(p, session);
         }
@@ -153,7 +167,10 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
                 completions.add("everyone");
                 ParkourPlayer.getPlayers().forEach(pp -> completions.add(pp.getName()));
             } else if (a1.equals("join") && ParkourOption.JOIN.mayPerform(sender)) {
+                Registry.getModes().forEach(m -> completions.add(m.getName()));
                 ParkourPlayer.getPlayers().forEach(pp -> completions.add(pp.getName()));
+            } else if (a1.equals("leaderboard") && ParkourOption.LEADERBOARDS.mayPerform(sender)) {
+                Registry.getModes().forEach(m -> completions.add(m.getName()));
             } else if (a1.equals("schematic") && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.addAll(Arrays.asList("wand", "pos1", "pos2", "save", "paste", "list", "reload"));
             } else if ((a1.equals("forcejoin") || a1.equals("forceleave")) && sender.hasPermission(ParkourOption.ADMIN.permission)) {

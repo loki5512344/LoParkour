@@ -62,21 +62,16 @@ generation:
 # Don't modify these if you don't know what you're doing!
 advanced:
 
-  # -= Spawn island options =-
-  # Options for the spawn island
+  # -= Spawn platform =-
+  # Start area is a flat square platform at the session cell (no .lpschem island).
   island:
     
-    # -= Island schematic =-
-    # The name of the schematic file to use for the spawn island
-    # This schematic should be placed in the schematics-new folder
-    # If not specified or not found, no island will be generated
+    # Legacy key (unused for spawn). Course schematics use schematics.yml / schematics-new.
     schematic-name: "island"
     
     spawn:
 
-      # -= Player block =-
-      # The material of the block that the player will spawn on.
-      # This block will be set to air once the schematic has been pasted.
+      # Legacy keys (unused). Platform material is parkour.first-block-material below.
       player-block: diamond_block
 
       # -= Spawn yaw/pitch =-
@@ -85,19 +80,58 @@ advanced:
 
     parkour:
 
-      # -= Begin block =-
-      # The block from which the parkour begins
-      # This block will be set to air once the schematic has been pasted
+      # Legacy (unused). begin-block was for island schematics.
       begin-block: emerald_block
 
-      # -= First parkour block material =-
-      # The material of the very first parkour block that players spawn on
+      # -= Platform + first jump pad material =-
+      # The whole spawn platform uses this block type.
       first-block-material: stone
 
       # -= Directional heading =-
       # The directional heading of the parkour
       # Possible options: north, south, west and east.
       heading: east
+
+  # -= Jump distance weights (advanced.distance.min .. max) =-
+  distance:
+    min: 1
+    max: 4
+    chances:
+      1: 25
+      2: 25
+      3: 25
+      4: 25
+
+  # -= Vertical step weights (advanced.height.min .. max) =-
+  height:
+    min: -1
+    max: 2
+    chances:
+      "-1": 20
+      "0": 30
+      1: 30
+      2: 20
+
+  # -= Block type mix (default vs special vs schematic) =-
+  type:
+    default: 80
+    special: 15
+    schematic: 5
+
+  # -= Special block variants (BlockData strings) =-
+  special:
+    ice:
+      material: minecraft:ice
+      chance: 25
+    slab:
+      material: minecraft:oak_slab
+      chance: 20
+    pane:
+      material: minecraft:glass_pane
+      chance: 15
+    fence:
+      material: minecraft:oak_fence
+      chance: 15
 
   # -= Border size =-
   # The diameter of the playing area of a person in the single mode.

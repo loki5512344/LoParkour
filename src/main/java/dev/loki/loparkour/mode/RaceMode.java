@@ -97,6 +97,7 @@ public class RaceMode implements Mode {
             }
         }
 
+        @SuppressWarnings("deprecation") // Spigot Chat API: action bar via TextComponent
         private void updateProgressBar() {
             int remaining = Math.max(0, targetScore - state.score);
             int filled = Math.min(20, state.score * 20 / targetScore);

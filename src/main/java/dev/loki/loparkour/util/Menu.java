@@ -15,17 +15,14 @@ public class Menu {
     }
     
     public Menu item(int slot, Item item) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public Menu distributeRowsEvenly() {
-        // TODO: Implement
         return this;
     }
     
     public void open(Player player) {
-        // TODO: Implement with LoLib GUI
-        player.sendMessage("§cМеню временно недоступно во время миграции");
+        player.sendMessage("§c" + title + " (" + rows + " рядов) — меню временно недоступно (миграция GUI).");
     }
 }

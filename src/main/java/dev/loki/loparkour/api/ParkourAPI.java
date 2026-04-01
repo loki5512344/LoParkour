@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
  *     <li>For Schematics, please view {@link dev.efnilite.LoParkour.schematic.LPSchematic}</li>
  * </ul>
  */
-@SuppressWarnings("unused")
 public class ParkourAPI {
 
     private ParkourAPI() throws IllegalAccessException {

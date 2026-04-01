@@ -1,9 +1,5 @@
 package dev.loki.loparkour.player;
 
-import java.util.ArrayList;
-
-import dev.lolib.scheduler.Scheduler;
-
 import com.google.gson.annotations.Expose;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
@@ -17,10 +13,10 @@ import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.storage.Storage;
 import dev.loki.loparkour.world.Divider;
-
 import dev.lolib.scheduler.Scheduler;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +33,9 @@ import java.util.function.BiConsumer;
 public class ParkourPlayer extends ParkourUser {
 
     public static final Map<String, PlayerSettingsManager.OptionContainer> PLAYER_COLUMNS = PlayerSettingsManager.getColumnMappings();
+
+    // Track scored blocks to prevent duplicate scoring
+    private final Set<Block> scoredBlocks = new HashSet<>();
 
     public @Expose Double schematicDifficulty;
     public @Expose Integer blockLead;
@@ -66,10 +65,6 @@ public class ParkourPlayer extends ParkourUser {
         for (PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());
         }
-    }
-
-    private static boolean parseBoolean(String string) {
-        return string == null || string.equals("1") || string.equals("true");
     }
 
     /**
@@ -111,8 +106,25 @@ public class ParkourPlayer extends ParkourUser {
         }
 
         session.removePlayers(this);
+        
+        // Clear scored blocks to prevent memory leak
+        scoredBlocks.clear();
 
         save(LoParkour.getPlugin().isEnabled());
+    }
+
+    /**
+     * Check if player has already scored on this block.
+     */
+    public boolean hasScored(Block block) {
+        return scoredBlocks.contains(block);
+    }
+
+    /**
+     * Mark block as scored to prevent duplicate scoring.
+     */
+    public void markScored(Block block) {
+        scoredBlocks.add(block);
     }
 
     /**
@@ -140,7 +152,8 @@ public class ParkourPlayer extends ParkourUser {
                 .set("selectedTime", selectedTime.toString())
                 .set("style", style);
 
-        generator.overrideProfile();
+        // Use profileManager instead of calling overrideProfile directly on generator
+        generator.profileManager.overrideProfile();
     }
 
     /**

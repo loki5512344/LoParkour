@@ -2,8 +2,6 @@ package dev.loki.loparkour.command;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.Registry;
-import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.mode.Mode;
 import dev.loki.loparkour.mode.Modes;
@@ -27,6 +25,8 @@ import java.util.UUID;
  * forcejoin, forceleave, reset, recoverinventory.
  */
 public class AdminCommandHandler {
+
+    private static final String COOLDOWN_HINT = "<gray>Please wait before using this again.";
 
     private final PlayerCommandHandler base;
 
@@ -56,6 +56,8 @@ public class AdminCommandHandler {
     // ── forcejoin ──────────────────────────────────────────────────────────────
 
     private void handleForceJoin(String target, CommandSender sender) {
+        if (!base.cooldown(sender, "forcejoin", 2500, COOLDOWN_HINT)) return;
+
         if (target.equalsIgnoreCase("everyone")) {
             Bukkit.getOnlinePlayers().forEach(p -> Modes.DEFAULT.create(p));
             send(sender, LoParkour.PREFIX + "Force joined everyone!");
@@ -76,6 +78,8 @@ public class AdminCommandHandler {
     // ── forceleave ─────────────────────────────────────────────────────────────
 
     private void handleForceLeave(String target, CommandSender sender) {
+        if (!base.cooldown(sender, "forceleave", 2500, COOLDOWN_HINT)) return;
+
         if (target.equalsIgnoreCase("everyone")) {
             ParkourPlayer.getPlayers().forEach(ParkourUser::leave);
             send(sender, LoParkour.PREFIX + "Force kicked everyone!");
@@ -91,7 +95,7 @@ public class AdminCommandHandler {
     // ── reset ──────────────────────────────────────────────────────────────────
 
     private void handleReset(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "reset", 2500)) return;
+        if (!base.cooldown(sender, "reset", 2500, COOLDOWN_HINT)) return;
 
         if (target.equalsIgnoreCase("everyone")) {
             Registry.getModes().stream()
@@ -116,7 +120,7 @@ public class AdminCommandHandler {
     // ── recoverinventory ───────────────────────────────────────────────────────
 
     private void handleRecoverInventory(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "recoverinventory", 2500)) return;
+        if (!base.cooldown(sender, "recoverinventory", 2500, COOLDOWN_HINT)) return;
         Player other = Bukkit.getPlayer(target);
         if (other == null) { send(sender, LoParkour.PREFIX + "Player not online!"); return; }
 
@@ -142,10 +146,17 @@ public class AdminCommandHandler {
             .orElse(null);
     }
 
+    @SuppressWarnings("deprecation") // Bukkit: name-based OfflinePlayer lookup (admin-only)
     private UUID resolveUUID(String input) {
         Player online = Bukkit.getPlayerExact(input);
         if (online != null) return online.getUniqueId();
-        if (input.contains("-")) return UUID.fromString(input);
+        if (input.contains("-")) {
+            try {
+                return UUID.fromString(input);
+            } catch (IllegalArgumentException ignored) {
+                // fall through to offline lookup by name
+            }
+        }
         return Bukkit.getOfflinePlayer(input).getUniqueId();
     }
 

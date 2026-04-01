@@ -1,244 +1,154 @@
 package dev.loki.loparkour.session;
 
-import java.util.ArrayList;
-
-import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourSpectator;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.world.Divider;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
- * <p>A session is bound to a {@link Divider} section.
- * It manages all players, all spectators, visibility, the generator, etc.</p>
- * <p>Iteration 2.</p>
- *
- * @author loki
- * @since 5.0.0
+ * Refactored Session using composition pattern.
+ * Coordinates player management and state management.
  */
 public class Session {
-
-    /**
-     * The spawn location of this session.
-     */
-    private Location spawnLocation;
-
-    /**
-     * The generator.
-     */
+    
     public ParkourGenerator generator;
-
+    
+    private final SessionPlayerManager playerManager;
+    private final SessionStateManager stateManager;
+    
+    private Session() {
+        this.playerManager = new SessionPlayerManager(this);
+        this.stateManager = new SessionStateManager(this);
+    }
+    
     /**
-     * The visibility of this session. Default public.
+     * Create a new session with specified parameters.
      */
-    private Visibility visibility = Visibility.PUBLIC;
-
-    /**
-     * Manages users (players and spectators) in this session.
-     */
-    private final SessionUserManager userManager = new SessionUserManager(this);
-
-    /**
-     * Function that takes the current session and returns whether new players should be accepted.
-     */
-    private Function<Session, Boolean> isAcceptingPlayers = session -> false;
-
-    /**
-     * Function that takes the current session and returns whether new spectators should be accepted.
-     */
-    private Function<Session, Boolean> isAcceptingSpectators = session -> session.visibility == Visibility.PUBLIC;
-
-    /**
-     * Creates a new session.
-     *
-     * @param generatorFunction     The generator function.
-     * @param isAcceptingPlayers    The function that takes the current session and returns whether new players should be accepted.
-     * @param isAcceptingSpectators The function that takes the current session and returns whether new spectators should be accepted.
-     * @param players               The players.
-     * @return The session.
-     */
-    public static Session create(Function<Session, ParkourGenerator> generatorFunction,
-                                 Function<Session, Boolean> isAcceptingPlayers,
-                                 Function<Session, Boolean> isAcceptingSpectators,
-                                 Player... players) {
+    @NotNull
+    public static Session create(
+            @NotNull Function<Session, ParkourGenerator> generatorFunction,
+            Function<Session, Boolean> isAcceptingPlayers,
+            Function<Session, Boolean> isAcceptingSpectators,
+            Player... players) {
+        
         Session session = new Session();
-
-        if (isAcceptingPlayers != null) session.isAcceptingPlayers = isAcceptingPlayers;
-        if (isAcceptingSpectators != null) session.isAcceptingSpectators = isAcceptingSpectators;
-
-        List<ParkourPlayer> pps = new ArrayList<>();
+        
+        // Set acceptance functions
+        if (isAcceptingPlayers != null) {
+            session.playerManager.setAcceptingPlayers(isAcceptingPlayers);
+        }
+        if (isAcceptingSpectators != null) {
+            session.playerManager.setAcceptingSpectators(isAcceptingSpectators);
+        }
+        
+        // Add initial players
+        List<ParkourPlayer> parkourPlayers = new ArrayList<>();
         if (players != null) {
             for (Player player : players) {
                 ParkourPlayer pp = ParkourUser.register(player, session);
                 session.addPlayers(pp);
-                pps.add(pp);
+                parkourPlayers.add(pp);
             }
         }
-
-        session.spawnLocation = Divider.add(session);
-        session.generator = generatorFunction.apply(session);
-
-        if (players != null) {
-            pps.forEach(p -> p.updateGeneratorSettings(session.generator));
+        
+        // Initialize session state
+        session.stateManager.initialize(generatorFunction);
+        
+        // Update generator settings for players
+        if (session.generator != null) {
+            parkourPlayers.forEach(p -> p.updateGeneratorSettings(session.generator));
         }
-
-        session.generator.island.build(session.spawnLocation);
-
+        
         return session;
     }
-
-    /**
-     * Sets the visibility of this session.
-     * @param visibility The visibility.
-     */
-    public void setVisibility(Visibility visibility) {
-        this.visibility = visibility;
+    
+    // Visibility management
+    public void setVisibility(@NotNull Visibility visibility) {
+        stateManager.setVisibility(visibility);
     }
-
-    /**
-     * @return The visibility of this session.
-     */
+    
+    @NotNull
     public Visibility getVisibility() {
-        return visibility;
+        return stateManager.getVisibility();
     }
-
-    /**
-     * Adds provided players to this session's player list.
-     *
-     * @param toAdd The players to add.
-     */
-    public void addPlayers(ParkourPlayer... toAdd) {
-        userManager.addPlayers(toAdd);
+    
+    // Player management
+    public void addPlayers(@NotNull ParkourPlayer... toAdd) {
+        playerManager.addPlayers(toAdd);
     }
-
-    /**
-     * Removes provided players from this session's player list.
-     *
-     * @param toRemove The players to remove.
-     */
-    public void removePlayers(ParkourPlayer... toRemove) {
-        userManager.removePlayers(toRemove);
+    
+    public void removePlayers(@NotNull ParkourPlayer... toRemove) {
+        playerManager.removePlayers(toRemove);
     }
-
-    /**
-     * @return The players.
-     */
+    
+    @NotNull
     public List<ParkourPlayer> getPlayers() {
-        return userManager.getPlayers();
+        return playerManager.getPlayers();
     }
-
-    /**
-     * Adds provided spectators to this session's spectator list.
-     *
-     * @param spectators The spectators to add.
-     */
-    public void addSpectators(ParkourSpectator... spectators) {
-        userManager.addSpectators(spectators);
+    
+    // Spectator management
+    public void addSpectators(@NotNull ParkourSpectator... spectators) {
+        playerManager.addSpectators(spectators);
     }
-
-    /**
-     * Removes provided spectators from this session's spectator list.
-     *
-     * @param spectators The spectators to remove.
-     */
-    public void removeSpectators(ParkourSpectator... spectators) {
-        userManager.removeSpectators(spectators);
+    
+    public void removeSpectators(@NotNull ParkourSpectator... spectators) {
+        playerManager.removeSpectators(spectators);
     }
-
-    /**
-     * @return The spectators.
-     */
+    
+    @NotNull
     public List<ParkourSpectator> getSpectators() {
-        return userManager.getSpectators();
+        return playerManager.getSpectators();
     }
-
-    /**
-     * @return The users.
-     */
+    
+    @NotNull
     public List<ParkourUser> getUsers() {
-        return userManager.getUsers();
+        return playerManager.getUsers();
     }
-
-    /**
-     * @return the spawn location for this {@link Session}.
-     */
-    @SuppressWarnings("unused")
+    
+    // State management
     public Location getSpawnLocation() {
-        return spawnLocation.clone();
+        return stateManager.getSpawnLocation();
     }
-
-    /**
-     * Toggles mute for the specified user.
-     *
-     * @param user The user to (un)mute.
-     */
+    
     public void toggleMute(@NotNull ParkourUser user) {
-        userManager.toggleMute(user);
+        stateManager.toggleMute(user);
     }
-
-    /**
-     * @param user The user.
-     * @return True when the user is muted, false if not.
-     */
+    
     public boolean isMuted(@NotNull ParkourUser user) {
-        return userManager.isMuted(user);
+        return stateManager.isMuted(user);
     }
-
-    /**
-     * Called when all players have left the session.
-     */
-    void onAllPlayersLeft() {
-        generator.reset(false);
-        Divider.remove(this);
-    }
-
-    /**
-     * @return True when players may join this session, false if not.
-     */
+    
+    // Acceptance checks
     public boolean isAcceptingPlayers() {
-        return isAcceptingPlayers.apply(this);
+        return playerManager.isAcceptingPlayers();
     }
-
-    /**
-     * @return True when spectators may join this session, false if not.
-     */
+    
     public boolean isAcceptingSpectators() {
-        return isAcceptingSpectators.apply(this);
+        return playerManager.isAcceptingSpectators();
     }
-
+    
+    // Lifecycle
+    public void onAllPlayersLeft() {
+        stateManager.cleanup();
+    }
+    
+    void setGenerator(@NotNull ParkourGenerator generator) {
+        this.generator = generator;
+    }
+    
+    // Enums
     public enum Visibility {
-
-        /**
-         * No-one can join.
-         */
-        PRIVATE,
-
-        /**
-         * Only people with the session id can join.
-         */
-        ID_ONLY,
-
-        /**
-         * Anyone can join.
-         */
-        PUBLIC,
-
+        PRIVATE, ID_ONLY, PUBLIC
     }
-
-    /**
-     * An enum for all available chat types that a player can select while playing
-     */
+    
     public enum ChatType {
-
         LOBBY_ONLY, PLAYERS_ONLY, PUBLIC
-
     }
 }

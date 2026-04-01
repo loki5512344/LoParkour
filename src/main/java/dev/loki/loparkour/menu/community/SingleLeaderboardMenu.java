@@ -7,8 +7,7 @@ import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.ParkourOption;
 import dev.loki.loparkour.mode.Mode;
 import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.util.ColorUtil;
-import dev.lolib.gui.ScrollableGUI;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -24,7 +23,15 @@ import java.util.UUID;
 
 public class SingleLeaderboardMenu extends LPMenu {
 
+    private static final int ITEMS_PER_PAGE = 7; // Slots 10-16 (middle row)
+    private int currentPage = 0;
+
     public void open(@NotNull Player player, @NotNull Mode mode, @NotNull Leaderboard.Sort sort) {
+        open(player, mode, sort, 0);
+    }
+    
+    public void open(@NotNull Player player, @NotNull Mode mode, @NotNull Leaderboard.Sort sort, int page) {
+        this.currentPage = page;
         Leaderboard leaderboard = mode.getLeaderboard();
         if (leaderboard == null) return;
 
@@ -66,14 +73,28 @@ public class SingleLeaderboardMenu extends LPMenu {
             items.add(skull);
         }
 
-        ScrollableGUI gui = ScrollableGUI.create()
-                .title(ColorUtil.color(title))
-                .rows(3)
-                .scrollUpButton(backItem(), 0)
-                .scrollDownButton(nextItem(), 8);
+        // Calculate pagination
+        int totalPages = (int) Math.ceil((double) items.size() / ITEMS_PER_PAGE);
+        int startIndex = currentPage * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
-        for (ItemStack item : items) {
-            gui = gui.addItem(item, e -> { /* view only */ });
+        InventoryGUI gui = baseGui(title, 3);
+
+        // Add items for current page
+        for (int i = startIndex; i < endIndex; i++) {
+            int slot = 10 + (i - startIndex); // Slots 10-16
+            gui = gui.setItem(slot, items.get(i), e -> { /* view only */ });
+        }
+
+        // Add navigation buttons
+        if (currentPage > 0) {
+            // Previous page button
+            gui = gui.setItem(0, backItem(), e -> open(player, mode, sort, currentPage - 1));
+        }
+        
+        if (currentPage < totalPages - 1) {
+            // Next page button
+            gui = gui.setItem(8, nextItem(), e -> open(player, mode, sort, currentPage + 1));
         }
 
         gui.open(player);

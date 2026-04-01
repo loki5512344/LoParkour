@@ -79,6 +79,7 @@ sql:
   url: 'localhost'
   port: 3306
   username: 'efnilite'
+  # If env LOPARKOUR_SQL_PASSWORD is set (non-empty), it overrides this value (recommended for production).
   password: 'super secret password'
   database: 'ip'
 
@@ -93,6 +94,10 @@ world:
   # -= World name =-
   # The world in which parkour will take place
   name: 'loparkour'
+
+  # -= Island schematic =-
+  # Name of the spawn island schematic (schematics-new folder). Falls back to generation.yml if empty.
+  island-schematic: island
 
   # -= Delete world on reload =-
   # Deletes the world on reload/restart of the server.
@@ -217,24 +222,24 @@ styles:
   # The list of all available styles, which you can add to if you want.
   # For changes, you have to restart or reload your server.
   list:
-    red: [red_wool, red_stained_glass, red_concrete, red_terracotta]
-    blue: [blue_wool, blue_stained_glass, blue_concrete, blue_terracotta]
-    light blue: [light_blue_wool, light_blue_stained_glass, light_blue_concrete, light_blue_terracotta]
-    green: [green_wool, green_stained_glass, green_concrete, green_terracotta]
-    lime: [lime_wool, lime_stained_glass, lime_concrete, lime_terracotta]
-    cyan: [cyan_wool, cyan_stained_glass, cyan_concrete, cyan_terracotta]
-    purple: [purple_wool, purple_stained_glass, purple_concrete, purple_terracotta]
-    yellow: [yellow_wool, yellow_stained_glass, yellow_concrete, yellow_terracotta]
-    gray: [gray_wool, gray_stained_glass, gray_concrete, gray_terracotta]
-    end: [end_stone, end_stone_bricks, purpur_block, purpur_pillar]
-    nether: [netherrack, nether_bricks, red_nether_bricks, chiseled_nether_bricks, nether_wart_block, nether_gold_ore, netherite_block, basalt]
-    quartz: [smooth_quartz, chiseled_quartz_block, quartz_block, quartz_bricks, quartz_pillar]
-    ocean: [prismarine, prismarine_bricks, dark_prismarine, sea_lantern]
-    redstone: [observer, dispenser, redstone_block, piston, sticky_piston, redstone_lamp, target]
-    overworld: [grass_block, stone, cobblestone, oak_log]
-    ores: [diamond_ore, gold_ore, iron_ore, coal_ore, nether_gold_ore, lapis_ore, redstone_ore, emerald_ore, nether_quartz_ore]
-    wood: [oak_planks, spruce_planks, jungle_planks, acacia_planks, birch_planks, dark_oak_planks, oak_log, spruce_log, jungle_log, birch_log, acacia_log, dark_oak_log]
-    rainbow: [red_wool, blue_wool, orange_wool, magenta_wool, lime_wool, purple_wool, yellow_concrete, orange_concrete, lime_concrete, light_blue_concrete, yellow_stained_glass, white_stained_glass, magenta_stained_glass, light_blue_stained_glass]
+    red: [red_wool, red_stained_glass, red_concrete, red_terracotta, red_concrete_slab, red_terracotta_slab]
+    blue: [blue_wool, blue_stained_glass, blue_concrete, blue_terracotta, blue_concrete_slab, blue_terracotta_slab]
+    light blue: [light_blue_wool, light_blue_stained_glass, light_blue_concrete, light_blue_terracotta, light_blue_concrete_slab, light_blue_terracotta_slab]
+    green: [green_wool, green_stained_glass, green_concrete, green_terracotta, green_concrete_slab, green_terracotta_slab]
+    lime: [lime_wool, lime_stained_glass, lime_concrete, lime_terracotta, lime_concrete_slab, lime_terracotta_slab]
+    cyan: [cyan_wool, cyan_stained_glass, cyan_concrete, cyan_terracotta, cyan_concrete_slab, cyan_terracotta_slab]
+    purple: [purple_wool, purple_stained_glass, purple_concrete, purple_terracotta, purple_concrete_slab, purple_terracotta_slab]
+    yellow: [yellow_wool, yellow_stained_glass, yellow_concrete, yellow_terracotta, yellow_concrete_slab, yellow_terracotta_slab]
+    gray: [gray_wool, gray_stained_glass, gray_concrete, gray_terracotta, gray_concrete_slab, gray_terracotta_slab]
+    end: [end_stone, end_stone_bricks, purpur_block, purpur_pillar, end_stone_brick_slab, purpur_slab]
+    nether: [netherrack, nether_bricks, red_nether_bricks, chiseled_nether_bricks, nether_wart_block, nether_gold_ore, netherite_block, basalt, nether_brick_slab, red_nether_brick_slab]
+    quartz: [smooth_quartz, chiseled_quartz_block, quartz_block, quartz_bricks, quartz_pillar, smooth_quartz_slab, quartz_slab]
+    ocean: [prismarine, prismarine_bricks, dark_prismarine, sea_lantern, prismarine_slab, prismarine_brick_slab, dark_prismarine_slab]
+    redstone: [observer, dispenser, redstone_block, piston, sticky_piston, redstone_lamp, target, smooth_stone_slab]
+    overworld: [grass_block, stone, cobblestone, oak_log, stone_slab, cobblestone_slab, oak_slab]
+    ores: [diamond_ore, gold_ore, iron_ore, coal_ore, nether_gold_ore, lapis_ore, redstone_ore, emerald_ore, nether_quartz_ore, stone_slab]
+    wood: [oak_planks, spruce_planks, jungle_planks, acacia_planks, birch_planks, dark_oak_planks, oak_log, spruce_log, jungle_log, birch_log, acacia_log, dark_oak_log, oak_slab, spruce_slab, jungle_slab, acacia_slab, birch_slab, dark_oak_slab]
+    rainbow: [red_wool, blue_wool, orange_wool, magenta_wool, lime_wool, purple_wool, yellow_concrete, orange_concrete, lime_concrete, light_blue_concrete, yellow_stained_glass, white_stained_glass, magenta_stained_glass, light_blue_stained_glass, red_concrete_slab, blue_concrete_slab, orange_concrete_slab, lime_concrete_slab]
     glow: [glowstone, jack_o_lantern, beacon, sea_lantern, crying_obsidian, shroomlight]
 
 # -= Jump validation options =-
@@ -291,12 +296,15 @@ jump-types:
 memory:
 
   # -= Block cleanup distance =-
-  # Distance in blocks after which old parkour blocks are removed.
-  # Lower values save memory but might remove blocks too early.
+  # Span (in history indices) for schematic trail removal and similar bulk clears.
   block-cleanup-distance: 20
 
+  # -= Trail keep-behind =-
+  # How many course blocks to keep behind the rearmost standing player before removing older trail (index-based; not world distance).
+  trail-keep-behind: 10
+
   # -= Cleanup interval =-
-  # How often (in ticks) to check for blocks to clean up.
+  # How often (in ticks) to run trail cleanup behind players.
   # 20 ticks = 1 second
   cleanup-interval: 100
 

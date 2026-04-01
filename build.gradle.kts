@@ -77,12 +77,14 @@ dependencies {
     compileOnly("net.kyori:adventure-text-minimessage:4.14.0")
     
     // LoLib Core
-    implementation(files("libs/lolib-2.0.1.jar"))
+    implementation(files("libs/lolib-3.0.0.jar"))
     
     // Shaded dependencies
     implementation("io.papermc:paperlib:1.0.7")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.bstats:bstats-bukkit:3.2.1")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("com.mysql:mysql-connector-j:8.3.0")
     
     // Provided dependencies (plugins)
     compileOnly("me.clip:placeholderapi:2.11.6")
@@ -110,9 +112,12 @@ tasks.shadowJar {
     relocate("io.papermc.lib", "dev.loki.loparkour.lib.paperlib")
     relocate("com.google.gson", "dev.loki.loparkour.lib.gson")
     relocate("org.bstats", "dev.loki.loparkour.lib.bstats")
-    
-    // Minimize jar size
-    minimize()
+
+    // Minimize jar size (keep JDBC pool + driver intact)
+    minimize {
+        exclude(dependency("com.zaxxer:HikariCP:.*"))
+        exclude(dependency("com.mysql:mysql-connector-j:.*"))
+    }
 }
 
 tasks.named("build") {

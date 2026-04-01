@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for JumpValidator.
@@ -104,9 +103,9 @@ class JumpValidatorTest {
         // Diagonal jump - 3 blocks X, 2 blocks Z, same height
         Location from = new Location(world, 0, 100, 0);
         Location to = new Location(world, 3, 100, 2);
-        
-        double distance = Math.sqrt(3*3 + 2*2); // ~3.6 blocks
-        assertTrue(validator.canJump(from, to), "Diagonal jump of ~3.6 blocks should be possible");
+
+        assertTrue(validator.canJump(from, to),
+                "Diagonal jump of ~" + Math.sqrt(3 * 3 + 2 * 2) + " blocks should be possible");
     }
 
     @Test

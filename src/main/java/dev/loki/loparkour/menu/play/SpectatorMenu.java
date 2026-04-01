@@ -5,9 +5,8 @@ import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.mode.Modes;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.loki.loparkour.util.ColorUtil;
 import dev.loki.loparkour.world.Divider;
-import dev.lolib.gui.ScrollableGUI;
+import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +18,16 @@ import java.util.List;
 
 public class SpectatorMenu extends LPMenu {
 
+    private static final int ITEMS_PER_PAGE = 7; // Slots 10-16 (middle row)
+    private int currentPage = 0;
+
     @Override
     public void open(@NotNull Player player) {
+        open(player, 0);
+    }
+    
+    public void open(@NotNull Player player, int page) {
+        this.currentPage = page;
         String locale = locale(player);
         ParkourUser user = ParkourUser.getUser(player);
         String title = Locales.getString(locale, "play.spectator.name");
@@ -44,15 +51,29 @@ public class SpectatorMenu extends LPMenu {
             items.add(skull);
         }
 
-        ScrollableGUI gui = ScrollableGUI.create()
-                .title(ColorUtil.color(title))
-                .rows(3)
-                .scrollUpButton(backItem(), 0)
-                .scrollDownButton(nextItem(), 8);
+        // Calculate pagination
+        int totalPages = (int) Math.ceil((double) items.size() / ITEMS_PER_PAGE);
+        int startIndex = currentPage * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
-        for (int i = 0; i < items.size(); i++) {
+        InventoryGUI gui = baseGui(title, 3);
+
+        // Add items for current page
+        for (int i = startIndex; i < endIndex; i++) {
             final Session session = sessions.get(i);
-            gui = gui.addItem(items.get(i), e -> Modes.SPECTATOR.create(player, session));
+            int slot = 10 + (i - startIndex); // Slots 10-16
+            gui = gui.setItem(slot, items.get(i), e -> Modes.SPECTATOR.create(player, session));
+        }
+
+        // Add navigation buttons
+        if (currentPage > 0) {
+            // Previous page button
+            gui = gui.setItem(0, backItem(), e -> open(player, currentPage - 1));
+        }
+        
+        if (currentPage < totalPages - 1) {
+            // Next page button
+            gui = gui.setItem(8, nextItem(), e -> open(player, currentPage + 1));
         }
 
         gui.open(player);

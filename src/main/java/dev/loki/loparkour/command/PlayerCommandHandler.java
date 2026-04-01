@@ -60,7 +60,13 @@ public class PlayerCommandHandler {
             case "menu", "main" -> {
                 if (ParkourOption.MAIN.mayPerform(player)) Menus.MAIN.open(player);
             }
-            case "leaderboard" -> player.performCommand("LoParkour leaderboard invalid");
+            case "leaderboard" -> {
+                if (!ParkourOption.LEADERBOARDS.mayPerform(player)) {
+                    send(sender, Locales.getString(player, "other.no_do"));
+                    return;
+                }
+                Menus.LEADERBOARDS.open(player);
+            }
             case "schematic" -> {
                 if (!player.hasPermission(ParkourOption.ADMIN.permission)) {
                     send(sender, Locales.getString(player, "other.no_do"));
@@ -107,10 +113,22 @@ public class PlayerCommandHandler {
     }
 
     public boolean cooldown(CommandSender sender, String key, long millis) {
+        return cooldown(sender, key, millis, null);
+    }
+
+    /**
+     * @param whenBlocked message sent (MiniMessage color) if still on cooldown; may be null for silent block
+     */
+    public boolean cooldown(CommandSender sender, String key, long millis, @Nullable String whenBlocked) {
         String fullKey = sender.getName() + ":" + key;
         long now = System.currentTimeMillis();
         Long last = cooldowns.get(fullKey);
-        if (last != null && now - last < millis) return false;
+        if (last != null && now - last < millis) {
+            if (whenBlocked != null) {
+                send(sender, whenBlocked);
+            }
+            return false;
+        }
         cooldowns.put(fullKey, now);
         return true;
     }

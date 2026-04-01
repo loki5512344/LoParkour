@@ -68,6 +68,7 @@ class ScoreboardManager {
         return new Score("?", "?", "?", 0);
     }
 
+    @SuppressWarnings("deprecation") // Scoreboard: legacy registerNewObjective(String,String,String)
     private void updateTitle(Score top, Score high, ParkourGenerator generator) {
         Objective obj = board.getObjective("lp_sidebar");
         if (obj == null) {

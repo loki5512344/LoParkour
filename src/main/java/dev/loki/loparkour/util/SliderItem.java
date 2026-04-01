@@ -9,12 +9,10 @@ import java.util.function.Consumer;
 public class SliderItem {
     
     public SliderItem initial(int value) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
     
     public SliderItem add(int index, Item item, Consumer<InventoryClickEvent> handler) {
-        // TODO: Implement with LoLib GUI
         return this;
     }
 }

@@ -1,14 +1,12 @@
 package dev.loki.loparkour.mode;
 
 import dev.loki.loparkour.config.Config;
-import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.leaderboard.Leaderboard;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.session.Session;
-import dev.loki.loparkour.world.Divider;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -139,8 +137,10 @@ public class CoopMode implements MultiMode {
         protected void score() {
             super.score(); // increments state.score and totalScore
 
-            // Track which player was on the block (primary player for single, varies in multi)
-            contributions.merge(player.getUUID(), 1, Integer::sum);
+            // Track contributions for all players in session
+            for (ParkourPlayer pp : getPlayers()) {
+                contributions.merge(pp.getUUID(), 1, Integer::sum);
+            }
 
             // Milestone every 50 points
             if (state.score % 50 == 0) {

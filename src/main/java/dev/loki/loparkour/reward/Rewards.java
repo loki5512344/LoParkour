@@ -47,6 +47,15 @@ public class Rewards {
         INTERVAL_REWARDS = parseScores("interval-rewards");
         ONE_TIME_REWARDS = parseScores("one-time-rewards");
     }
+    
+    /**
+     * Clear all reward maps to prevent memory leaks on reload
+     */
+    public static void clear() {
+        SCORE_REWARDS.clear();
+        INTERVAL_REWARDS.clear();
+        ONE_TIME_REWARDS.clear();
+    }
 
     private static Map<Integer, List<Reward>> parseScores(String path) {
         Map<Integer, List<Reward>> rewardMap = new HashMap<>();

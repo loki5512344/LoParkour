@@ -25,18 +25,21 @@ public class PlayerSettingsManager {
     private static void initializeColumnMappings() {
         COLUMN_MAPPINGS.put("uuid", new OptionContainer(null, null));
         COLUMN_MAPPINGS.put("style", new OptionContainer(ParkourOption.STYLES, (p, v) -> p.style = v));
-        COLUMN_MAPPINGS.put("blockLead", new OptionContainer(ParkourOption.LEADS, (p, v) -> p.blockLead = Integer.parseInt(v)));
+        COLUMN_MAPPINGS.put("blockLead", new OptionContainer(ParkourOption.LEADS, (p, v) ->
+                p.blockLead = parseIntSafe(v, defaultBlockLead())));
         COLUMN_MAPPINGS.put("useParticles", new OptionContainer(ParkourOption.PARTICLES, (p, v) -> p.particles = parseBoolean(v)));
         COLUMN_MAPPINGS.put("useSpecial", new OptionContainer(ParkourOption.SPECIAL_BLOCKS, (p, v) -> p.useSpecialBlocks = parseBoolean(v)));
         COLUMN_MAPPINGS.put("showFallMsg", new OptionContainer(ParkourOption.FALL_MESSAGE, (p, v) -> p.showFallMessage = parseBoolean(v)));
         COLUMN_MAPPINGS.put("showScoreboard", new OptionContainer(ParkourOption.SCOREBOARD, (p, v) -> p.showScoreboard = parseBoolean(v)));
-        COLUMN_MAPPINGS.put("selectedTime", new OptionContainer(ParkourOption.TIME, (p, v) -> p.selectedTime = Integer.parseInt(v)));
+        COLUMN_MAPPINGS.put("selectedTime", new OptionContainer(ParkourOption.TIME, (p, v) ->
+                p.selectedTime = parseIntSafe(v, defaultSelectedTime())));
         COLUMN_MAPPINGS.put("collectedRewards", new OptionContainer(null, PlayerSettingsManager::applyCollectedRewards));
         COLUMN_MAPPINGS.put("locale", new OptionContainer(ParkourOption.LANG, (p, v) -> {
             p._locale = v;
             p.locale = v;
         }));
-        COLUMN_MAPPINGS.put("schematicDifficulty", new OptionContainer(ParkourOption.SCHEMATICS, (p, v) -> p.schematicDifficulty = Double.parseDouble(v)));
+        COLUMN_MAPPINGS.put("schematicDifficulty", new OptionContainer(ParkourOption.SCHEMATICS, (p, v) ->
+                p.schematicDifficulty = parseDoubleSafe(v, defaultSchematicDifficulty())));
         COLUMN_MAPPINGS.put("sound", new OptionContainer(ParkourOption.SOUND, (p, v) -> p.sound = parseBoolean(v)));
     }
 
@@ -64,7 +67,49 @@ public class PlayerSettingsManager {
     }
 
     private static boolean parseBoolean(String string) {
-        return string == null || string.equals("1") || string.equals("true");
+        return string == null || string.equals("1") || string.equalsIgnoreCase("true");
+    }
+
+    private static int defaultBlockLead() {
+        return parseIntSafe(Option.OPTIONS_DEFAULTS.getOrDefault(ParkourOption.LEADS, "1"), 1);
+    }
+
+    private static int defaultSelectedTime() {
+        return parseIntSafe(Option.OPTIONS_DEFAULTS.getOrDefault(ParkourOption.TIME, "6000"), 6000);
+    }
+
+    private static double defaultSchematicDifficulty() {
+        return parseDoubleSafe(Option.OPTIONS_DEFAULTS.getOrDefault(ParkourOption.SCHEMATICS, "0.6"), 0.6);
+    }
+
+    private static int parseIntSafe(String v, int fallback) {
+        if (v == null) {
+            return fallback;
+        }
+        String s = v.trim();
+        if (s.isEmpty() || "true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private static double parseDoubleSafe(String v, double fallback) {
+        if (v == null) {
+            return fallback;
+        }
+        String s = v.trim();
+        if (s.isEmpty() || "true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
+            return fallback;
+        }
+        try {
+            return Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
     }
 
     private static void applyCollectedRewards(ParkourPlayer player, String value) {

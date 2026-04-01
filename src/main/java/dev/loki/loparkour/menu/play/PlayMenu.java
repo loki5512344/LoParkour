@@ -4,7 +4,6 @@ import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.menu.LPMenu;
 import dev.loki.loparkour.menu.Menus;
 import dev.loki.loparkour.menu.ParkourOption;
-import dev.lolib.gui.InventoryGUI;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

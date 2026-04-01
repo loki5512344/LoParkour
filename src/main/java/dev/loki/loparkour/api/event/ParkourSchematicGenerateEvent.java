@@ -17,11 +17,11 @@ public class ParkourSchematicGenerateEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public final dev.loki.loparkour.schematic.lpschem.LPSchematic schematic;
+    public final LPSchematic schematic;
     public final ParkourGenerator generator;
     public final ParkourPlayer player;
 
-    public ParkourSchematicGenerateEvent(dev.loki.loparkour.schematic.lpschem.LPSchematic schematic, ParkourGenerator generator, ParkourPlayer player) {
+    public ParkourSchematicGenerateEvent(LPSchematic schematic, ParkourGenerator generator, ParkourPlayer player) {
         this.schematic = schematic;
         this.generator = generator;
         this.player = player;

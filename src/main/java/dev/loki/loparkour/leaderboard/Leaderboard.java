@@ -1,9 +1,5 @@
 package dev.loki.loparkour.leaderboard;
 
-import java.util.ArrayList;
-
-import dev.lolib.scheduler.Scheduler;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.storage.Storage;
@@ -29,9 +25,9 @@ public class Leaderboard {
     public final Sort sort;
 
     /**
-     * A map of all scores for this mode
+     * A map of all scores for this mode (thread-safe)
      */
-    public final Map<UUID, Score> scores = new LinkedHashMap<>();
+    public final Map<UUID, Score> scores = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public Leaderboard(@NotNull String mode, Sort sort) {
         this.mode = mode.toLowerCase();
@@ -45,9 +41,8 @@ public class Leaderboard {
 
         var interval = Config.CONFIG.getInt("storage-update-interval");
 
-        // TODO: Fix scheduler call - needs proper implementation
-        // read/write all data every x seconds after x seconds to allow time for reading/writing
-        Scheduler.get(LoParkour.getPlugin()).runTimerAsync(() -> {
+        // Main-thread timer: only schedules I/O; avoids async + Bukkit edge cases
+        Scheduler.get(LoParkour.getPlugin()).runTimer(() -> {
             if (Config.CONFIG.getBoolean("joining")) {
                 write(true);
             } else {
@@ -68,8 +63,13 @@ public class Leaderboard {
      */
     public void read(boolean async) {
         run(() -> {
-            scores.clear();
-            scores.putAll(Storage.readScores(mode));
+            Map<UUID, Score> loadedScores = Storage.readScores(mode);
+            
+            // Synchronize access to prevent concurrent modification
+            synchronized (scores) {
+                scores.clear();
+                scores.putAll(loadedScores);
+            }
 
             sort();
         }, async);
@@ -91,7 +91,12 @@ public class Leaderboard {
     public Map<UUID, Score> sort(Sort sort) {
         LinkedHashMap<UUID, Score> sorted = new LinkedHashMap<>();
 
-        scores.entrySet().stream()
+        List<Map.Entry<UUID, Score>> snapshot;
+        synchronized (scores) {
+            snapshot = new ArrayList<>(scores.entrySet());
+        }
+
+        snapshot.stream()
                 .sorted((one, two) -> {
                     switch (sort) {
                         case SCORE -> {
@@ -122,8 +127,11 @@ public class Leaderboard {
     private void sort() {
         var sorted = sort(sort);
 
-        scores.clear();
-        scores.putAll(sorted);
+        // Synchronize access to prevent concurrent modification
+        synchronized (scores) {
+            scores.clear();
+            scores.putAll(sorted);
+        }
     }
 
     /**
@@ -157,7 +165,11 @@ public class Leaderboard {
      * Resets all registered scores for this mode
      */
     public void resetAll() {
-        new HashSet<>(scores.keySet()).forEach(this::remove);
+        List<UUID> keys;
+        synchronized (scores) {
+            keys = new ArrayList<>(scores.keySet());
+        }
+        keys.forEach(this::remove);
     }
 
     /**
@@ -174,7 +186,11 @@ public class Leaderboard {
      * @return The rank. Starts from 1. Returns 0 if no ranking is found.
      */
     public int getRank(@NotNull UUID uuid) {
-        return new ArrayList<>(scores.keySet()).indexOf(uuid) + 1;
+        List<UUID> keys;
+        synchronized (scores) {
+            keys = new ArrayList<>(scores.keySet());
+        }
+        return keys.indexOf(uuid) + 1;
     }
 
     /**
@@ -186,11 +202,14 @@ public class Leaderboard {
      */
     @Nullable
     public Score getScoreAtRank(int rank) {
-        if (scores.size() < rank) {
-            return null;
+        List<Score> values;
+        synchronized (scores) {
+            if (scores.size() < rank) {
+                return null;
+            }
+            values = new ArrayList<>(scores.values());
         }
-
-        return new ArrayList<>(scores.values()).get(rank - 1);
+        return values.get(rank - 1);
     }
 
     public enum Sort {

@@ -1,40 +1,36 @@
 package dev.loki.loparkour.generator;
 
-import java.util.ArrayList;
-
-import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Config;
+import dev.loki.loparkour.config.Option;
 import dev.loki.loparkour.session.Session;
+import dev.loki.loparkour.util.Materials;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
- * Spawn island handler.
- *
- * @author loki
- * @since 5.0.0
+ * Spawn area: flat platform at the session cell (no island schematic).
  */
 public final class Island {
 
-    /**
-     * The session.
-     */
+    /** Half-size: platform is (2*R+1) x (2*R+1) blocks. */
+    private static final int PLATFORM_RADIUS = 4;
+
     public final Session session;
     /**
-     * The schematic.
+     * Unused for spawn; kept for API / {@link dev.loki.loparkour.generator.jump.BlockPlacer} schematic branch.
      */
     public final dev.loki.loparkour.schematic.lpschem.LPSchematic schematic;
 
-    /**
-     * The blocks that have been affected by the schematic.
-     */
     public List<Block> blocks;
 
     public Island(@NotNull Session session, @Nullable dev.loki.loparkour.schematic.lpschem.LPSchematic schematic) {
@@ -42,62 +38,64 @@ public final class Island {
         this.schematic = schematic;
     }
 
-    /**
-     * Builds the island and teleports the player.
-     */
     public void build(Location location) {
-        if (schematic == null) {
-            LoParkour.getPlugin().getLogger().warning("Cannot build island - schematic is null!");
+        World world = location.getWorld();
+        if (world == null) {
             return;
         }
 
-        blocks = schematic.paste(location, location.getWorld());
+        int cx = location.getBlockX();
+        int cy = location.getBlockY();
+        int cz = location.getBlockZ();
 
-        Material playerMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.spawn.player-block").toUpperCase());
-        Material parkourMaterial = Material.getMaterial(Config.GENERATION.getString("advanced.island.parkour.begin-block").toUpperCase());
-        
-        // Fallback for first-block-material if not present in config
-        String firstBlockStr = "stone";
-        try {
-            firstBlockStr = Config.GENERATION.getString("advanced.island.parkour.first-block-material");
-        } catch (NoSuchElementException ex) {
-            LoParkour.getPlugin().getLogger().warning("Config key 'advanced.island.parkour.first-block-material' not found, using 'stone' as default");
+        BlockFace face = Option.HEADING;
+        int hx = face.getModX();
+        int hz = face.getModZ();
+
+        if (session.generator.state.heading == null) {
+            session.generator.state.heading = face.getDirection();
         }
-        Material firstBlockMaterial = Material.getMaterial(firstBlockStr.toUpperCase());
+        Vector h = session.generator.state.heading;
 
-        try {
-            Block player = blocks.stream().filter(block -> block.getType() == playerMaterial).findAny().orElseThrow();
-            Block parkour = blocks.stream().filter(block -> block.getType() == parkourMaterial).findAny().orElseThrow();
+        String firstBlockStr = Config.GENERATION.getString("advanced.island.parkour.first-block-material");
+        if (firstBlockStr.isBlank()) {
+            firstBlockStr = "stone";
+        }
+        Material platformMat = Materials.parseOr(firstBlockStr, Material.STONE);
 
-            player.setType(firstBlockMaterial);
-            parkour.setType(firstBlockMaterial);
+        List<Block> placed = new ArrayList<>();
+        for (int dx = -PLATFORM_RADIUS; dx <= PLATFORM_RADIUS; dx++) {
+            for (int dz = -PLATFORM_RADIUS; dz <= PLATFORM_RADIUS; dz++) {
+                Block b = world.getBlockAt(cx + dx, cy, cz + dz);
+                b.setType(platformMat);
+                placed.add(b);
+            }
+        }
 
-            Location ps = player.getLocation().add(0.5, 1.0, 0.5);
-            ps.setYaw(Config.GENERATION.getInt("advanced.island.spawn.yaw"));
-            ps.setPitch(Config.GENERATION.getInt("advanced.island.spawn.pitch"));
+        // Player stand 2 blocks "behind" center along heading; course line continues +4 then first jump +4 more (old island logic)
+        int px = cx - 2 * hx;
+        int pz = cz - 2 * hz;
+        int qx = px + 4 * hx;
+        int qz = pz + 4 * hz;
 
-            // First parkour block position - fixed offset from parkour marker
-            // Always 4 blocks in the direction of heading from center
-            Location parkourStart = parkour.getLocation().clone();
-            parkourStart.add(
-                session.generator.state.heading.getX() * 4,
+        Block playerFoot = world.getBlockAt(px, cy, pz);
+
+        Location ps = playerFoot.getLocation().add(0.5, 1.0, 0.5);
+        ps.setYaw((float) Config.GENERATION.getInt("advanced.island.spawn.yaw"));
+        ps.setPitch((float) Config.GENERATION.getInt("advanced.island.spawn.pitch"));
+
+        Location parkourStart = world.getBlockAt(qx, cy, qz).getLocation().add(
+                h.getX() * 4,
                 0,
-                session.generator.state.heading.getZ() * 4
-            );
-            
-            session.generator.generateFirst(ps, parkourStart);
-            session.generator.startTick();
-            session.getPlayers().forEach(pp -> pp.setup(ps));
-        } catch (NoSuchElementException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to find parkour or player spawn in schematic %s - check if you used the same material as the one in generation.yml - ".formatted("schematic") + ex.getMessage());
+                h.getZ() * 4);
 
-            blocks.forEach(block -> block.setType(Material.AIR));
-        }
+        session.generator.generateFirst(ps, parkourStart);
+        session.generator.startTick();
+        session.getPlayers().forEach(pp -> pp.setup(ps));
+
+        this.blocks = placed;
     }
 
-    /**
-     * Destroys the island.
-     */
     public void destroy() {
         if (blocks == null) {
             return;

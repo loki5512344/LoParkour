@@ -115,10 +115,12 @@ public class SpeedrunMode implements Mode {
 
             ScheduledTask warningTask = Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 if (block.getType() != Material.AIR) {
-                    player.player.playSound(block.getLocation(),
-                        Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
-                    player.player.spawnParticle(Particle.FLAME,
-                        block.getLocation().add(0.5, 1, 0.5), 8, 0.2, 0.2, 0.2, 0.01);
+                    for (ParkourPlayer pp : getPlayers()) {
+                        pp.player.playSound(block.getLocation(),
+                            Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+                        pp.player.spawnParticle(Particle.FLAME,
+                            block.getLocation().add(0.5, 1, 0.5), 8, 0.2, 0.2, 0.2, 0.01);
+                    }
                 }
             }, warningTicks);
 

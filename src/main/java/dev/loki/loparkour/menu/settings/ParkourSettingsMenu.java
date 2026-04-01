@@ -147,7 +147,6 @@ public class ParkourSettingsMenu extends LPMenu {
         String locale = pp.locale;
         String title = Locales.getString(locale, "settings.parkour_settings.styles.name");
 
-        List<Style> styles = new ArrayList<>();
         InventoryGUI gui = baseGui(title, 3);
 
         int slot = 10;

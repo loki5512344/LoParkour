@@ -1,30 +1,17 @@
 package dev.loki.loparkour.schematic;
 
-import dev.lolib.scheduler.Scheduler;
-
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
 import dev.lolib.scheduler.Scheduler;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * Stores schematics, so they don't have to be read every time.
+ * Schematic folder discovery (files are loaded on demand elsewhere).
  */
 public class Schematics {
 
-    private static final String[] SPAWN_SCHEMATICS = new String[]{
-            "spawn-island", "spawn-island-duels"
-    };
     private static final File FOLDER = LoParkour.getInFolder("schematics");
 
-    /**
-     * Reads all files.
-     */
     public static void init() {
         Scheduler.get(LoParkour.getPlugin()).runAsync(() -> {
             if (!FOLDER.exists()) {
@@ -37,7 +24,7 @@ public class Schematics {
                 LoParkour.log("No schematics found in " + FOLDER.getAbsolutePath());
                 return;
             }
-          
+
             LoParkour.log("Found " + files.length + " schematic files");
         });
     }

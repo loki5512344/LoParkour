@@ -1,32 +1,31 @@
 package dev.loki.loparkour.storage;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.Option;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Manages SQL database connection lifecycle.
- *
- * @since 5.0.0
+ * MySQL access via HikariCP pool.
  */
 class SQLConnectionManager {
 
-    private Connection connection;
+    private HikariDataSource dataSource;
     private volatile boolean connected = false;
     private final List<Runnable> onConnectCallbacks = new CopyOnWriteArrayList<>();
 
     public boolean isConnected() {
-        return connected;
+        return connected && dataSource != null && !dataSource.isClosed();
     }
 
     public void runWhenConnected(Runnable callback) {
-        if (connected) {
+        if (isConnected()) {
             callback.run();
         } else {
             onConnectCallbacks.add(callback);
@@ -35,14 +34,19 @@ class SQLConnectionManager {
 
     public void connect() {
         try {
-            LoParkour.log("Connecting to MySQL...");
-            loadDriver();
+            LoParkour.log("Connecting to MySQL (pool)...");
 
-            connection = DriverManager.getConnection(
-                    buildConnectionUrl(),
-                    Option.SQL_USERNAME,
-                    Option.SQL_PASSWORD);
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(buildConnectionUrl());
+            config.setUsername(Option.SQL_USERNAME);
+            config.setPassword(Option.SQL_PASSWORD);
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+            config.setConnectionTimeout(5000);
+            config.setMaxLifetime(1_800_000);
+            config.setPoolName("LoParkour");
 
+            dataSource = new HikariDataSource(config);
             connected = true;
             LoParkour.log("Connected to MySQL");
 
@@ -53,23 +57,17 @@ class SQLConnectionManager {
     }
 
     public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                LoParkour.log("Closed connection to MySQL");
-            }
-        } catch (SQLException ex) {
-            LoParkour.getPlugin().getLogger().severe(
-                    "Error while trying to close connection to SQL database - " + ex.getMessage());
+        connected = false;
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+            LoParkour.log("Closed MySQL pool");
         }
+        dataSource = null;
     }
 
     public PreparedStatement prepareStatement(String sql) {
-        validateConnection();
-        if (connection == null) return null;
-
         try {
-            return connection.prepareStatement(sql);
+            return getConnection().prepareStatement(sql);
         } catch (SQLException ex) {
             LoParkour.getPlugin().getLogger().severe(
                     "Error preparing statement: %s - %s".formatted(sql, ex.getMessage()));
@@ -77,30 +75,27 @@ class SQLConnectionManager {
         }
     }
 
+    public Connection getConnection() throws SQLException {
+        if (!isConnected()) {
+            throw new SQLException("Database not connected");
+        }
+        return dataSource.getConnection();
+    }
+
+    /**
+     * Ensures the pool was created; does not recreate the pool on failure (restart required).
+     */
     public void validateConnection() {
-        try {
-            if (connection == null || !connection.isValid(2)) {
-                LoParkour.getPlugin().getLogger().warning("MySQL connection lost, attempting reconnect...");
-                connect();
-            }
-        } catch (Exception ex) {
-            LoParkour.getPlugin().getLogger().severe("Error reconnecting to MySQL - " + ex.getMessage());
+        if (!isConnected()) {
+            LoParkour.getPlugin().getLogger().warning("MySQL pool not available");
             Option.SQL = false;
         }
     }
 
-    private void loadDriver() throws ClassNotFoundException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            Class.forName("com.mysql.jdbc.Driver");
-        }
-    }
-
     private String buildConnectionUrl() {
-        return ("jdbc:mysql://%s:%d/%s?allowPublicKeyRetrieval=true" +
-                "&useSSL=false&useUnicode=true&characterEncoding=utf-8" +
-                "&autoReconnect=true&maxReconnects=2&connectTimeout=5000&socketTimeout=5000")
+        return ("jdbc:mysql://%s:%d/%s?allowPublicKeyRetrieval=true"
+                + "&useSSL=false&useUnicode=true&characterEncoding=utf-8"
+                + "&autoReconnect=true&maxReconnects=2&connectTimeout=5000&socketTimeout=5000")
                 .formatted(Option.SQL_URL, Option.SQL_PORT, Option.SQL_DB);
     }
 
@@ -120,5 +115,10 @@ class SQLConnectionManager {
                 "Could not connect to MySQL - check your SQL settings - " + ex.getMessage());
         LoParkour.getPlugin().getLogger().severe("Disabling SQL storage, using local storage instead");
         Option.SQL = false;
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+        dataSource = null;
+        connected = false;
     }
 }

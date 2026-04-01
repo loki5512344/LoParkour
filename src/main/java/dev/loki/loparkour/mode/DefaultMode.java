@@ -1,7 +1,5 @@
 package dev.loki.loparkour.mode;
 
-import dev.loki.loparkour.util.Item;
-
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;

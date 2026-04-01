@@ -30,7 +30,7 @@ public class LangMenu extends LPMenu {
         String locale = pp.locale;
         String title = Locales.getString(locale, "settings.lang.name");
 
-        List<String> langs = new ArrayList<>(Locales.locales.keySet());
+        List<String> langs = new ArrayList<>(Locales.getLocaleKeys());
 
         InventoryGUI gui = baseGui(title, 3);
 

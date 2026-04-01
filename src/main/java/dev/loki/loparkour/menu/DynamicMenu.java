@@ -27,7 +27,7 @@ public abstract class DynamicMenu {
      * @param item          The item
      * @param shouldDisplay Whether this item should be displayed right now.
      */
-    // TODO: Migrate to LoLib GUI system
+    // Stub: migrate to LoLib GUI when dynamic rows are wired up.
     /*
     public void registerMainItem(int row, int id, BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.MenuItem> item, Predicate<Player> shouldDisplay) {
         if (id < 0 || row < 0 || row > 4) {
@@ -50,7 +50,7 @@ public abstract class DynamicMenu {
      * @param player The player
      * @param menu   The menu
      */
-    // TODO: Migrate to LoLib GUI system
+    // Stub: migrate to LoLib GUI when dynamic rows are wired up.
     /*
     public void display(Player player, Menu menu) {
         ParkourUser user = ParkourUser.getUser(player);

@@ -18,9 +18,9 @@ import dev.loki.loparkour.player.UserRegistry;
 import dev.loki.loparkour.reward.Rewards;
 import dev.loki.loparkour.schematic.lpschem.LPSchematicManager;
 import dev.loki.loparkour.storage.Storage;
+import dev.loki.loparkour.world.Divider;
 import dev.loki.loparkour.world.World;
 import dev.lolib.core.LoPlugin;
-import dev.lolib.scheduler.Scheduler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bstats.bukkit.Metrics;
@@ -30,6 +30,7 @@ import org.bstats.charts.SingleLineChart;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Main class of LoParkour
@@ -171,7 +172,7 @@ public final class LoParkour extends LoPlugin {
         Metrics metrics = new Metrics(this, 29754);
         metrics.addCustomChart(new SimplePie("using_sql", () -> Boolean.toString(Option.SQL)));
         metrics.addCustomChart(new SimplePie("using_rewards", () -> Boolean.toString(Rewards.REWARDS_ENABLED)));
-        metrics.addCustomChart(new SimplePie("locale_count", () -> Integer.toString(Locales.locales.size())));
+        metrics.addCustomChart(new SimplePie("locale_count", () -> Integer.toString(Locales.getLocaleCount())));
         metrics.addCustomChart(new SingleLineChart("player_joins", () -> {
             int joins = UserRegistry.getJoinCount();
             return joins;
@@ -181,12 +182,30 @@ public final class LoParkour extends LoPlugin {
     @Override
     public void disable() {
         try {
+            // Clear all sessions BEFORE leaving players to prevent memory leaks
+            new ArrayList<>(Divider.sections.keySet()).forEach(session -> {
+                try {
+                    session.onAllPlayersLeft();
+                } catch (Exception e) {
+                    getLogger().warning("Error cleaning up session: " + e.getMessage());
+                }
+            });
+            
+            // Remove all sessions from Divider
+            new ArrayList<>(Divider.sections.keySet()).forEach(Divider::remove);
+            
+            // Now leave all players
             for (ParkourUser user : ParkourUser.getUsers()) {
                 ParkourUser.leave(user);
             }
 
-            // write all LoParkour gamemodes
-            Modes.DEFAULT.getLeaderboard().write(false);
+            // write all LoParkour gamemodes (may be null if enable failed)
+            if (Modes.DEFAULT != null && Modes.DEFAULT.getLeaderboard() != null) {
+                Modes.DEFAULT.getLeaderboard().write(false);
+            }
+
+            // Clear rewards to prevent memory leaks
+            dev.loki.loparkour.reward.Rewards.clear();
 
             Storage.close();
             World.delete();

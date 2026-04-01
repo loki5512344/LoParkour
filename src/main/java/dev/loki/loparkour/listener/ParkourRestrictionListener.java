@@ -83,14 +83,14 @@ public class ParkourRestrictionListener implements Listener {
                 && event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND;
         if (!isRightClick) return;
 
-        org.bukkit.Material held = heldItem(player).getType();
+        ItemStack held = heldItem(player);
         event.setCancelled(true);
 
-        if      (held == Locales.getItem(player, "play.item").build().getType())      Menus.PLAY.open(player);
-        else if (held == Locales.getItem(player, "community.item").build().getType()) Menus.COMMUNITY.open(player);
-        else if (held == Locales.getItem(player, "settings.item").build().getType())  Menus.SETTINGS.open(player);
-        else if (held == Locales.getItem(player, "lobby.item").build().getType())     Menus.LOBBY.open(player);
-        else if (held == Locales.getItem(player, "other.quit").build().getType())     ParkourUser.leave(player);
+        if      (matchesLocaleHotbar(player, "play.item", held))       Menus.PLAY.open(player);
+        else if (matchesLocaleHotbar(player, "community.item", held))  Menus.COMMUNITY.open(player);
+        else if (matchesLocaleHotbar(player, "settings.item", held))   Menus.SETTINGS.open(player);
+        else if (matchesLocaleHotbar(player, "lobby.item", held))      Menus.LOBBY.open(player);
+        else if (matchesLocaleHotbar(player, "other.quit", held))      ParkourUser.leave(player);
         else if (!Config.CONFIG.getBoolean("options.disable-inventory-blocks"))       event.setCancelled(false);
     }
 
@@ -129,5 +129,11 @@ public class ParkourRestrictionListener implements Listener {
         return inv.getItemInMainHand().getType() == org.bukkit.Material.AIR
                 ? inv.getItemInOffHand()
                 : inv.getItemInMainHand();
+    }
+
+    /** Matches configured hotbar item (material + meta), not material alone. */
+    private boolean matchesLocaleHotbar(Player player, String localeKey, ItemStack held) {
+        ItemStack ref = Locales.getItem(player, localeKey).build();
+        return held != null && held.getType() != org.bukkit.Material.AIR && held.isSimilar(ref);
     }
 }

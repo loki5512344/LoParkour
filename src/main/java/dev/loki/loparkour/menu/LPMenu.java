@@ -26,7 +26,8 @@ public abstract class LPMenu {
 
     protected String locale(@NotNull Player player) {
         var user = dev.loki.loparkour.player.ParkourUser.getUser(player);
-        return user != null ? user.locale : Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG);
+        String loc = user != null ? user.locale : Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG);
+        return (loc != null && !loc.isBlank()) ? loc : "en";
     }
 
     protected ItemStack filler() {

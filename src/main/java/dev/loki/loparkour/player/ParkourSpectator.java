@@ -1,7 +1,5 @@
 package dev.loki.loparkour.player;
 
-import dev.lolib.scheduler.Scheduler;
-
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.api.event.ParkourSpectateEvent;
 import dev.loki.loparkour.config.Locales;
@@ -9,11 +7,11 @@ import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.session.Session;
 import dev.loki.loparkour.util.ColorUtil;
 import dev.lolib.scheduler.Scheduler;
+import dev.lolib.scheduler.ScheduledTask;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import dev.lolib.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +24,7 @@ import java.util.Comparator;
  */
 public class ParkourSpectator extends ParkourUser {
 
-    private final dev.lolib.scheduler.ScheduledTask closestChecker;
+    private final ScheduledTask closestChecker;
     /**
      * The closest player.
      */
@@ -54,7 +52,8 @@ public class ParkourSpectator extends ParkourUser {
                 }
             }, 1);
 
-        closestChecker = Scheduler.get(LoParkour.getPlugin()).runTimerAsync(() -> {
+        // Use runTimer (sync) instead of runTimerAsync to safely access Bukkit API
+        closestChecker = Scheduler.get(LoParkour.getPlugin()).runTimer(() -> {
                 if (session.getPlayers().isEmpty()) {
                     return;
                 }
@@ -68,6 +67,7 @@ public class ParkourSpectator extends ParkourUser {
     /**
      * Updates the spectator's action bar, scoreboard and checks distance.
      */
+    @SuppressWarnings("deprecation") // Spigot Chat API: action bar via TextComponent
     public void update() {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ColorUtil.color(Locales.getString(player, "play.spectator.action_bar"))));
         player.setGameMode(GameMode.SPECTATOR);
