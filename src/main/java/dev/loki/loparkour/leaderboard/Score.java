@@ -26,13 +26,24 @@ public record Score(String name, String time, String difficulty, int score) {
      * @return This score's time in millis.
      */
     public int getTimeMillis() {
-        String[] split = time.split(":");
+        if ("?".equals(time)) {
+            return Integer.MAX_VALUE; // Unknown time sorts last
+        }
 
-        int m = Integer.parseInt(split[0]);
-        int s = Integer.parseInt(split[1]);
-        int ms = Integer.parseInt(split[2]);
+        try {
+            String[] split = time.split(":");
+            if (split.length != 3) {
+                return Integer.MAX_VALUE;
+            }
 
-        return m * 60 * 1000 + s * 1000 + ms;
+            int m = Integer.parseInt(split[0]);
+            int s = Integer.parseInt(split[1]);
+            int ms = Integer.parseInt(split[2]);
+
+            return m * 60 * 1000 + s * 1000 + ms;
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
+        }
     }
 
     @Override

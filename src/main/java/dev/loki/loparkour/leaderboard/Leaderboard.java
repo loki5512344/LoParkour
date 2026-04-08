@@ -105,11 +105,13 @@ public class Leaderboard {
                             if (scoreComparison != 0) {
                                 return scoreComparison;
                             } else {
-                                return one.getValue().getTimeMillis() - two.getValue().getTimeMillis();
+                                // Use Integer.compare to avoid overflow
+                                return Integer.compare(one.getValue().getTimeMillis(), two.getValue().getTimeMillis());
                             }
                         }
                         case TIME -> {
-                            return one.getValue().getTimeMillis() - two.getValue().getTimeMillis();
+                            // Use Integer.compare to avoid overflow
+                            return Integer.compare(one.getValue().getTimeMillis(), two.getValue().getTimeMillis());
                         }
                         case DIFFICULTY -> {
                             return (int) Math.signum(Double.parseDouble(two.getValue().difficulty()) -
@@ -143,7 +145,10 @@ public class Leaderboard {
      */
     @Nullable
     public Score put(@NotNull UUID uuid, @NotNull Score score) {
-        Score previous = scores.put(uuid, score);
+        Score previous;
+        synchronized (scores) {
+            previous = scores.put(uuid, score);
+        }
 
         sort();
 
