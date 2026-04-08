@@ -111,6 +111,12 @@ public class SchematicCommandHandler {
     private static void handleSave(String name, CommandSender sender, Player player, PlayerCommandHandler cooldowns) {
         if (!cooldowns.cooldown(sender, "schematic-save", 2500)) return;
 
+        // Validate schematic name to prevent path traversal
+        if (!isValidSchematicName(name)) {
+            send(player, "<dark_red><bold>Schematics <reset><red>Invalid name. Use only letters, numbers, hyphens and underscores.");
+            return;
+        }
+
         Location[] sel = selections.get(player);
         if (sel == null || sel[0] == null || sel[1] == null) {
             send(player, "<dark_red><bold>Schematics <reset><red>Selection incomplete. Set both positions first.");
@@ -133,7 +139,24 @@ public class SchematicCommandHandler {
         }
     }
 
+    /**
+     * Validates schematic name to prevent path traversal and filesystem issues.
+     * Only allows alphanumeric characters, hyphens, and underscores.
+     */
+    private static boolean isValidSchematicName(String name) {
+        if (name == null || name.isEmpty() || name.length() > 64) {
+            return false;
+        }
+        return name.matches("^[a-zA-Z0-9_-]+$");
+    }
+
     private static void handlePaste(String name, CommandSender sender, Player player) {
+        // Validate schematic name to prevent path traversal
+        if (!isValidSchematicName(name)) {
+            send(player, "<dark_red><bold>Schematics <reset><red>Invalid name. Use only letters, numbers, hyphens and underscores.");
+            return;
+        }
+
         LPSchematic s = LoParkour.getSchematicManager().getSchematic(name);
         if (s == null) {
             send(sender, LoParkour.PREFIX + "Schematic '" + name + "' not found.");
