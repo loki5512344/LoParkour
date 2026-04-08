@@ -77,6 +77,8 @@ public class SpeedrunMode implements Mode {
 
     private static class SpeedrunGenerator extends ParkourGenerator {
 
+        private static final int TICKS_PER_SECOND = 20;
+
         /** Tracks scheduled tasks per block. Key = block, value = [warningTask, removalTask]. */
         private final Map<Block, ScheduledTask[]> scheduledTasks = new HashMap<>();
 
@@ -109,9 +111,9 @@ public class SpeedrunMode implements Mode {
             double blockLifetime = Config.CONFIG.getDouble("modes.speedrun.block-lifetime");
             double warningTime   = Config.CONFIG.getDouble("modes.speedrun.warning-time");
 
-            // Convert seconds → ticks (20 ticks/s), minimum 1 tick
-            long removalTicks = Math.max(1, Math.round(blockLifetime * 20));
-            long warningTicks = Math.max(1, Math.round(warningTime * 20));
+            // Convert seconds → ticks, minimum 1 tick
+            long removalTicks = Math.max(1, Math.round(blockLifetime * TICKS_PER_SECOND));
+            long warningTicks = Math.max(1, Math.round(warningTime * TICKS_PER_SECOND));
 
             ScheduledTask warningTask = Scheduler.get(LoParkour.getPlugin()).runLater(() -> {
                 if (block.getType() != Material.AIR) {

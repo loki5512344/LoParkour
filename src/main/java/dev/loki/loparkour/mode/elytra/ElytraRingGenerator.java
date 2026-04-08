@@ -77,14 +77,26 @@ public class ElytraRingGenerator {
     @NotNull
     private Location constrainHeight(@NotNull Location pos, @NotNull Location origin) {
         double maxHeight = origin.getY() + config.getMaxHeightAboveSpawn();
-        double minHeight = origin.getY() - 20; // Don't go too low
-        
+        double minHeight = Math.max(
+            origin.getWorld().getMinHeight() + 10, // World minimum + safety margin
+            origin.getY() - 20 // Don't go too far below spawn
+        );
+        double worldMaxHeight = origin.getWorld().getMaxHeight() - 10; // Safety margin from world ceiling
+
+        // Constrain to configured limits
         if (pos.getY() > maxHeight) {
-            pos.setY(maxHeight);
+            pos.setY(Math.min(maxHeight, worldMaxHeight));
         } else if (pos.getY() < minHeight) {
             pos.setY(minHeight);
         }
-        
+
+        // Final world bounds check
+        if (pos.getY() > worldMaxHeight) {
+            pos.setY(worldMaxHeight);
+        } else if (pos.getY() < origin.getWorld().getMinHeight()) {
+            pos.setY(origin.getWorld().getMinHeight() + 10);
+        }
+
         return pos;
     }
     

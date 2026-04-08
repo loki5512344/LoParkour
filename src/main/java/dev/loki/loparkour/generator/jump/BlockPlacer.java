@@ -87,10 +87,13 @@ public class BlockPlacer {
     private void placeNormalBlock() {
         List<Block> blocks = selectBlocks();
         if (blocks.isEmpty()) return;
-        
+
         Block selectedBlock = blocks.get(0); // Use first block for simplicity
         BlockData blockData = blockSelector.selectBlockData();
-        
+        if (blockData == null) {
+            return; // Skip if no valid block data available
+        }
+
         placeBlockData(selectedBlock, blockData);
         generator.state.history.add(selectedBlock);
     }
@@ -162,15 +165,7 @@ public class BlockPlacer {
     
     @NotNull
     private List<Block> pasteSchematic(@NotNull LPSchematic schematic, @NotNull Location location) {
-        List<Block> blocks = new ArrayList<>();
-        
-        // Simplified schematic pasting - would need full implementation
-        // For now, just place a single block
-        Block block = location.getBlock();
-        BlockData blockData = blockSelector.selectBlockData();
-        placeBlockData(block, blockData);
-        blocks.add(block);
-        
-        return blocks;
+        // Use the schematic's built-in paste method
+        return schematic.paste(location, location.getWorld());
     }
 }

@@ -65,16 +65,10 @@ class SQLConnectionManager {
         dataSource = null;
     }
 
-    public PreparedStatement prepareStatement(String sql) {
-        try {
-            return getConnection().prepareStatement(sql);
-        } catch (SQLException ex) {
-            LoParkour.getPlugin().getLogger().severe(
-                    "Error preparing statement: %s - %s".formatted(sql, ex.getMessage()));
-            return null;
-        }
-    }
-
+    /**
+     * Get a connection from the pool.
+     * Caller MUST close the connection when done (use try-with-resources).
+     */
     public Connection getConnection() throws SQLException {
         if (!isConnected()) {
             throw new SQLException("Database not connected");

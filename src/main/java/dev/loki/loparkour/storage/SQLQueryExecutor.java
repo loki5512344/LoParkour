@@ -2,6 +2,7 @@ package dev.loki.loparkour.storage;
 
 import dev.loki.loparkour.LoParkour;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -39,7 +40,8 @@ class SQLQueryExecutor {
 
     private void executeStaticUpdate(String sql, boolean suppressErrors) {
         connectionManager.validateConnection();
-        try (PreparedStatement stmt = connectionManager.prepareStatement(sql)) {
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (stmt != null) stmt.executeUpdate();
         } catch (SQLException ex) {
             if (!suppressErrors) {
@@ -58,7 +60,8 @@ class SQLQueryExecutor {
      */
     public void executeUpdate(String sql, Object... params) {
         connectionManager.validateConnection();
-        try (PreparedStatement stmt = connectionManager.prepareStatement(sql)) {
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (stmt == null) return;
             bindParams(stmt, params);
             stmt.executeUpdate();
@@ -70,10 +73,19 @@ class SQLQueryExecutor {
 
     /**
      * Prepares a statement for callers that need to read a {@link java.sql.ResultSet}.
-     * Parameters must be bound by the caller before executing.
+     * Caller is responsible for closing both the PreparedStatement AND the Connection.
+     *
+     * @deprecated Use try-with-resources with getConnection() instead to avoid connection leaks
      */
+    @Deprecated
     public PreparedStatement prepareStatement(String sql) {
-        return connectionManager.prepareStatement(sql);
+        try {
+            return connectionManager.getConnection().prepareStatement(sql);
+        } catch (SQLException ex) {
+            LoParkour.getPlugin().getLogger().severe(
+                "Error preparing statement: " + ex.getMessage());
+            return null;
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

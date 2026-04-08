@@ -93,7 +93,7 @@ public class SessionStateManager {
      * Get muted users count.
      */
     public int getMutedUsersCount() {
-        return (int) mutedUsers.values().stream().mapToInt(muted -> muted ? 1 : 0).sum();
+        return (int) mutedUsers.values().stream().filter(muted -> muted).count();
     }
     
     /**

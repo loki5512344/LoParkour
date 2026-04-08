@@ -43,6 +43,9 @@ public class ParkourGenerator {
         // Initialize zone from session
         if (session != null) {
             Location[] selection = dev.loki.loparkour.world.Divider.toSelection(session);
+            if (selection == null || selection.length < 2) {
+                throw new IllegalArgumentException("Invalid session zone: selection must contain at least 2 locations");
+            }
             this.state.zone = selection;
         }
         

@@ -131,13 +131,18 @@ public class GeneratorProfileManager {
     
     /**
      * Normalize a map so all values sum to 1.0
+     * If sum is 0, distributes values equally.
      */
     private <K> void normalizeMap(Map<K, Double> map) {
         if (map.isEmpty()) return;
-        
+
         double sum = map.values().stream().mapToDouble(Double::doubleValue).sum();
         if (sum > 0) {
             map.replaceAll((k, v) -> v / sum);
+        } else {
+            // If all values are 0, distribute equally
+            double equalValue = 1.0 / map.size();
+            map.replaceAll((k, v) -> equalValue);
         }
     }
 }

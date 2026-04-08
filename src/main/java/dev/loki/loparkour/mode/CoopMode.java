@@ -139,7 +139,7 @@ public class CoopMode implements MultiMode {
 
             // Track contributions for all players in session
             for (ParkourPlayer pp : getPlayers()) {
-                contributions.merge(pp.getUUID(), 1, Integer::sum);
+                contributions.compute(pp.getUUID(), (uuid, count) -> (count == null ? 0 : count) + 1);
             }
 
             // Milestone every 50 points

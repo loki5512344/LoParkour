@@ -130,10 +130,12 @@ public class RaceMode implements Mode {
             // Save to leaderboard
             registerScore(time, "1.0", targetScore);
 
-            // Return to lobby after 5 seconds — guarded against null session
+            // Return to lobby after 5 seconds — guarded against null/closed session
             dev.lolib.scheduler.Scheduler.get(LoParkour.getPlugin())
                 .runLater(() -> {
-                    if (!state.stopped) reset(false);
+                    if (session != null && !state.stopped) {
+                        reset(false);
+                    }
                 }, 100L);
         }
 
