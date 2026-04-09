@@ -263,6 +263,12 @@ public class Option {
 
             if (Config.CONFIG.isPath(parent + ".default")) {
                 Object value = Config.CONFIG.get(parent + ".default");
+
+                // Debug logging for LANG option
+                if (option == ParkourOption.LANG) {
+                    LoParkour.getPlugin().getLogger().info("LANG option: path=" + parent + ".default, value=" + value + ", type=" + (value != null ? value.getClass().getSimpleName() : "null"));
+                }
+
                 if (value != null) OPTIONS_DEFAULTS.put(option, String.valueOf(value));
             }
         }
