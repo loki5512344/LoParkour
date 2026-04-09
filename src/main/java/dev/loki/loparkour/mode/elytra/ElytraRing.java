@@ -1,80 +1,77 @@
 package dev.loki.loparkour.mode.elytra;
 
 import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a ring that players must fly through in Elytra mode.
+ * Represents a ring that players must fly through in Elytra mode
  */
 public class ElytraRing {
-    
-    private final int id;
+
     private final Location center;
-    private final Vector normal;
-    private final double radius;
-    private ArmorStand entity;
-    private boolean passed = false;
-    
-    public ElytraRing(int id, @NotNull Location center, @NotNull Vector normal, double radius) {
-        this.id = id;
+    private final int radius;
+    private final Vector direction;
+    private final int index;
+
+    public ElytraRing(@NotNull Location center, int radius, @NotNull Vector direction, int index) {
         this.center = center.clone();
-        this.normal = normal.clone().normalize();
         this.radius = radius;
+        this.direction = direction.clone().normalize();
+        this.index = index;
     }
-    
+
+    @NotNull
+    public Location getCenter() {
+        return center.clone();
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    @NotNull
+    public Vector getDirection() {
+        return direction.clone();
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
     /**
-     * Check if player has crossed through this ring.
+     * Check if a location is inside this ring
      */
-    public boolean hasCrossed(@NotNull Location playerLoc, @NotNull Vector velocity) {
-        if (passed) return false;
-        
-        Vector toPlayer = playerLoc.toVector().subtract(center.toVector());
-        double distanceToPlane = toPlayer.dot(normal);
-        
-        // Check if player is close to the ring plane
-        if (Math.abs(distanceToPlane) > 2.0) return false;
-        
-        // Check if moving towards the ring
-        if (velocity.dot(normal) <= 0) return false;
-        
-        // Check if within ring radius
-        Vector projectedPos = toPlayer.subtract(normal.clone().multiply(distanceToPlane));
-        return projectedPos.length() <= radius;
+    public boolean contains(@NotNull Location location) {
+        if (!location.getWorld().equals(center.getWorld())) {
+            return false;
+        }
+
+        Vector toLocation = location.toVector().subtract(center.toVector());
+        double distanceFromCenter = toLocation.length();
+
+        return distanceFromCenter <= radius;
     }
-    
+
     /**
-     * Check if player is currently inside the ring.
+     * Check if a location is centered (within inner radius) in this ring
      */
-    public boolean isInside(@NotNull Location playerLoc) {
-        Vector toPlayer = playerLoc.toVector().subtract(center.toVector());
-        double distanceToPlane = Math.abs(toPlayer.dot(normal));
-        
-        if (distanceToPlane > 1.0) return false;
-        
-        Vector projectedPos = toPlayer.subtract(normal.clone().multiply(toPlayer.dot(normal)));
-        return projectedPos.length() <= radius;
+    public boolean isCentered(@NotNull Location location, double innerRadiusPercent) {
+        if (!location.getWorld().equals(center.getWorld())) {
+            return false;
+        }
+
+        Vector toLocation = location.toVector().subtract(center.toVector());
+        double distanceFromCenter = toLocation.length();
+        double innerRadius = radius * innerRadiusPercent;
+
+        return distanceFromCenter <= innerRadius;
     }
-    
+
     /**
-     * Remove the ring's visual representation.
+     * Remove visual representation (called on cleanup)
      */
     public void remove() {
-        if (entity != null && !entity.isDead()) {
-            entity.remove();
-        }
+        // Particles are temporary, nothing to clean up
     }
-    
-    // Getters
-    public int getId() { return id; }
-    public Location getCenter() { return center.clone(); }
-    public Vector getNormal() { return normal.clone(); }
-    public double getRadius() { return radius; }
-    public ArmorStand getEntity() { return entity; }
-    public boolean isPassed() { return passed; }
-    
-    // Setters
-    public void setEntity(ArmorStand entity) { this.entity = entity; }
-    public void setPassed(boolean passed) { this.passed = passed; }
 }

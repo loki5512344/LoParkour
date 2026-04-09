@@ -12,129 +12,126 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Handles physics calculations and validation for Elytra mode.
+ * Handles physics checks for Elytra mode (ring crossings, falls, boosts)
  */
 public class ElytraPhysics {
-    
+
     private final ElytraConfig config;
-    private final Map<UUID, Long> lastFireworkTime = new HashMap<>();
-    
+    private final Map<UUID, Long> lastFireworkBoost = new HashMap<>();
+
     public ElytraPhysics(@NotNull ElytraConfig config) {
         this.config = config;
     }
-    
+
     /**
-     * Check if any rings have been crossed by the player.
+     * Check if player has crossed any new rings
+     * @return new ring index if crossed, otherwise current index
      */
-    public int checkRingCrossings(@NotNull ParkourPlayer player, @NotNull List<ElytraRing> rings, int currentRingIndex) {
-        Player p = player.player;
-        Location playerLoc = p.getLocation();
-        Vector velocity = p.getVelocity();
-        
-        // Check rings starting from current index
-        for (int i = currentRingIndex; i < rings.size(); i++) {
-            ElytraRing ring = rings.get(i);
-            
-            if (ring.hasCrossed(playerLoc, velocity)) {
-                ring.setPassed(true);
-                return i + 1; // Return new current ring index
-            }
-            
-            // Only check a few rings ahead to avoid skipping
-            if (i > currentRingIndex + 2) break;
+    public int checkRingCrossings(@NotNull ParkourPlayer player, @NotNull List<ElytraRing> rings, int currentIndex) {
+        if (currentIndex >= rings.size()) {
+            return currentIndex;
         }
+
+        Location playerLoc = player.player.getLocation();
         
-        return currentRingIndex; // No change
+        // Check next ring
+        ElytraRing nextRing = rings.get(currentIndex);
+        if (nextRing.contains(playerLoc)) {
+            return currentIndex + 1;
+        }
+
+        return currentIndex;
     }
-    
+
     /**
-     * Check if player should fall due to deviation from course.
+     * Check if player should fall (too far from course)
      */
     @NotNull
-    public FallCheckResult checkFall(@NotNull ParkourPlayer player, @NotNull List<ElytraRing> rings, int currentRingIndex) {
-        Player p = player.player;
-        Location playerLoc = p.getLocation();
-        
-        if (rings.isEmpty() || currentRingIndex >= rings.size()) {
-            return new FallCheckResult(false, "No rings available");
+    public FallCheckResult checkFall(@NotNull ParkourPlayer player, @NotNull List<ElytraRing> rings, int currentIndex) {
+        if (rings.isEmpty()) {
+            return FallCheckResult.noFall();
         }
-        
-        // Check distance to current ring
-        ElytraRing currentRing = rings.get(currentRingIndex);
-        double distanceToRing = playerLoc.distance(currentRing.getCenter());
-        
-        if (distanceToRing > config.getMaxDeviation()) {
-            return new FallCheckResult(true, "Too far from course (distance: " + String.format("%.1f", distanceToRing) + ")");
+
+        Location playerLoc = player.player.getLocation();
+
+        // Check if player is too far from nearest ring
+        ElytraRing nearestRing = currentIndex < rings.size() ? rings.get(currentIndex) : rings.get(rings.size() - 1);
+        double distance = playerLoc.distance(nearestRing.getCenter());
+
+        if (distance > config.getMaxDeviation()) {
+            return FallCheckResult.fall("Too far from course");
         }
-        
-        // Check if player is flying (has elytra deployed)
-        if (!p.isGliding()) {
-            return new FallCheckResult(true, "Not gliding");
+
+        // Check if player is gliding
+        if (!player.player.isGliding()) {
+            return FallCheckResult.fall("Not gliding");
         }
-        
-        return new FallCheckResult(false, null);
+
+        return FallCheckResult.noFall();
     }
-    
+
     /**
-     * Apply firework boost to player if cooldown allows.
-     */
-    public boolean applyFireworkBoost(@NotNull ParkourPlayer player) {
-        Player p = player.player;
-        UUID playerId = p.getUniqueId();
-        long currentTime = System.currentTimeMillis();
-        
-        // Check cooldown
-        Long lastBoost = lastFireworkTime.get(playerId);
-        if (lastBoost != null && (currentTime - lastBoost) < config.getFireworkCooldownMs()) {
-            return false; // Still on cooldown
-        }
-        
-        // Apply boost
-        Vector velocity = p.getVelocity();
-        Vector boostedVelocity = velocity.multiply(config.getBoostPower());
-        p.setVelocity(boostedVelocity);
-        
-        // Update cooldown
-        lastFireworkTime.put(playerId, currentTime);
-        
-        return true;
-    }
-    
-    /**
-     * Check if player is centered when passing through a ring.
+     * Check if player passed through center of ring (for bonus points)
      */
     public boolean isPlayerCentered(@NotNull Location playerLoc, @NotNull ElytraRing ring) {
-        Vector toPlayer = playerLoc.toVector().subtract(ring.getCenter().toVector());
-        Vector normal = ring.getNormal();
-        
-        // Project player position onto ring plane
-        Vector projectedPos = toPlayer.subtract(normal.clone().multiply(toPlayer.dot(normal)));
-        
-        // Check if within center threshold (25% of ring radius)
-        double centerThreshold = ring.getRadius() * 0.25;
-        return projectedPos.length() <= centerThreshold;
+        return ring.isCentered(playerLoc, 0.5); // 50% of radius
     }
-    
+
     /**
-     * Clean up physics data for a player.
+     * Apply firework boost if cooldown allows
      */
-    public void cleanup(@NotNull UUID playerId) {
-        lastFireworkTime.remove(playerId);
+    public boolean applyFireworkBoost(@NotNull ParkourPlayer player) {
+        UUID uuid = player.getUUID();
+        long now = System.currentTimeMillis();
+        Long lastBoost = lastFireworkBoost.get(uuid);
+
+        if (lastBoost != null && (now - lastBoost) < config.getFireworkCooldownMs()) {
+            return false; // Still on cooldown
+        }
+
+        // Apply boost
+        Player p = player.player;
+        Vector velocity = p.getVelocity();
+        Vector boost = p.getLocation().getDirection().multiply(config.getBoostPower());
+        p.setVelocity(velocity.add(boost));
+
+        lastFireworkBoost.put(uuid, now);
+        return true;
     }
-    
+
     /**
-     * Result of fall check.
+     * Cleanup player data
+     */
+    public void cleanup(@NotNull UUID uuid) {
+        lastFireworkBoost.remove(uuid);
+    }
+
+    /**
+     * Result of fall check
      */
     public static class FallCheckResult {
         private final boolean shouldFall;
         private final String reason;
-        
-        public FallCheckResult(boolean shouldFall, String reason) {
+
+        private FallCheckResult(boolean shouldFall, String reason) {
             this.shouldFall = shouldFall;
             this.reason = reason;
         }
-        
-        public boolean shouldFall() { return shouldFall; }
-        public String getReason() { return reason; }
+
+        public static FallCheckResult fall(String reason) {
+            return new FallCheckResult(true, reason);
+        }
+
+        public static FallCheckResult noFall() {
+            return new FallCheckResult(false, "");
+        }
+
+        public boolean shouldFall() {
+            return shouldFall;
+        }
+
+        public String getReason() {
+            return reason;
+        }
     }
 }
