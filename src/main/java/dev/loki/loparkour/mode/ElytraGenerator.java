@@ -55,18 +55,34 @@ public class ElytraGenerator extends ParkourGenerator implements Listener {
     
     @Override
     public void generateFirst(Location spawn, Location blockSpawn) {
-        // Generate initial rings
+        // Generate initial rings starting from spawn position
         Vector initialDirection = new Vector(1, 0, 0); // East direction
         List<ElytraRing> initialRings = ringGenerator.generateRings(spawn, initialDirection, config.getRingLead());
         rings.addAll(initialRings);
-        
-        // Initialize player data
+
+        // Initialize player data and launch them
         for (ParkourPlayer player : getPlayers()) {
             playerRingIndex.put(player, 0);
             giveElytraAndFireworks(player);
+            launchPlayer(player, spawn);
         }
-        
+
         startTasks();
+    }
+
+    private void launchPlayer(@NotNull ParkourPlayer player, @NotNull Location spawn) {
+        Player p = player.player;
+
+        // Teleport player above spawn (10 blocks up)
+        Location launchPos = spawn.clone().add(0, 10, 0);
+        p.teleport(launchPos);
+
+        // Enable gliding
+        p.setGliding(true);
+
+        // Give initial forward velocity
+        Vector velocity = new Vector(1, 0, 0).normalize().multiply(1.5);
+        p.setVelocity(velocity);
     }
     
     @Override
