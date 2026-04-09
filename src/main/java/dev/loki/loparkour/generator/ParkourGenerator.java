@@ -72,7 +72,7 @@ public class ParkourGenerator {
     // Lifecycle methods
     public void startTick() { lifecycle.startTick(); }
     public void tick() { lifecycle.tick(); }
-    protected void fall() { lifecycle.fall(); }
+    public void fall() { lifecycle.fall(); }
     protected void score() { lifecycle.score(); }
     
     public void reset(boolean regenerate) {

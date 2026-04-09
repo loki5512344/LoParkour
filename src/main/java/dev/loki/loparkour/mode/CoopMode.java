@@ -163,7 +163,7 @@ public class CoopMode implements MultiMode {
         }
 
         @Override
-        protected void fall() {
+        public void fall() {
             // Show each player their individual contribution before reset
             getPlayers().forEach(pp -> {
                 int contrib = contributions.getOrDefault(pp.getUUID(), 0);

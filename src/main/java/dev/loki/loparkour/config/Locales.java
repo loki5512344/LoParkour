@@ -90,9 +90,15 @@ public class Locales {
     @NotNull
     public static Item getItem(@NotNull String locale, @NotNull String path, String... replace) {
         synchronized (locales) {
-            if (locales.isEmpty()) return new Item(Material.STONE, "");
+            if (locales.isEmpty()) {
+                LoParkour.getPlugin().getLogger().warning("Locales are empty! Returning STONE item for path: " + path);
+                return new Item(Material.STONE, "");
+            }
             FileConfiguration config = locales.get(locale);
-            if (config == null) return new Item(Material.STONE, "");
+            if (config == null) {
+                LoParkour.getPlugin().getLogger().warning("Locale '" + locale + "' not found! Available: " + locales.keySet() + ". Returning STONE for path: " + path);
+                return new Item(Material.STONE, "");
+            }
             return buildItem(config, path, replace);
         }
     }

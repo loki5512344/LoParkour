@@ -44,19 +44,40 @@ public class LifecycleTickManager {
      */
     public void tick() {
         tickCounter++;
-        
+
+        // Check if players fell below threshold
+        checkPlayerFall();
+
         if (tickCounter % Option.CLEANUP_INTERVAL == 0) {
             cleanup.cleanupDistantBlocks();
         }
         if (tickCounter % TIME_UI_INTERVAL == 0) {
             visualUpdater.updateTimeDisplays();
         }
-        
+
         // Generate more blocks if needed
         maintainBlockLead();
-        
+
         // Update player visuals
         visualUpdater.updateAllPlayers();
+    }
+
+    /**
+     * Check if any player fell below the threshold.
+     */
+    private void checkPlayerFall() {
+        if (generator.state.playerSpawn == null) {
+            return;
+        }
+
+        double fallThreshold = generator.state.playerSpawn.getY() - 30;
+
+        for (var player : generator.getPlayers()) {
+            if (player.player.getLocation().getY() < fallThreshold) {
+                generator.fall();
+                break; // Only trigger once per tick
+            }
+        }
     }
     
     /**
