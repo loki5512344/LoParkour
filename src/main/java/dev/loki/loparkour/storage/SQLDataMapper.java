@@ -85,9 +85,14 @@ public class SQLDataMapper {
      * Apply player data to ParkourPlayer object.
      */
     public static void applyPlayerData(@NotNull ParkourPlayer player, @NotNull PlayerData data) {
-        player.locale = data.locale();
+        // Sanitize legacy Boolean locale values
+        String locale = data.locale();
+        if (locale == null || "true".equals(locale) || "false".equals(locale) || "1".equals(locale) || "0".equals(locale)) {
+            locale = "en";
+        }
+        player.locale = locale;
         player.style = data.styleName();
-        
+
         // Apply settings if available
         if (data.settings() != null && !data.settings().isEmpty()) {
             deserializeSettings(player, data.settings());

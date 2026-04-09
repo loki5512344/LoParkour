@@ -266,6 +266,12 @@ public class Option {
                 // Always read as String to avoid Boolean parsing issues
                 String value = Config.CONFIG.getString(defaultPath);
 
+                // Sanitize legacy Boolean values for LANG option
+                if (option == ParkourOption.LANG && ("true".equals(value) || "false".equals(value) || "1".equals(value) || "0".equals(value))) {
+                    value = "en";
+                    LoParkour.getPlugin().getLogger().warning("LANG option had invalid Boolean value, reset to 'en'");
+                }
+
                 // Debug logging
                 if (option == ParkourOption.LANG) {
                     LoParkour.getPlugin().getLogger().info("LANG option: path=" + defaultPath + ", value=" + value);

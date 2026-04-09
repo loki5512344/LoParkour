@@ -72,11 +72,12 @@ public final class Island {
             }
         }
 
-        // Player stand 2 blocks "behind" center along heading; course line continues +4 then first jump +4 more (old island logic)
-        int px = cx - 2 * hx;
-        int pz = cz - 2 * hz;
-        int qx = px + 4 * hx;
-        int qz = pz + 4 * hz;
+        // Player spawns at center, first parkour block 6 blocks forward and 1 block up
+        int px = cx;
+        int pz = cz;
+        int qx = cx + 6 * hx;
+        int qz = cz + 6 * hz;
+        int qy = cy + 1;
 
         Block playerFoot = world.getBlockAt(px, cy, pz);
 
@@ -84,10 +85,7 @@ public final class Island {
         ps.setYaw((float) Config.GENERATION.getInt("advanced.island.spawn.yaw"));
         ps.setPitch((float) Config.GENERATION.getInt("advanced.island.spawn.pitch"));
 
-        Location parkourStart = world.getBlockAt(qx, cy, qz).getLocation().add(
-                h.getX() * 4,
-                0,
-                h.getZ() * 4);
+        Location parkourStart = world.getBlockAt(qx, qy, qz).getLocation();
 
         session.generator.generateFirst(ps, parkourStart);
         session.generator.startTick();

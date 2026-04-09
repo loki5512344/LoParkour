@@ -46,5 +46,9 @@ class SQLMigrationManager {
         queryExecutor.executeStaticUpdateSuppressed("ALTER TABLE `%soptions` ADD `sound` BOOLEAN;".formatted(prefix));
         queryExecutor.executeStaticUpdateSuppressed("ALTER TABLE `%soptions` DROP COLUMN `useDifficulty`;".formatted(prefix));
         queryExecutor.executeStaticUpdateSuppressed("ALTER TABLE `%soptions` DROP COLUMN `useStructure`;".formatted(prefix));
+
+        // Fix legacy Boolean locale values (true/false) to proper locale codes
+        queryExecutor.executeStaticUpdateSuppressed(
+            "UPDATE `%soptions` SET `locale` = 'en' WHERE `locale` IN ('true', 'false', '1', '0');".formatted(prefix));
     }
 }

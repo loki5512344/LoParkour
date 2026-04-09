@@ -97,7 +97,13 @@ class StorageDisk {
             settings.put("showScoreboard", from.showScoreboard);
             settings.put("selectedTime", from.selectedTime);
             settings.put("collectedRewards", from.collectedRewards);
-            settings.put("locale", from._locale);
+
+            // Sanitize legacy Boolean locale values
+            String locale = from._locale;
+            if (locale == null || "true".equals(locale) || "false".equals(locale) || "1".equals(locale) || "0".equals(locale)) {
+                locale = "en";
+            }
+            settings.put("locale", locale);
             settings.put("schematicDifficulty", from.schematicDifficulty);
             settings.put("sound", from.sound);
 

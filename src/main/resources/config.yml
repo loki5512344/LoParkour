@@ -17,107 +17,53 @@
 #                                                                               #
 #===============================================================================#
 
+# -= Spawn location =-
+# Location where players spawn when joining parkour
+# Syntax: '(x,y,z,worldName)'
+spawn-location: '(0,100,0,loparkour)'
+
+# -= Spawn axes =-
+# Sets the pitch and yaw of the spawn location
+# First argument is pitch, second is yaw
+spawn-axes: '0,0'
+
 # -= Debugging =-
 debug: false
 
 # -= Enable joining =-
-# Whether players can join the parkour.
-# When joining is disabled, the IP instance on this server will only read data from leaderboard databases.
-# Set joining to false if you want to create a cross-server leaderboard on this server.
-# true = players can join, false = players can't join.
 joining: true
 
 # -= Proxy options =-
-# Change the proxy settings. Applies to Velocity as well.
-# This also applies to servers who only want to run this plugin.
 bungeecord:
-
-  # -= Proxy enabled =-
-  # Enabling this will make players who join the server automatically join the parkour.
-  # You can enable this even without BungeeCord to make this a parkour-only server.
-  # True = players will automatically join the parkour on join, false = players have to use the menu/parkour command.
   enabled: false
-
-  # -= Proxy return server =-
-  # The server the players will be returned to after they leave.
   return_server: 'Lobby'
-
-  # -= Go back enabled =-
-  # Whether players should be teleported to a specific location after leaving.
-  # True = players get teleported to a specific location when they leave, false = they go to their location when they joined.
   go-back-enabled: false
-
-  # -= Go back location =-
-  # The place players will go back to when they leave
-  # Only applies if proxy mode is disabled and the go-back-enabled option is true.
-  # Syntax: '(x,y,z,worldName)'
   go-back: '(0,100,0,world)'
-
-  # -= Go back axes =-
-  # Sets the pitch and yaw of the go-back location.
-  # The first argument is the pitch, second yaw.
   go-back-axes: '0,0'
 
 # -= Storage update interval =-
-# The amount of seconds between every disk/database storage update.
-# In this update, the in-memory scores will be written to storage.
-# A lower number might reduce the chance of losing data on server crashes,
-# but will increase the amount of requests to the disk/database.
-# (requires a restart, default = 300)
 storage-update-interval: 300
 
 # -= MySQL =-
-# The options for using MySQL as storage.
 sql:
-
-  # -= MySQL enabled =-
-  # Using databases makes you able to sync player data across multiple servers.
-  # True = data will be stored in a database, false = data will be stored locally.
   enabled: false
-
-  # -= MySQL settings =-
   url: 'localhost'
   port: 3306
   username: 'efnilite'
-  # If env LOPARKOUR_SQL_PASSWORD is set (non-empty), it overrides this value (recommended for production).
   password: 'super secret password'
   database: 'ip'
-
-  # -= MySQL prefix =-
-  # The prefix given to any table names
-  # The default is ''. Example: 'ip-' -> this would make the table 'ip-players'
   prefix: ''
 
 # -= World options =-
 world:
-
-  # -= World name =-
-  # The world in which parkour will take place
   name: 'loparkour'
-
-  # -= Island schematic =-
-  # Name of the spawn island schematic (schematics-new folder). Falls back to generation.yml if empty.
-  island-schematic: island
-
-  # -= Delete world on reload =-
-  # Deletes the world on reload/restart of the server.
-  # This makes sure there are no ghost blocks left when a server crash occurs.
-  # Disable this if you want to have a custom map.
+  island-schematic: 'island'
   delete-on-reload: true
-
-  # -= World fall back =-
-  # The world players will be teleported to if they accidentally join the Parkour world without joining parkour
   fall-back: 'world'
 
 # -= General options =-
 options:
-
-  # -= Leads options =-
   leads:
-
-    # -= Leads amounts =-
-    # The lead amounts a player can select in their options menu.
-    # Values also need to be above 1 and below 64.
     amount:
       - 1
       - 2
@@ -130,46 +76,15 @@ options:
       - 9
       - 10
 
-  # -= Time options =-
   time:
-
-    # -= Time format =-
-    # Choose between:
-    # 24 - 24 hour clock. (00:00, 12:00, 23:59)
-    # 12 - 12 hour clock. (12:00 AM, 12:00 PM, 11:59 PM)
     format: 24
-
-    # -= Score time format =-
-    # H = hours, m = minutes, s = seconds, S = milliseconds
     score-format: "mm:ss:SSS"
 
-  # -= Inventory handling =-
-  # Toggles the inventory handling system.
-  # True = players' inventories get saved and cleared when they join the parkour and when they leave they get their items back
-  # False = players keep their inventories when they join the parkour
   inventory-handling: true
-
-  # -= Inventory saving =-
-  # Logs inventories of the players that join to the inventories/ folder.
-  # It is highly recommended to keep this enabled. Server crashes or errors while leaving might cause
-  # inventories of players to be lost if this is set to false!
-  # Use /ip recoverinventory to recover inventories of players who joined the parkour and who lost their inventories in a crash, etc.
   inventory-saving: true
-
-  # -= Alternate inventory saving command =-
-  # If you don't trust this plugin to save inventories, you can select another plugin to execute a command
-  # to save players' inventories.
-  # Example: /inventory save %player%
-  # This command will be executed by console.
   alt-inventory-saving-command: ''
-
-  # -= Disables inventory blocks =-
-  # Disables the ability for a player to open blocks with an inventory.
   disable-inventory-blocks: false
 
-  # -= Hotbar slots =-
-  # Configure which hotbar slots (0-8) to use for parkour items
-  # Items will be placed in these slots in order: play, community, settings, lobby, quit
   hotbar-slots:
     play: 1
     community: 3
@@ -178,33 +93,13 @@ options:
     quit: 7
 
 # -= Permissions options =-
-# These permissions are used to determine which things the player can change.
-# Find them at https://efnilite.dev/projects/ip/wiki
 permissions:
-
-  # -= Permissions enabled =-
-  # If permission handling is enabled.
-  # True = players need a permission to join, view the leaderboard, etc., false = players can do and view anything
-  # from this plugin besides admin commands.
   enabled: false
-
-  # -= Per style permissions =-
-  # Gives every style a permission. The permission is the name of the style.
-  # Syntax: ip.settings.styles.<style> - example: ip.settings.styles.red
-  # Useful for servers with ranks.
   per-style: false
 
 # -= Focus mode options =-
 focus-mode:
-
-  # -= Focus mode enabled =-
-  # If focus mode is enabled players can't use commands while in parkour.
-  # Note: this might not work on all commands because Minecraft.
   enabled: false
-
-  # -=
-  # A whitelist for commands which ARE allowed during focus mode (if focus mode is enabled).
-  # If you want to disable the default whitelisted commands you can remove every item in the list below.
   whitelist:
     - 'ip'
     - 'parkour'
@@ -217,10 +112,6 @@ focus-mode:
 
 # -= Styles options =-
 styles:
-
-  # -= Styles list =-
-  # The list of all available styles, which you can add to if you want.
-  # For changes, you have to restart or reload your server.
   list:
     red: [red_wool, red_stained_glass, red_concrete, red_terracotta, red_concrete_slab, red_terracotta_slab]
     blue: [blue_wool, blue_stained_glass, blue_concrete, blue_terracotta, blue_concrete_slab, blue_terracotta_slab]
@@ -244,37 +135,15 @@ styles:
 
 # -= Jump validation options =-
 jump-validation:
-
-  # -= Jump validation enabled =-
-  # Validates generated jumps using Minecraft physics.
-  # Ensures all jumps are physically possible.
   enabled: true
-
-  # -= Maximum jump distance =-
-  # Maximum 3D distance for a jump (Pythagorean theorem).
   max-distance: 4.5
-
-  # -= Maximum horizontal distance =-
-  # Maximum horizontal distance (X and Z axes only).
   max-horizontal: 4.1
-
-  # -= Maximum vertical up =-
-  # Maximum height a player can jump up.
   max-vertical-up: 1.25
-
-  # -= Maximum vertical down =-
-  # Maximum height a player can jump down.
   max-vertical-down: 3.0
 
 # -= Jump types options =-
 jump-types:
-
-  # -= Jump types enabled =-
-  # Enables special jump types (neo-jumps, fence jumps, etc.).
   enabled: false
-
-  # -= Jump types list =-
-  # Configure which jump types are enabled and their spawn chances.
   types:
     neo-jump:
       enabled: true
@@ -294,50 +163,24 @@ jump-types:
 
 # -= Memory optimization =-
 memory:
-
-  # -= Block cleanup distance =-
-  # Span (in history indices) for schematic trail removal and similar bulk clears.
   block-cleanup-distance: 20
-
-  # -= Trail keep-behind =-
-  # How many course blocks to keep behind the rearmost standing player before removing older trail (index-based; not world distance).
   trail-keep-behind: 10
-
-  # -= Cleanup interval =-
-  # How often (in ticks) to run trail cleanup behind players.
-  # 20 ticks = 1 second
   cleanup-interval: 100
 
 # -= Ghost mode options =-
 ghost-mode:
-
-  # -= Ghost mode enabled =-
-  # Shows ghosts of top players running alongside you.
   enabled: false
-
-  # -= Show top =-
-  # How many top ghosts to show (1-3).
   show-top: 3
-
-  # -= Ghost transparency =-
-  # Transparency of ghost entities (0.0 = invisible, 1.0 = fully visible).
   transparency: 0.5
 
 # -= Game modes options =-
 modes:
-
-  # -= Speedrun mode =-
   speedrun:
-    # Block lifetime in seconds before disappearing
     block-lifetime: 1.5
-    # Warning time in seconds before block disappears
     warning-time: 0.5
 
-  # -= Gravity shift mode =-
   gravity-shift:
-    # Interval in jumps before effect changes
     interval: 10
-    
     effects:
       jump-boost:
         enabled: true
@@ -356,97 +199,45 @@ modes:
         amplifier: 1
         duration: 5
 
-  # -= Hardcore mode =-
   hardcore:
-    # Reset all rewards on fall
     reset-rewards: true
 
-  # -= Elytra mode =-
   elytra:
-    # Enable elytra mode
     enabled: true
-
-    # --- Ring course settings ---
-    # Minimum distance (blocks) between consecutive rings
     ring-distance-min: 20
-    # Maximum distance (blocks) between consecutive rings
     ring-distance-max: 40
-    # Ring radius in blocks. Player must fly through the center hole.
     ring-size: 5
-    # How many rings to generate ahead of the player
     ring-lead: 8
-    # Maximum horizontal heading change per ring in degrees (course curvature)
     max-heading-change-horizontal: 30
-    # Maximum vertical heading change per ring in degrees
     max-heading-change-vertical: 15
-    # Maximum Y blocks above spawn point that the course can reach
     max-height-above-spawn: 60
-    # How far from the course (blocks) before a fall is triggered
     max-deviation: 25
-
-    # --- Firework / boost settings ---
-    # Firework velocity boost multiplier
     boost-power: 1.5
-    # Cooldown between firework boosts in milliseconds
     firework-cooldown-ms: 3000
-    # Number of fireworks given at session start
     starting-fireworks: 64
 
-  # -= Race mode =-
   race:
-    # Enable race mode
     enabled: true
-    # Target score to win
     target-score: 100
 
-  # -= Co-op mode =-
   coop:
-    # Enable co-op mode
     enabled: true
-    # Maximum players in co-op session
     max-players: 4
-
 
 # -= Scoring options =-
 scoring:
-
-  # -= All points =-
-  # This will give the player all possible points.
-  # If a player skips a block jump, it will still give the points for that block.
   all-points: false
-
-  # -= Rewards use total score =-
-  # Whether interval rewards should use the total score of a session or not.
-  # The total score doesn't reset when a player falls.
   rewards-use-total-score: false
 
 # -= Particle options =-
 particles:
-
-  # -= Particle shape =-
-  # The shape of the particle that will appear when a new block generates.
-  # Possible options: dot, box, circle
   particle-shape: 'box'
-
-  # -= Particle type =-
-  # The type of particle that will appear when a new block generates.
-  # You can find all types at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Particle.html
   particle-type: 'SPELL_INSTANT'
-
-  # -= Sound type =-
-  # The sound that will play when a new block generates.
-  # You can find all sounds at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
   sound-type: 'BLOCK_NOTE_BLOCK_GUITAR'
-
-  # -= Sound pitch =-
-  # The pitch of the sound that will play when a new block generates.
   sound-pitch: 3
-
-  # -= Sound volume =-
   sound-volume: 2
 
 # -= Default values =-
-# This is a list of all options and defaults.
 default-values:
   main:
     enabled: true
@@ -456,39 +247,33 @@ default-values:
 
   play:
     enabled: true
-
     single:
       enabled: true
-
     spectator:
       enabled: true
 
   community:
     enabled: true
-
     leaderboards:
       enabled: true
 
   settings:
     enabled: true
-
     lang:
       enabled: true
-      default: en
+      default: 'en'
 
     chat:
       enabled: true
 
     parkour_settings:
-
       item:
         enabled: true
 
       items:
-
         styles:
           enabled: true
-          default: "red"
+          default: 'red'
 
         leads:
           enabled: true
@@ -524,9 +309,7 @@ default-values:
 
   lobby:
     enabled: true
-
     visibility:
       enabled: true
-
     player_management:
       enabled: true

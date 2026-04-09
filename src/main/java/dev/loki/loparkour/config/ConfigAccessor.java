@@ -85,11 +85,17 @@ public class ConfigAccessor {
     
     /**
      * Get string value at path.
+     * Forces conversion to String even if YAML parsed as Boolean/Number.
      */
     @NotNull
     public String getString(@NotNull String path) {
         warnIfMissing(path);
-        return config.getString(path, "");
+        Object value = config.get(path);
+        if (value == null) {
+            return "";
+        }
+        // Force toString() to handle Boolean/Number values
+        return String.valueOf(value);
     }
     
     /**

@@ -1,6 +1,6 @@
 # LoParkour — TODO
 
-> Обновлено: 2026-04-01.
+> Обновлено: 2026-04-09.
 
 ## Легенда
 
@@ -11,9 +11,93 @@
 
 ---
 
-## Главный план (стабилизация)
+## Текущие задачи (2026-04-09)
 
-Консолидировано после обхода: меню/util, `LoParkour`, `LoParkourCommand`, join/teleport, `SessionStateManager`, `Island.build()`, Locales, LoLib 3.x.
+### 🔴 P0 — Критичные баги
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 1 | Баг с локалью `'true'` в БД/конфиге | ✅ Исправлено (санитизация на всех уровнях) |
+| 2 | Первый блок паркура генерится на платформе | ✅ Исправлено (6 блоков вперёд + 1 вверх) |
+| 3 | ElytraMode полностью не работает | 🔴 **КРИТИЧНО** - отсутствуют классы |
+
+### 🟡 P1 — Важные недоработки
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 4 | GravityShiftMode не реализован | 🟡 Только конфиг |
+| 5 | HardcoreMode не реализован | 🟡 Только конфиг |
+
+### 🟢 P2 — Проверка после исправлений
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 6 | DefaultMode после изменений Island.java | 🟢 Требует проверки |
+| 7 | SpeedrunMode таймеры блоков | 🟢 Требует проверки |
+| 8 | RaceMode прогресс-бар и финиш | 🟢 Требует проверки |
+| 9 | CoopMode мультиплеер | 🟢 Требует проверки |
+
+---
+
+## Детальный план исправления режимов
+
+### ElytraMode (4-6 часов)
+
+**Проблема:** Отсутствуют классы, на которые ссылается `ElytraGenerator`:
+- `ElytraConfig` - загрузка настроек из config.yml
+- `ElytraRing` - модель кольца (центр, радиус, направление)
+- `ElytraRingGenerator` - генерация колец по траектории
+- `ElytraPhysics` - проверка пролёта, падения, буста
+- `ElytraRenderer` - отрисовка частицами
+
+**План:**
+1. Создать `mode/elytra/ElytraConfig.java`
+2. Создать `mode/elytra/ElytraRing.java`
+3. Создать `mode/elytra/ElytraRingGenerator.java`
+4. Создать `mode/elytra/ElytraPhysics.java`
+5. Создать `mode/elytra/ElytraRenderer.java`
+6. Исправить `generateFirst()` в `ElytraGenerator`
+7. Добавить выдачу элитры и фейерверков
+
+### GravityShiftMode (2-3 часа)
+
+**План:**
+1. Создать `GravityShiftMode.java`
+2. Создать `GravityShiftGenerator extends ParkourGenerator`
+3. Счётчик прыжков, каждые N прыжков - случайный эффект
+4. Эффекты: jump-boost, speed, slowness, levitation
+5. Зарегистрировать в `Modes.java`
+
+### HardcoreMode (1-2 часа)
+
+**План:**
+1. Создать `HardcoreMode.java`
+2. Создать `HardcoreGenerator extends ParkourGenerator`
+3. Переопределить `fall()` - сбросить `collectedRewards`
+4. Зарегистрировать в `Modes.java`
+
+---
+
+## Исправления от 2026-04-09
+
+### ✅ Баг с локалью
+- `ConfigAccessor.getString()` - форсирует String через `String.valueOf()`
+- `Option.java:267-272` - санитизация при загрузке дефолтов из конфига
+- `PlayerSettingsManager.java:37-44` - санитизация при загрузке настроек
+- `SQLDataMapper.java:87-95` - санитизация при загрузке из SQL
+- `StorageDisk.java:90-106` - санитизация при загрузке из JSON
+- `SQLMigrationManager.java:51-53` - SQL миграция для исправления БД
+
+### ✅ Первый блок паркура
+- `Island.java:75-90` - первый блок на 6 блоков вперёд + 1 вверх от центра
+- `GeneratorCleanup.java:110-127` - после падения тоже 6 вперёд + 1 вверх
+
+### ✅ Spawn location в конфиге
+- Добавлены `spawn-location` и `spawn-axes` в начало config.yml
+
+---
+
+## Главный план (стабилизация)
 
 ### P0 — блокер загрузки или геймплей
 
@@ -37,17 +121,6 @@
 | 6 | `LifecycleTickManager` / cleanup / time UI | ✅ |
 | 7 | Scoring в воздухе | ✅ документировано (стояние на блоке) |
 
-### Контекст (не в «критичном» списке)
-
-- Порядок `generateFirst` / телепорт из `Island.build()` — ок при неизменённом порядке вызовов.
-- `history.contains(Block)` — Bukkit сравнивает по миру и координатам.
-- `InventoryType.CHEST` в GUI — при странных кейсах проверить тип инвентаря.
-
-### Порядок работ (регрессия)
-
-1. `./gradlew build`, старт без `LinkageError`.
-2. Ручной прогон паркура: счёт, меню, scoreboard, режимы.
-
 ---
 
 ## Follow-up (сделано в коде)
@@ -62,7 +135,6 @@
 - **RandomStyle** / **ElytraGenerator**: защита от пустых списков.
 - **InventoryData**: новые сохранения в **YAML**; legacy binary читается один раз при миграции.
 
-
 ---
 
 ## Чек-лист перед релизом
@@ -71,7 +143,4 @@
 - [ ] Старт сервера, `/parkour`, меню, один полный забег
 - [ ] SQL: при проде выставить `LOPARKOUR_SQL_PASSWORD` на хосте
 - [ ] Проверить миграцию старых `.dat` инвентарей при первом заходе игрока
-
----
-
-
+- [ ] Протестировать все режимы: default, speedrun, race, coop, elytra, gravity-shift, hardcore

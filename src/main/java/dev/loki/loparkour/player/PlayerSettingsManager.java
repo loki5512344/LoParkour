@@ -35,8 +35,13 @@ public class PlayerSettingsManager {
                 p.selectedTime = parseIntSafe(v, defaultSelectedTime())));
         COLUMN_MAPPINGS.put("collectedRewards", new OptionContainer(null, PlayerSettingsManager::applyCollectedRewards));
         COLUMN_MAPPINGS.put("locale", new OptionContainer(ParkourOption.LANG, (p, v) -> {
-            p._locale = v;
-            p.locale = v;
+            // Sanitize legacy Boolean values from old config parsing
+            String sanitized = v;
+            if ("true".equals(v) || "false".equals(v)) {
+                sanitized = Option.OPTIONS_DEFAULTS.getOrDefault(ParkourOption.LANG, "en");
+            }
+            p._locale = sanitized;
+            p.locale = sanitized;
         }));
         COLUMN_MAPPINGS.put("schematicDifficulty", new OptionContainer(ParkourOption.SCHEMATICS, (p, v) ->
                 p.schematicDifficulty = parseDoubleSafe(v, defaultSchematicDifficulty())));
