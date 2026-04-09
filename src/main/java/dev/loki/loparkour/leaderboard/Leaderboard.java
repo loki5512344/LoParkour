@@ -114,8 +114,19 @@ public class Leaderboard {
                             return Integer.compare(one.getValue().getTimeMillis(), two.getValue().getTimeMillis());
                         }
                         case DIFFICULTY -> {
-                            return (int) Math.signum(Double.parseDouble(two.getValue().difficulty()) -
-                                    Double.parseDouble(one.getValue().difficulty()));
+                            String diff1 = one.getValue().difficulty();
+                            String diff2 = two.getValue().difficulty();
+
+                            // Handle "?" as lowest difficulty
+                            if ("?".equals(diff1) && "?".equals(diff2)) return 0;
+                            if ("?".equals(diff1)) return 1;
+                            if ("?".equals(diff2)) return -1;
+
+                            try {
+                                return (int) Math.signum(Double.parseDouble(diff2) - Double.parseDouble(diff1));
+                            } catch (NumberFormatException e) {
+                                return 0;
+                            }
                         }
                         default -> throw new IllegalArgumentException("Invalid sort method");
                     }

@@ -47,7 +47,12 @@ public class HoloHook {
             String type = split[1].toLowerCase();
             String rank = split[2].replace("#", "");
 
-            Score score = leaderboard.getScoreAtRank(Integer.parseInt(rank));
+            Score score;
+            try {
+                score = leaderboard.getScoreAtRank(Integer.parseInt(rank));
+            } catch (NumberFormatException e) {
+                return "?";
+            }
 
             if (score == null) {
                 return "?";
@@ -69,7 +74,15 @@ public class HoloHook {
             return "?";
         }
 
-        double difficulty = Double.parseDouble(string);
+        try {
+            double difficulty = Double.parseDouble(string);
+            return parseDifficultyValue(difficulty);
+        } catch (NumberFormatException e) {
+            return "?";
+        }
+    }
+
+    private static String parseDifficultyValue(double difficulty) {
         if (difficulty <= 0.25) {
             return "easy";
         } else if (difficulty <= 0.5) {

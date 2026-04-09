@@ -19,7 +19,15 @@ public record Score(String name, String time, String difficulty, int score) {
     public static Score fromString(String string) {
         String[] parts = string.split(",");
 
-        return new Score(parts[0], parts[1], parts[2], Integer.parseInt(parts[3]));
+        if (parts.length != 4) {
+            return new Score("?", "?", "?", 0);
+        }
+
+        try {
+            return new Score(parts[0], parts[1], parts[2], Integer.parseInt(parts[3]));
+        } catch (NumberFormatException e) {
+            return new Score(parts[0], parts[1], parts[2], 0);
+        }
     }
 
     /**

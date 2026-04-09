@@ -113,11 +113,12 @@ tasks.shadowJar {
     relocate("com.google.gson", "dev.loki.loparkour.lib.gson")
     relocate("org.bstats", "dev.loki.loparkour.lib.bstats")
 
-    // Minimize jar size (keep JDBC pool + driver intact)
-    minimize {
-        exclude(dependency("com.zaxxer:HikariCP:.*"))
-        exclude(dependency("com.mysql:mysql-connector-j:.*"))
-    }
+    // Don't minimize - causes issues with Caffeine's dynamically generated classes
+    // minimize {
+    //     exclude(dependency("com.zaxxer:HikariCP:.*"))
+    //     exclude(dependency("com.mysql:mysql-connector-j:.*"))
+    //     exclude(dependency(files("libs/lolib-3.0.0.jar")))
+    // }
 }
 
 tasks.named("build") {
