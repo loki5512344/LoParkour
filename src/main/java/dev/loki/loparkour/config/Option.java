@@ -263,15 +263,16 @@ public class Option {
 
             String defaultPath = parent + ".default";
             if (Config.CONFIG.isPath(defaultPath)) {
-                Object value = Config.CONFIG.get(defaultPath);
+                // Always read as String to avoid Boolean parsing issues
+                String value = Config.CONFIG.getString(defaultPath);
 
                 // Debug logging
                 if (option == ParkourOption.LANG) {
-                    LoParkour.getPlugin().getLogger().info("LANG option: path=" + defaultPath + ", value=" + value + ", type=" + (value != null ? value.getClass().getSimpleName() : "null"));
+                    LoParkour.getPlugin().getLogger().info("LANG option: path=" + defaultPath + ", value=" + value);
                 }
 
-                if (value != null) {
-                    OPTIONS_DEFAULTS.put(option, String.valueOf(value));
+                if (value != null && !value.isEmpty()) {
+                    OPTIONS_DEFAULTS.put(option, value);
                 }
             } else {
                 // Debug: path not found
