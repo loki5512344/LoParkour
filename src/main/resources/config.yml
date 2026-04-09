@@ -474,7 +474,7 @@ default-values:
 
     lang:
       enabled: true
-      default: "en"
+      default: en
 
     chat:
       enabled: true

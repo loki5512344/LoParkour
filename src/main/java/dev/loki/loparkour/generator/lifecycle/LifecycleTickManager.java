@@ -34,9 +34,9 @@ public class LifecycleTickManager {
         if (generator.state.start == null) {
             generator.state.start = java.time.Instant.now();
         }
-        
-        // Generate initial blocks
-        generator.generate(GENERATION_LEAD);
+
+        // Generate initial blocks (reduced from GENERATION_LEAD to avoid too far generation)
+        generator.generate(3);
     }
     
     /**
