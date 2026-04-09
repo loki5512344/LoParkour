@@ -1,6 +1,5 @@
 package dev.loki.loparkour.mode;
 
-import dev.loki.loparkour.api.Registry;
 import dev.loki.loparkour.config.Config;
 import dev.loki.loparkour.config.Locales;
 import dev.loki.loparkour.generator.ParkourGenerator;
@@ -32,7 +31,7 @@ public class GravityShiftMode implements Mode {
     @Override
     @Nullable
     public Item getItem(String locale) {
-        return Locales.getItem(locale, "modes.gravity-shift");
+        return Locales.getItem(locale, "play.single.gravity-shift");
     }
 
     @Override
@@ -44,7 +43,7 @@ public class GravityShiftMode implements Mode {
     @Override
     public void create(Player player) {
         if (!Config.CONFIG.getBoolean("joining")) {
-            player.sendMessage("§cJoining is currently disabled.");
+            player.sendMessage("Joining is currently disabled.");
             return;
         }
 
@@ -158,7 +157,7 @@ public class GravityShiftMode implements Mode {
 
         @Override
         public Mode getMode() {
-            return Registry.getMode("gravity-shift");
+            return Modes.GRAVITY_SHIFT;
         }
 
         private record EffectConfig(int amplifier, int durationTicks) {}
