@@ -25,8 +25,8 @@
 
 | # | Задача | Статус |
 |---|--------|--------|
-| 4 | GravityShiftMode не реализован | 🟡 Только конфиг |
-| 5 | HardcoreMode не реализован | 🟡 Только конфиг |
+| 4 | GravityShiftMode не реализован | ✅ Реализовано (случайные эффекты зелий) |
+| 5 | HardcoreMode не реализован | ✅ Реализовано (сброс наград при падении) |
 
 ### 🟢 P2 — Проверка после исправлений
 
@@ -59,22 +59,31 @@
 6. Исправить `generateFirst()` в `ElytraGenerator`
 7. Добавить выдачу элитры и фейерверков
 
-### GravityShiftMode (2-3 часа)
+### ✅ GravityShiftMode (реализовано 2026-04-09)
 
-**План:**
-1. Создать `GravityShiftMode.java`
-2. Создать `GravityShiftGenerator extends ParkourGenerator`
-3. Счётчик прыжков, каждые N прыжков - случайный эффект
-4. Эффекты: jump-boost, speed, slowness, levitation
-5. Зарегистрировать в `Modes.java`
+**Реализация:**
+1. ✅ Создан `mode/GravityShiftMode.java` с внутренним `GravityShiftGenerator`
+2. ✅ Счётчик прыжков на игрока, каждые N прыжков - случайный эффект
+3. ✅ Эффекты: jump-boost, speed, slowness, levitation (настраиваемые)
+4. ✅ Зарегистрирован в `Modes.java` и `LoParkour.java`
+5. ✅ Добавлены локали (en.yml, ru.yml)
 
-### HardcoreMode (1-2 часа)
+**Коммиты:**
+- `159a4fd` - feat: implement GravityShiftMode with random potion effects
+- `cf84789` - fix: correct GravityShiftMode getMode() and documentation
 
-**План:**
-1. Создать `HardcoreMode.java`
-2. Создать `HardcoreGenerator extends ParkourGenerator`
-3. Переопределить `fall()` - сбросить `collectedRewards`
-4. Зарегистрировать в `Modes.java`
+### ✅ HardcoreMode (реализовано 2026-04-09)
+
+**Реализация:**
+1. ✅ Создан `mode/HardcoreMode.java` с внутренним `HardcoreGenerator`
+2. ✅ Переопределён `fall()` - очистка `collectedRewards` для всех игроков
+3. ✅ Зарегистрирован в `Modes.java` и `LoParkour.java`
+4. ✅ Добавлены локали (en.yml, ru.yml)
+
+**Коммиты:**
+- `64badce` - feat: implement HardcoreMode with reward reset on fall
+- `191c1b9` - feat: register HardcoreMode in Modes registry
+- `3690915` - fix: register GravityShift and Hardcore modes in plugin
 
 ---
 
