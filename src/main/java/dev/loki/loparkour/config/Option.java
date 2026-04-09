@@ -261,15 +261,24 @@ public class Option {
             String parent = "default-values." + option.path;
             OPTIONS_ENABLED.put(option, Config.CONFIG.getBoolean(parent + ".enabled"));
 
-            if (Config.CONFIG.isPath(parent + ".default")) {
-                Object value = Config.CONFIG.get(parent + ".default");
+            String defaultPath = parent + ".default";
+            if (Config.CONFIG.isPath(defaultPath)) {
+                Object value = Config.CONFIG.get(defaultPath);
 
-                // Debug logging for LANG option
+                // Debug logging
                 if (option == ParkourOption.LANG) {
-                    LoParkour.getPlugin().getLogger().info("LANG option: path=" + parent + ".default, value=" + value + ", type=" + (value != null ? value.getClass().getSimpleName() : "null"));
+                    LoParkour.getPlugin().getLogger().info("LANG option: path=" + defaultPath + ", value=" + value + ", type=" + (value != null ? value.getClass().getSimpleName() : "null"));
                 }
 
-                if (value != null) OPTIONS_DEFAULTS.put(option, String.valueOf(value));
+                if (value != null) {
+                    OPTIONS_DEFAULTS.put(option, String.valueOf(value));
+                }
+            } else {
+                // Debug: path not found
+                if (option == ParkourOption.LANG) {
+                    LoParkour.getPlugin().getLogger().warning("LANG default path not found: " + defaultPath);
+                    LoParkour.getPlugin().getLogger().warning("Available keys: " + Config.CONFIG.fileConfiguration.getKeys(true));
+                }
             }
         }
     }
