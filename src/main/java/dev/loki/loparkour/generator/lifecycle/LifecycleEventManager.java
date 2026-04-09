@@ -91,9 +91,16 @@ public class LifecycleEventManager {
         // Record statistics
         String time = generator.getFormattedTime();
         String difficulty = String.valueOf(generator.getDifficultyScore());
-        
+
         generator.registerScore(time, difficulty, generator.state.score);
-        
+
+        // Teleport players back to spawn before reset
+        for (ParkourPlayer player : generator.getPlayers()) {
+            if (generator.state.playerSpawn != null) {
+                player.teleport(generator.state.playerSpawn);
+            }
+        }
+
         // Reset generator state
         generator.reset(true);
     }

@@ -101,24 +101,20 @@ public class Locales {
 
     private static void loadLocalesAsync() {
         Plugin plugin = LoParkour.getPlugin();
-        Scheduler.get(plugin).runAsync(() -> {
-            try {
-                FileConfiguration embedded = YamlConfiguration.loadConfiguration(
-                        new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
+        try {
+            FileConfiguration embedded = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(plugin.getResource("locales/en.yml"), StandardCharsets.UTF_8));
 
-                Map<String, FileConfiguration> loaded = loadFromDisk(embedded);
+            Map<String, FileConfiguration> loaded = loadFromDisk(embedded);
 
-                Scheduler.get(plugin).run(() -> {
-                    synchronized (locales) {
-                        locales.clear();
-                        locales.putAll(loaded);
-                    }
-                    LoParkour.log("Locales reloaded successfully (" + loaded.size() + " locales)");
-                });
-            } catch (Exception ex) {
-                plugin.getLogger().severe("Error while loading locale files: " + ex.getMessage());
+            synchronized (locales) {
+                locales.clear();
+                locales.putAll(loaded);
             }
-        });
+            LoParkour.log("Locales loaded successfully (" + loaded.size() + " locales)");
+        } catch (Exception ex) {
+            plugin.getLogger().severe("Error while loading locale files: " + ex.getMessage());
+        }
     }
 
     @NotNull

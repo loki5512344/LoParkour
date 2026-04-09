@@ -1,8 +1,11 @@
 package dev.loki.loparkour.session;
 
+import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.generator.ParkourGenerator;
 import dev.loki.loparkour.player.ParkourUser;
 import dev.loki.loparkour.world.Divider;
+import dev.lolib.scheduler.Scheduler;
+import dev.lolib.scheduler.ScheduledTask;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +23,7 @@ public class SessionStateManager {
     private Location spawnLocation;
     private Session.Visibility visibility = Session.Visibility.PUBLIC;
     private final Map<ParkourUser, Boolean> mutedUsers = new HashMap<>();
+    private ScheduledTask tickTask = null;
     
     public SessionStateManager(@NotNull Session session) {
         this.session = session;
@@ -31,25 +35,56 @@ public class SessionStateManager {
     public void initialize(@NotNull Function<Session, ParkourGenerator> generatorFunction) {
         // Allocate spawn location
         this.spawnLocation = Divider.add(session);
-        
+
         // Create generator
         ParkourGenerator generator = generatorFunction.apply(session);
         session.setGenerator(generator);
-        
+
         // Build island at spawn location
         generator.island.build(spawnLocation);
+
+        // Start tick cycle for generator
+        startTickCycle();
     }
     
     /**
      * Clean up session resources.
      */
     public void cleanup() {
+        // Stop tick cycle
+        stopTickCycle();
+
         if (session.generator != null) {
             session.generator.reset(false);
         }
-        
+
         Divider.remove(session);
         mutedUsers.clear();
+    }
+
+    /**
+     * Start tick cycle for generator.
+     */
+    private void startTickCycle() {
+        if (session.generator == null || tickTask != null) {
+            return;
+        }
+
+        tickTask = Scheduler.get(LoParkour.getPlugin()).runTimer(() -> {
+            if (session.generator != null) {
+                session.generator.tick();
+            }
+        }, 0, 1); // Run every tick (1 = 50ms)
+    }
+
+    /**
+     * Stop tick cycle.
+     */
+    private void stopTickCycle() {
+        if (tickTask != null) {
+            tickTask.cancel();
+            tickTask = null;
+        }
     }
     
     /**
