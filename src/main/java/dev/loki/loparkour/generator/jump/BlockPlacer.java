@@ -1,9 +1,12 @@
 package dev.loki.loparkour.generator.jump;
 
 import dev.loki.loparkour.generator.ParkourGenerator;
+import dev.loki.loparkour.player.ParkourPlayer;
 import dev.loki.loparkour.schematic.lpschem.LPSchematic;
 import dev.loki.loparkour.util.Probs;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
@@ -115,8 +118,18 @@ public class BlockPlacer {
     }
 
     /** Prefer no neighbor physics to avoid fragile vanilla multi-block checks in empty worlds. */
-    private static void placeBlockData(@NotNull Block block, @NotNull BlockData data) {
+    private void placeBlockData(@NotNull Block block, @NotNull BlockData data) {
         block.setBlockData(data, false);
+
+        // Play effects for all players
+        Location loc = block.getLocation().add(0.5, 0.5, 0.5);
+        for (ParkourPlayer player : generator.getPlayers()) {
+            // Spawn particles
+            player.player.spawnParticle(Particle.BLOCK_CRACK, loc, 10, 0.3, 0.3, 0.3, 0.1, data);
+
+            // Play sound
+            player.player.playSound(loc, Sound.BLOCK_STONE_PLACE, 0.5f, 1.0f);
+        }
     }
     
     @NotNull

@@ -204,9 +204,20 @@ public class Locales {
 
     @NotNull
     private static Item buildItem(@NotNull FileConfiguration config, @NotNull String path, String... replace) {
-        String material = config.getString("%s.material".formatted(path), "STONE");
-        String name     = applyReplacements(config.getString("%s.name".formatted(path), ""), replace);
-        String lore     = applyReplacements(config.getString("%s.lore".formatted(path), ""), replace);
+        String materialPath = "%s.material".formatted(path);
+        String namePath = "%s.name".formatted(path);
+        String lorePath = "%s.lore".formatted(path);
+
+        String material = config.getString(materialPath, "STONE");
+        String name = applyReplacements(config.getString(namePath, ""), replace);
+        String lore = applyReplacements(config.getString(lorePath, ""), replace);
+
+        // Debug logging
+        if ("STONE".equals(material)) {
+            LoParkour.getPlugin().getLogger().warning("Material defaulted to STONE for path: " + path);
+            LoParkour.getPlugin().getLogger().warning("  Tried: " + materialPath + " = " + config.getString(materialPath));
+            LoParkour.getPlugin().getLogger().warning("  Available keys: " + config.getKeys(true));
+        }
 
         Material mat = Materials.parse(material);
         if (mat == null) {
