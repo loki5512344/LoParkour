@@ -246,6 +246,15 @@ public class Locales {
     private static String getPlayerLocale(@NotNull Player player) {
         ParkourUser user = ParkourUser.getUser(player);
         String loc = user == null ? Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG) : user.locale;
+
+        // Fix legacy Boolean "true" values from old config parsing
+        if ("true".equals(loc) || "false".equals(loc)) {
+            loc = Option.OPTIONS_DEFAULTS.get(ParkourOption.LANG);
+            if (user != null) {
+                user.locale = loc; // Update user's locale to fixed value
+            }
+        }
+
         return (loc != null && !loc.isBlank()) ? loc : "en";
     }
 }
