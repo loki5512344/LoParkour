@@ -111,15 +111,15 @@ public class GeneratorCleanup {
             // Regenerate first block
             Location spawn = generator.state.playerSpawn;
             if (spawn != null) {
-                // Place first block 6 blocks forward and 1 block up from spawn
+                // Place first block 6 blocks forward at same Y level as spawn
                 Location blockSpawn = spawn.clone();
 
-                // Move block forward based on heading (6 blocks forward, 1 up)
+                // Move block forward based on heading (6 blocks forward, same height)
                 switch (dev.loki.loparkour.config.Option.HEADING) {
-                    case NORTH -> blockSpawn.add(0, 1, -6);
-                    case SOUTH -> blockSpawn.add(0, 1, 6);
-                    case WEST  -> blockSpawn.add(-6, 1, 0);
-                    case EAST  -> blockSpawn.add(6, 1, 0);
+                    case NORTH -> blockSpawn.add(0, 0, -6);
+                    case SOUTH -> blockSpawn.add(0, 0, 6);
+                    case WEST  -> blockSpawn.add(-6, 0, 0);
+                    case EAST  -> blockSpawn.add(6, 0, 0);
                 }
 
                 generator.generateFirst(spawn, blockSpawn);
