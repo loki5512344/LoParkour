@@ -1,155 +1,270 @@
-# LoParkour — TODO
+# LoParkour — TODO (обновлено 2026-04-27)
 
-> Обновлено: 2026-04-09.
+> Roadmap для превращения плагина в платформу с адаптивной генерацией.
 
 ## Легенда
 
-- 🔴 Критично — баг/краш/безопасность
-- 🟡 Важно — заявлено, но не работает / серьёзные проблемы
-- 🟢 Планово — улучшение / техдолг
+- 🔴 Критично — блокирует работу
+- 🟡 Важно — заявленная функциональность
+- 🟢 Планово — улучшение
 - ✅ Готово
 
 ---
 
-## Текущие задачи (2026-04-09)
+## Фаза 1: Рефакторинг (2-3 дня)
 
-### 🔴 P0 — Критичные баги
+### 🟢 Архитектура
 
-| # | Задача | Статус |
-|---|--------|--------|
-| 1 | Баг с локалью `'true'` в БД/конфиге | ✅ Исправлено (санитизация на всех уровнях) |
-| 2 | Первый блок паркура генерится на платформе | ✅ Исправлено (6 блоков вперёд + 1 вверх) |
-| 3 | ElytraMode полностью не работает | 🔴 **КРИТИЧНО** - отсутствуют классы |
+| # | Задача | Файлы | Статус |
+|---|--------|-------|--------|
+| 1 | Разбить ParkourGenerator (335 строк) | Generator.java, GeneratorConfig.java | 🟢 |
+| 2 | Разбить GeneratorProfileManager | ProfileManager.java, ProfileCalculator.java | 🟢 |
+| 3 | Вынести statistics из generator | statistics/TimeTracker.java, ScoreTracker.java, LeaderboardSync.java | 🟢 |
+| 4 | Создать структуру пакетов | generator/core/, generator/profile/, mode/base/, mode/impl/ | 🟢 |
+| 5 | Рефакторинг интерфейсов | GameMode, DifficultyProfile, GeneratorEventListener | 🟢 |
 
-### 🟡 P1 — Важные недоработки
+### 🟢 Большие файлы (>200 строк)
 
-| # | Задача | Статус |
-|---|--------|--------|
-| 4 | GravityShiftMode не реализован | ✅ Реализовано (случайные эффекты зелий) |
-| 5 | HardcoreMode не реализован | ✅ Реализовано (сброс наград при падении) |
-
-### 🟢 P2 — Проверка после исправлений
-
-| # | Задача | Статус |
-|---|--------|--------|
-| 6 | DefaultMode после изменений Island.java | 🟢 Требует проверки |
-| 7 | SpeedrunMode таймеры блоков | 🟢 Требует проверки |
-| 8 | RaceMode прогресс-бар и финиш | 🟢 Требует проверки |
-| 9 | CoopMode мультиплеер | 🟢 Требует проверки |
+| # | Файл | Строк | Действие | Статус |
+|---|------|-------|----------|--------|
+| 1 | Option.java | 335 | Разбить по типам опций | 🟢 |
+| 2 | ElytraGenerator.java | 261 | Вынести в mode/elytra/ | 🟢 |
+| 3 | Locales.java | 260 | Разбить на LocaleLoader + LocaleCache | 🟢 |
+| 4 | ParkourPlayer.java | 236 | Вынести inventory/settings в отдельные классы | 🟢 |
+| 5 | Leaderboard.java | 234 | Разбить на Leaderboard + LeaderboardStorage | 🟢 |
 
 ---
 
-## Детальный план исправления режимов
+## Фаза 2: Адаптивная система (3-4 дня)
 
-### ElytraMode (4-6 часов)
+### 🟡 Инфраструктура
 
-**Проблема:** Отсутствуют классы, на которые ссылается `ElytraGenerator`:
-- `ElytraConfig` - загрузка настроек из config.yml
-- `ElytraRing` - модель кольца (центр, радиус, направление)
-- `ElytraRingGenerator` - генерация колец по траектории
-- `ElytraPhysics` - проверка пролёта, падения, буста
-- `ElytraRenderer` - отрисовка частицами
+| # | Задача | Пакет | Статус |
+|---|--------|-------|--------|
+| 1 | Создать модели данных | adaptive/model/ | 🟡 |
+| 2 | Реализовать хранилища | adaptive/storage/ | 🟡 |
+| 3 | SQL таблицы для метрик | loparkour_player_stats | 🟡 |
+| 4 | Файловое хранилище | playerdata/<uuid>.json | 🟡 |
 
-**План:**
-1. Создать `mode/elytra/ElytraConfig.java`
-2. Создать `mode/elytra/ElytraRing.java`
-3. Создать `mode/elytra/ElytraRingGenerator.java`
-4. Создать `mode/elytra/ElytraPhysics.java`
-5. Создать `mode/elytra/ElytraRenderer.java`
-6. Исправить `generateFirst()` в `ElytraGenerator`
-7. Добавить выдачу элитры и фейерверков
+### 🟡 Сбор метрик
 
-### ✅ GravityShiftMode (реализовано 2026-04-09)
+| # | Задача | Класс | Статус |
+|---|--------|-------|--------|
+| 1 | MetricsCollector | adaptive/core/MetricsCollector.java | 🟡 |
+| 2 | GeneratorEventListener | generator/core/GeneratorEventListener.java | 🟡 |
+| 3 | Интеграция с Generator | Generator.score(), Generator.fall() | 🟡 |
+| 4 | Детекция nearMiss | MetricsCollector.onBlockLand() | 🟡 |
 
-**Реализация:**
-1. ✅ Создан `mode/GravityShiftMode.java` с внутренним `GravityShiftGenerator`
-2. ✅ Счётчик прыжков на игрока, каждые N прыжков - случайный эффект
-3. ✅ Эффекты: jump-boost, speed, slowness, levitation (настраиваемые)
-4. ✅ Зарегистрирован в `Modes.java` и `LoParkour.java`
-5. ✅ Добавлены локали (en.yml, ru.yml)
+### 🟡 Анализ и корректировка
 
-**Коммиты:**
-- `159a4fd` - feat: implement GravityShiftMode with random potion effects
-- `cf84789` - fix: correct GravityShiftMode getMode() and documentation
+| # | Задача | Класс | Статус |
+|---|--------|-------|--------|
+| 1 | SkillAnalyzer | adaptive/core/SkillAnalyzer.java | 🟡 |
+| 2 | DifficultyCalculator | adaptive/core/DifficultyCalculator.java | 🟡 |
+| 3 | DifficultyAdjuster | adaptive/core/DifficultyAdjuster.java | 🟡 |
+| 4 | Формулы рейтинга | SkillRating calculation | 🟡 |
 
-### ✅ HardcoreMode (реализовано 2026-04-09)
+### 🟡 Интеграция с режимами
 
-**Реализация:**
-1. ✅ Создан `mode/HardcoreMode.java` с внутренним `HardcoreGenerator`
-2. ✅ Переопределён `fall()` - очистка `collectedRewards` для всех игроков
-3. ✅ Зарегистрирован в `Modes.java` и `LoParkour.java`
-4. ✅ Добавлены локали (en.yml, ru.yml)
+| # | Задача | Класс | Статус |
+|---|--------|-------|--------|
+| 1 | AdaptiveMode базовый класс | mode/base/AdaptiveMode.java | 🟡 |
+| 2 | AdaptiveSession | adaptive/core/AdaptiveSession.java | 🟡 |
+| 3 | StatsService | adaptive/core/StatsService.java | 🟡 |
+| 4 | Миграция DefaultMode | mode/impl/DefaultMode.java | 🟡 |
+| 5 | Миграция SpeedrunMode | mode/impl/SpeedrunMode.java, SpeedrunGenerator.java | 🟡 |
+| 6 | Миграция HardcoreMode | mode/impl/HardcoreMode.java | 🟡 |
+| 7 | Миграция GravityShiftMode | mode/impl/GravityShiftMode.java | 🟡 |
 
-**Коммиты:**
-- `64badce` - feat: implement HardcoreMode with reward reset on fall
-- `191c1b9` - feat: register HardcoreMode in Modes registry
-- `3690915` - fix: register GravityShift and Hardcore modes in plugin
+### 🟡 Конфигурация
 
----
-
-## Исправления от 2026-04-09
-
-### ✅ Баг с локалью
-- `ConfigAccessor.getString()` - форсирует String через `String.valueOf()`
-- `Option.java:267-272` - санитизация при загрузке дефолтов из конфига
-- `PlayerSettingsManager.java:37-44` - санитизация при загрузке настроек
-- `SQLDataMapper.java:87-95` - санитизация при загрузке из SQL
-- `StorageDisk.java:90-106` - санитизация при загрузке из JSON
-- `SQLMigrationManager.java:51-53` - SQL миграция для исправления БД
-
-### ✅ Первый блок паркура
-- `Island.java:75-90` - первый блок на 6 блоков вперёд + 1 вверх от центра
-- `GeneratorCleanup.java:110-127` - после падения тоже 6 вперёд + 1 вверх
-
-### ✅ Spawn location в конфиге
-- Добавлены `spawn-location` и `spawn-axes` в начало config.yml
+| # | Задача | Файл | Статус |
+|---|--------|------|--------|
+| 1 | Секция adaptive в config.yml | config.yml | 🟡 |
+| 2 | Конфиги режимов | modes/*.yml | 🟡 |
+| 3 | AdaptiveConfig с кэшированием | adaptive/model/AdaptiveConfig.java | 🟡 |
+| 4 | Предзагрузка при старте | LoParkour.onEnable() | 🟡 |
 
 ---
 
-## Главный план (стабилизация)
+## Фаза 3: ElytraMode (1-2 дня)
 
-### P0 — блокер загрузки или геймплей
+### 🔴 Критичные классы (отсутствуют)
 
-| # | Задача | Статус |
-|---|--------|--------|
-| 1 | LoLib 3.x в classpath | ✅ `build.gradle.kts` → `libs/lolib-3.0.0.jar` |
-| 2 | `GeneratorCleanup` — хвост только **сзади** по индексу в `history` | ✅ |
-| 3 | Потокобезопасность `history` | ✅ `synchronizedList`, снимок при полном `reset()` |
+| # | Класс | Ответственность | Статус |
+|---|-------|-----------------|--------|
+| 1 | ElytraConfig | Загрузка настроек из modes/elytra.yml | 🔴 |
+| 2 | ElytraRing | Модель кольца (центр, радиус, направление) | 🔴 |
+| 3 | RingGenerator | Генерация колец по траектории | 🔴 |
+| 4 | RingRenderer | Отрисовка частицами | 🔴 |
+| 5 | ElytraPhysics | Проверка пролёта, буст от фейерверков | 🔴 |
 
-### P1 — важно
-
-| # | Задача | Статус |
-|---|--------|--------|
-| 4 | Хотбар: клик по предмету | ✅ `isSimilar` в restriction listener |
-| 5 | SQL `readPlayer` на корректном потоке | ✅ |
-
-### P2 — проверить после P0–P1
+### 🔴 Интеграция
 
 | # | Задача | Статус |
 |---|--------|--------|
-| 6 | `LifecycleTickManager` / cleanup / time UI | ✅ |
-| 7 | Scoring в воздухе | ✅ документировано (стояние на блоке) |
+| 1 | Создать ElytraMode | 🔴 |
+| 2 | Выдача элитры и фейерверков | 🔴 |
+| 3 | Тесты полёта | 🔴 |
+| 4 | Конфиг modes/elytra.yml | 🔴 |
 
 ---
 
-## Follow-up (сделано в коде)
+## Фаза 4: Новые режимы (2-3 дня)
 
-- **Leaderboard**: sync-таймер; итерация/снимки без гонок с `synchronizedMap`.
-- **AdminCommandHandler**: cooldown 2.5 с на `forcejoin`, `forceleave`, `reset`, `recoverinventory`; при блокировке — сообщение.
-- **SQLConnectionManager**: HikariCP + `mysql-connector-j` в shadow.
-- **SQL password**: если задана непустая **`LOPARKOUR_SQL_PASSWORD`**, она перекрывает `config.yml` → `sql.password`.
-- **World**: валидация имени; папка через `getWorldContainer()`; безопасное удаление; кик только если мир не null.
-- **LoParkourCommand**: `MultiMode` для join к другу; tab-complete; leaderboard без хака; «too many args».
-- **PlayerCommandHandler**: `/parkour leaderboard` без второго аргумента открывает меню лидербордов.
-- **RandomStyle** / **ElytraGenerator**: защита от пустых списков.
-- **InventoryData**: новые сохранения в **YAML**; legacy binary читается один раз при миграции.
+### 🟢 RoguelikeMode
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 1 | Случайные модификаторы каждые N блоков | 🟢 |
+| 2 | Выбор перков перед стартом | 🟢 |
+| 3 | Риск-награда развилки | 🟢 |
+| 4 | Балансировка | 🟢 |
+
+### 🟢 Проверка существующих режимов
+
+| # | Режим | Задача | Статус |
+|---|-------|--------|--------|
+| 1 | RaceMode | Проверить прогресс-бар и финиш | 🟢 |
+| 2 | CoopMode | Проверить мультиплеер | 🟢 |
+| 3 | DefaultMode | Тесты после рефакторинга | 🟢 |
+| 4 | SpeedrunMode | Тесты таймеров блоков | 🟢 |
+
+---
+
+## Архитектурные решения
+
+### Структура пакетов
+
+```
+src/main/java/dev/loki/loparkour/
+├── adaptive/                    # Адаптивная система
+│   ├── core/                    # MetricsCollector, SkillAnalyzer, DifficultyCalculator, DifficultyAdjuster
+│   ├── model/                   # PlayerMetrics, SkillRating, AdaptiveConfig
+│   └── storage/                 # StatsRepository, SQLStatsStorage, FileStatsStorage
+├── statistics/                  # Вынесено из generator
+│   ├── TimeTracker.java
+│   ├── ScoreTracker.java
+│   └── LeaderboardSync.java
+├── generator/
+│   ├── core/                    # Generator, GeneratorState, GeneratorConfig, Island
+│   ├── profile/                 # DifficultyProfile, ProfileManager, ProfileCalculator
+│   ├── jump/                    # JumpCalculator, JumpValidator, JumpDirector, BlockPlacer
+│   └── lifecycle/               # GeneratorLifecycle, GeneratorCleanup
+└── mode/
+    ├── base/                    # GameMode, AdaptiveMode, ModeRegistry
+    ├── impl/                    # DefaultMode, SpeedrunMode, HardcoreMode, GravityShiftMode, RoguelikeMode
+    └── elytra/                  # ElytraMode, ElytraConfig, ElytraRing, RingGenerator, RingRenderer, ElytraPhysics
+```
+
+### Зависимости
+
+```
+adaptive → generator/profile (только через DifficultyProfile интерфейс)
+generator → НЕ знает про adaptive (через GeneratorEventListener)
+statistics → используется и generator, и adaptive
+mode → использует generator + опционально adaptive
+```
+
+### Хранение данных
+
+**SQL (критичные метрики):**
+- `loparkour_player_stats`: skill_rating, sessions_count, total_jumps, longest_streak
+- Автосохранение каждые 5 минут
+
+**JSON (детальная аналитика):**
+- `playerdata/<uuid>.json`: avgTimePerBlock, jumpTypeStats, nearMissCount
+- `playerdata/history/<uuid>_jumps.jsonl`: история прыжков (последние 1000)
+- Сохранение при выходе игрока
+
+---
+
+## Технический долг
+
+### 🟢 Оптимизация
+
+| # | Задача | Приоритет | Статус |
+|---|--------|-----------|--------|
+| 1 | Кэширование конфигов режимов | Средний | ✅ (в дизайне) |
+| 2 | Batch updates для SQL метрик | Средний | 🟢 |
+| 3 | Очистка старой истории прыжков | Низкий | 🟢 |
+
+### 🟢 Тестирование
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 1 | Unit тесты для адаптивной системы | 🟢 |
+| 2 | Integration тесты для режимов | 🟢 |
+| 3 | Performance тесты (100+ игроков) | 🟢 |
 
 ---
 
 ## Чек-лист перед релизом
 
-- [ ] `./gradlew build`
-- [ ] Старт сервера, `/parkour`, меню, один полный забег
-- [ ] SQL: при проде выставить `LOPARKOUR_SQL_PASSWORD` на хосте
-- [ ] Проверить миграцию старых `.dat` инвентарей при первом заходе игрока
-- [ ] Протестировать все режимы: default, speedrun, race, coop, elytra, gravity-shift, hardcore
+- [ ] Все режимы работают (default, speedrun, hardcore, gravity-shift, elytra)
+- [ ] Адаптивная система корректно собирает метрики
+- [ ] SQL миграции применены
+- [ ] Конфиги валидируются при загрузке
+- [ ] Нет memory leaks (проверить с VisualVM)
+- [ ] Документация обновлена (README.md, CHANGELOG.md)
+- [ ] Тесты проходят (`./gradlew test`)
+- [ ] Build успешен (`./gradlew build`)
+
+---
+
+## Оценка времени
+
+| Фаза | Задач | Дней | Начало | Конец |
+|------|-------|------|--------|-------|
+| Фаза 1: Рефакторинг | 10 | 2-3 | День 1 | День 3 |
+| Фаза 2: Адаптивность | 20 | 3-4 | День 4 | День 7 |
+| Фаза 3: ElytraMode | 9 | 1-2 | День 8 | День 9 |
+| Фаза 4: Новые режимы | 8 | 2-3 | День 10 | День 12 |
+| **Итого** | **47** | **8-12** | - | - |
+
+---
+
+## Метрики успеха
+
+### Технические
+- ✅ Все файлы < 200 строк
+- ✅ Максимум 6 файлов в папке
+- ✅ SOLID принципы соблюдены
+- ✅ Нет циклических зависимостей
+
+### Функциональные
+- ✅ Адаптивная сложность работает для 4+ режимов
+- ✅ Метрики сохраняются между сессиями
+- ✅ ElytraMode полностью функционален
+- ✅ Новый режим (Roguelike) добавлен
+
+### Производительность
+- ✅ TPS не падает при 50+ игроках
+- ✅ SQL запросы < 50ms
+- ✅ Конфиги кэшируются (нет I/O при входе игрока)
+
+---
+
+## SQL миграция
+
+```sql
+-- Создание таблицы для адаптивных метрик
+CREATE TABLE IF NOT EXISTS loparkour_player_stats (
+    player_uuid VARCHAR(36) PRIMARY KEY,
+    skill_rating DOUBLE DEFAULT 1.0,
+    sessions_count INT DEFAULT 0,
+    total_jumps INT DEFAULT 0,
+    total_falls INT DEFAULT 0,
+    longest_streak INT DEFAULT 0,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_skill_rating (skill_rating),
+    INDEX idx_last_updated (last_updated)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Миграция существующих данных (если есть старая таблица)
+INSERT INTO loparkour_player_stats (player_uuid, sessions_count, last_updated)
+SELECT player_uuid, COUNT(*) as sessions, MAX(timestamp) as last_updated
+FROM loparkour_scores
+GROUP BY player_uuid
+ON DUPLICATE KEY UPDATE sessions_count = VALUES(sessions_count);
+```
