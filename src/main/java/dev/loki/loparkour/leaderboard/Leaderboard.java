@@ -1,16 +1,13 @@
 package dev.loki.loparkour.leaderboard;
 
-import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
-import dev.loki.loparkour.storage.Storage;
-import dev.lolib.scheduler.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
- * Class for handling leaderboards.
+ * Facade for leaderboard: CRUD operations with automatic sorting.
+ * Delegates to LeaderboardStorage and LeaderboardSorter.
  */
 public class Leaderboard {
 
@@ -20,132 +17,52 @@ public class Leaderboard {
     public final String mode;
 
     /**
-     * The way in which items will be sorted.
+     * The way in which items will be sorted
      */
-    public final Sort sort;
+    public final LeaderboardSorter.Sort sort;
 
     /**
      * A map of all scores for this mode (thread-safe)
      */
     public final Map<UUID, Score> scores = Collections.synchronizedMap(new LinkedHashMap<>());
 
-    public Leaderboard(@NotNull String mode, Sort sort) {
+    private final LeaderboardStorage storage;
+    private final LeaderboardSorter sorter;
+
+    public Leaderboard(@NotNull String mode, LeaderboardSorter.Sort sort) {
         this.mode = mode.toLowerCase();
         this.sort = sort;
+        this.sorter = new LeaderboardSorter(sort);
+        this.storage = new LeaderboardStorage(mode, scores, sorter);
 
-        Storage.init(mode);
-
-        // Defer initial read until storage is ready (SQL connects async — reading before
-        // connection is established would return empty results and lose all scores).
-        Storage.runWhenReady(() -> read(true));
-
-        var interval = Config.CONFIG.getInt("storage-update-interval");
-
-        // Main-thread timer: only schedules I/O; avoids async + Bukkit edge cases
-        Scheduler.get(LoParkour.getPlugin()).runTimer(() -> {
-            if (Config.CONFIG.getBoolean("joining")) {
-                write(true);
-            } else {
-                read(true);
-            }
-        }, interval * 20, interval * 20);
+        storage.initAndSchedule();
     }
 
     /**
-     * Writes all scores to the leaderboard file associated with this leaderboard
+     * @deprecated Use {@link #Leaderboard(String, LeaderboardSorter.Sort)} instead
+     */
+    @Deprecated
+    public Leaderboard(@NotNull String mode, Sort sort) {
+        this(mode, sort.toSorterSort());
+    }
+
+    // ── I/O operations ────────────────────────────────────────────────────────
+
+    /**
+     * Writes all scores to storage
      */
     public void write(boolean async) {
-        run(() -> Storage.writeScores(mode, scores), async);
+        storage.write(async);
     }
 
     /**
-     * Reads all scores from the leaderboard file
+     * Reads all scores from storage
      */
     public void read(boolean async) {
-        run(() -> {
-            Map<UUID, Score> loadedScores = Storage.readScores(mode);
-            
-            // Synchronize access to prevent concurrent modification
-            synchronized (scores) {
-                scores.clear();
-                scores.putAll(loadedScores);
-            }
-
-            sort();
-        }, async);
+        storage.read(async);
     }
 
-    private void run(Runnable runnable, boolean async) {
-        if (async) {
-            Scheduler.get(LoParkour.getPlugin()).runAsync(runnable);
-        } else {
-            runnable.run();
-        }
-    }
-
-    /**
-     * Returns sorted copy of the score map.
-     * @param sort The sorting method.
-     * @return A sorted map of scores.
-     */
-    public Map<UUID, Score> sort(Sort sort) {
-        LinkedHashMap<UUID, Score> sorted = new LinkedHashMap<>();
-
-        List<Map.Entry<UUID, Score>> snapshot;
-        synchronized (scores) {
-            snapshot = new ArrayList<>(scores.entrySet());
-        }
-
-        snapshot.stream()
-                .sorted((one, two) -> {
-                    switch (sort) {
-                        case SCORE -> {
-                            int scoreComparison = two.getValue().score() - one.getValue().score();
-
-                            if (scoreComparison != 0) {
-                                return scoreComparison;
-                            } else {
-                                // Use Integer.compare to avoid overflow
-                                return Integer.compare(one.getValue().getTimeMillis(), two.getValue().getTimeMillis());
-                            }
-                        }
-                        case TIME -> {
-                            // Use Integer.compare to avoid overflow
-                            return Integer.compare(one.getValue().getTimeMillis(), two.getValue().getTimeMillis());
-                        }
-                        case DIFFICULTY -> {
-                            String diff1 = one.getValue().difficulty();
-                            String diff2 = two.getValue().difficulty();
-
-                            // Handle "?" as lowest difficulty
-                            if ("?".equals(diff1) && "?".equals(diff2)) return 0;
-                            if ("?".equals(diff1)) return 1;
-                            if ("?".equals(diff2)) return -1;
-
-                            try {
-                                return (int) Math.signum(Double.parseDouble(diff2) - Double.parseDouble(diff1));
-                            } catch (NumberFormatException e) {
-                                return 0;
-                            }
-                        }
-                        default -> throw new IllegalArgumentException("Invalid sort method");
-                    }
-                })
-                .forEachOrdered(entry -> sorted.put(entry.getKey(), entry.getValue()));
-
-        return sorted;
-    }
-
-    // sorts all scores in the map
-    private void sort() {
-        var sorted = sort(sort);
-
-        // Synchronize access to prevent concurrent modification
-        synchronized (scores) {
-            scores.clear();
-            scores.putAll(sorted);
-        }
-    }
+    // ── CRUD operations ───────────────────────────────────────────────────────
 
     /**
      * Registers a new score, overriding the old one
@@ -161,7 +78,7 @@ public class Leaderboard {
             previous = scores.put(uuid, score);
         }
 
-        sort();
+        sorter.sortInPlace(scores);
 
         return previous;
     }
@@ -189,8 +106,8 @@ public class Leaderboard {
     }
 
     /**
-     * @param uuid The {@link UUID} to get.
-     * @return The {@link Score} associated with the player. If null, returns a {@link Score} instance with "?".
+     * @param uuid The {@link UUID} to get
+     * @return The {@link Score} associated with the player. If null, returns a {@link Score} instance with "?"
      */
     @NotNull
     public Score get(@NotNull UUID uuid) {
@@ -199,7 +116,7 @@ public class Leaderboard {
 
     /**
      * @param uuid The uuid
-     * @return The rank. Starts from 1. Returns 0 if no ranking is found.
+     * @return The rank. Starts from 1. Returns 0 if no ranking is found
      */
     public int getRank(@NotNull UUID uuid) {
         List<UUID> keys;
@@ -228,7 +145,38 @@ public class Leaderboard {
         return values.get(rank - 1);
     }
 
+    // ── Sorting ───────────────────────────────────────────────────────────────
+
+    /**
+     * Returns sorted copy of the score map.
+     * @param sort The sorting method
+     * @return A sorted map of scores
+     */
+    public Map<UUID, Score> sort(LeaderboardSorter.Sort sort) {
+        synchronized (scores) {
+            return sorter.sort(scores, sort);
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #sort(LeaderboardSorter.Sort)} instead
+     */
+    @Deprecated
+    public Map<UUID, Score> sort(Sort sort) {
+        return sort(sort.toSorterSort());
+    }
+
+    // ── Backward compatibility ────────────────────────────────────────────────
+
+    /**
+     * @deprecated Use {@link LeaderboardSorter.Sort} instead
+     */
+    @Deprecated
     public enum Sort {
-        SCORE, TIME, DIFFICULTY
+        SCORE, TIME, DIFFICULTY;
+
+        public LeaderboardSorter.Sort toSorterSort() {
+            return LeaderboardSorter.Sort.valueOf(this.name());
+        }
     }
 }
