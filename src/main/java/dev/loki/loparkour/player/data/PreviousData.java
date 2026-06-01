@@ -1,9 +1,9 @@
 package dev.loki.loparkour.player.data;
 
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.reward.Reward;
+import dev.loki.loparkour.config.core.Config;
+import dev.loki.loparkour.config.options.Option;
+import dev.loki.loparkour.reward.core.Reward;
 import io.papermc.lib.PaperLib;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

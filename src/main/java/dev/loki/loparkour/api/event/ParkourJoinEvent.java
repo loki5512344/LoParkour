@@ -1,6 +1,6 @@
 package dev.loki.loparkour.api.event;
 
-import dev.loki.loparkour.player.ParkourUser;
+import dev.loki.loparkour.player.core.ParkourUser;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

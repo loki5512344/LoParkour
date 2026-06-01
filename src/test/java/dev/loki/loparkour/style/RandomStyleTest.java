@@ -1,5 +1,6 @@
 package dev.loki.loparkour.style;
 
+import dev.loki.loparkour.style.core.RandomStyle;
 import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 

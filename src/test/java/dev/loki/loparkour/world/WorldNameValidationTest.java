@@ -1,5 +1,6 @@
 package dev.loki.loparkour.world;
 
+import dev.loki.loparkour.world.core.World;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

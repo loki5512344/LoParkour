@@ -31,7 +31,7 @@ hs_err_pid*
 .settings/
 .classpath
 .project
-
+.cursor/
 # Maven
 target/
 pom.xml.tag

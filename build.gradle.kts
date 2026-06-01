@@ -66,6 +66,11 @@ repositories {
         name = "codemc-snapshots"
         url = uri("https://repo.codemc.io/repository/maven-snapshots/")
     }
+
+    maven {
+        name = "enginehub"
+        url = uri("https://maven.enginehub.org/repo/")
+    }
 }
 
 dependencies {
@@ -85,7 +90,9 @@ dependencies {
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.mysql:mysql-connector-j:8.3.0")
-    
+    implementation("com.sk89q.worldedit:worldedit-core:7.3.6")
+    implementation("com.sk89q.worldedit:worldedit-bukkit:7.3.6")
+
     // Provided dependencies (plugins)
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
@@ -112,6 +119,8 @@ tasks.shadowJar {
     relocate("io.papermc.lib", "dev.loki.loparkour.lib.paperlib")
     relocate("com.google.gson", "dev.loki.loparkour.lib.gson")
     relocate("org.bstats", "dev.loki.loparkour.lib.bstats")
+    relocate("com.sk89q.worldedit", "dev.loki.loparkour.lib.worldedit")
+    relocate("org.enginehub", "dev.loki.loparkour.lib.enginehub")
 
     // Don't minimize - causes issues with Caffeine's dynamically generated classes
     // minimize {

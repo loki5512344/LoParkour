@@ -1,6 +1,6 @@
 package dev.loki.loparkour.mode.elytra;
 
-import dev.loki.loparkour.player.ParkourPlayer;
+import dev.loki.loparkour.player.core.ParkourPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;

@@ -1,9 +1,9 @@
 package dev.loki.loparkour.config.options;
 
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.ConfigAccessor;
-import dev.loki.loparkour.style.Style;
-import dev.loki.loparkour.util.Materials;
+import dev.loki.loparkour.config.core.ConfigAccessor;
+import dev.loki.loparkour.style.core.Style;
+import dev.loki.loparkour.util.item.Materials;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 

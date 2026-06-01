@@ -1,9 +1,9 @@
 package dev.loki.loparkour.menu.community;
 
-import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.menu.LPMenu;
-import dev.loki.loparkour.menu.Menus;
-import dev.loki.loparkour.menu.ParkourOption;
+import dev.loki.loparkour.config.locale.Locales;
+import dev.loki.loparkour.menu.core.LPMenu;
+import dev.loki.loparkour.menu.core.Menus;
+import dev.loki.loparkour.menu.core.ParkourOption;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

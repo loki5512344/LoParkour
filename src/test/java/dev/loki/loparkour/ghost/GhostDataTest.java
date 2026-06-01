@@ -1,5 +1,7 @@
 package dev.loki.loparkour.ghost;
 
+import dev.loki.loparkour.ghost.model.GhostData;
+import dev.loki.loparkour.ghost.model.GhostFrame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

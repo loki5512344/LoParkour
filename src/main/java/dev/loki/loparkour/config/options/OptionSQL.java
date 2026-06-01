@@ -1,7 +1,7 @@
 package dev.loki.loparkour.config.options;
 
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
+import dev.loki.loparkour.config.core.Config;
 
 /**
  * SQL database configuration options.

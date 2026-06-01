@@ -1,9 +1,9 @@
 package dev.loki.loparkour.config.options;
 
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.util.ParticleData;
+import dev.loki.loparkour.config.core.Config;
+import dev.loki.loparkour.config.options.Option;
+import dev.loki.loparkour.util.particle.ParticleData;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 

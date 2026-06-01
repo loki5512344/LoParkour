@@ -1,12 +1,12 @@
 package dev.loki.loparkour.menu.lobby;
 
-import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.menu.LPMenu;
-import dev.loki.loparkour.menu.Menus;
-import dev.loki.loparkour.mode.Modes;
-import dev.loki.loparkour.player.ParkourPlayer;
-import dev.loki.loparkour.player.ParkourUser;
-import dev.loki.loparkour.util.ColorUtil;
+import dev.loki.loparkour.config.locale.Locales;
+import dev.loki.loparkour.menu.core.LPMenu;
+import dev.loki.loparkour.menu.core.Menus;
+import dev.loki.loparkour.mode.base.Modes;
+import dev.loki.loparkour.player.core.ParkourPlayer;
+import dev.loki.loparkour.player.core.ParkourUser;
+import dev.loki.loparkour.util.text.ColorUtil;
 import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -51,10 +51,18 @@ public class PlayerManagementMenu extends LPMenu {
             boolean muted = session.isMuted(other);
             ItemMeta displayMeta = skull.getItemMeta();
             if (displayMeta != null) {
-                displayMeta.setDisplayName(ColorUtil.color("<yellow>" + other.getName() + (muted ? " §c[muted]" : "")));
+                String muteSuffix = muted
+                        ? Locales.getString(locale, "lobby.player_management.head.muted_suffix")
+                        : "";
+                displayMeta.setDisplayName(ColorUtil.color(
+                        Locales.getString(locale, "lobby.player_management.head.name")
+                                .formatted(other.getName(), muteSuffix)));
+                String muteLoreKey = muted
+                        ? "lobby.player_management.head.lore_unmute"
+                        : "lobby.player_management.head.lore_mute";
                 displayMeta.setLore(List.of(
-                        ColorUtil.color("§7Left-click §fto kick"),
-                        ColorUtil.color("§7Right-click §f" + (muted ? "to unmute" : "to mute"))
+                        ColorUtil.color(Locales.getString(locale, "lobby.player_management.head.lore_kick")),
+                        ColorUtil.color(Locales.getString(locale, muteLoreKey))
                 ));
                 skull.setItemMeta(displayMeta);
             }

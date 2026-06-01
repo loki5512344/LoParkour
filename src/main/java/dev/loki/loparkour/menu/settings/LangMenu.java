@@ -1,10 +1,10 @@
 package dev.loki.loparkour.menu.settings;
 
-import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.menu.LPMenu;
-import dev.loki.loparkour.menu.Menus;
-import dev.loki.loparkour.player.ParkourPlayer;
-import dev.loki.loparkour.util.ColorUtil;
+import dev.loki.loparkour.config.locale.Locales;
+import dev.loki.loparkour.menu.core.LPMenu;
+import dev.loki.loparkour.menu.core.Menus;
+import dev.loki.loparkour.player.core.ParkourPlayer;
+import dev.loki.loparkour.util.text.ColorUtil;
 import dev.lolib.gui.InventoryGUI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

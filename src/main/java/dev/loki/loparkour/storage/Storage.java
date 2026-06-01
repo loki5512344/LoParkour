@@ -1,8 +1,10 @@
 package dev.loki.loparkour.storage;
 
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.leaderboard.Score;
-import dev.loki.loparkour.player.ParkourPlayer;
+import dev.loki.loparkour.config.options.Option;
+import dev.loki.loparkour.leaderboard.model.Score;
+import dev.loki.loparkour.storage.disk.StorageDisk;
+import dev.loki.loparkour.storage.sql.StorageSQL;
+import dev.loki.loparkour.player.core.ParkourPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

@@ -1,9 +1,9 @@
 package dev.loki.loparkour.generator.effect;
 
-import dev.loki.loparkour.config.Option;
-import dev.loki.loparkour.generator.ParkourGenerator;
-import dev.loki.loparkour.player.ParkourPlayer;
-import dev.loki.loparkour.util.ParticleUtil;
+import dev.loki.loparkour.config.options.Option;
+import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
+import dev.loki.loparkour.player.core.ParkourPlayer;
+import dev.loki.loparkour.util.particle.ParticleUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 

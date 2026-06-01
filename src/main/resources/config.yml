@@ -33,6 +33,15 @@ debug: false
 # -= Enable joining =-
 joining: true
 
+# -= Adaptive difficulty =-
+adaptive:
+  enabled: true
+  min-sessions: 3
+  update-interval: 300
+  rating-weight: 0.15
+  confidence-threshold: 0.3
+  near-miss-distance: 0.3
+
 # -= Proxy options =-
 bungeecord:
   enabled: false

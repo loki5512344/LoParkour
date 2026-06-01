@@ -1,7 +1,7 @@
 # Русский (Russian, ru)
 # By loki
 # Материалы должны быть из: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
-# Узнайте больше о цветах: https://docs.adventure.kyori.net/minimessage/format.html#format
+# Цвета: hex &#RRGGBB и legacy & (см. .cursor/rules/locale-and-colors.mdc)
 
 name: "Русский"
 
@@ -235,10 +235,14 @@ lobby:
 
     head:
       material: ""
-      name: "&#00D4FF&l%s"
+      name: "&#FFFF55%s%s"
+      muted_suffix: " &#FF4444[заглушён]"
       lore: ""
       top: "&#404040Заглушён в лобби||"
       bottom: "&#00D4FFЛевый клик&#404040 чтобы исключить из лобби||&#00D4FFПравый клик&#404040 чтобы заглушить/разблокировать в лобби"
+      lore_kick: "&#A0A0A0ЛКМ &#FFFFFF— исключить"
+      lore_mute: "&#A0A0A0ПКМ &#FFFFFF— заглушить"
+      lore_unmute: "&#A0A0A0ПКМ &#FFFFFF— разглушить"
 
 scoreboard:
 
@@ -255,8 +259,24 @@ scoreboard:
 other:
 
   no_do: "&#A0A0A0Вы не можете сделать это сейчас."
+  no_menu_items: "&#FF4444&lСейчас нет доступных пунктов меню."
+  joining_disabled: "&#FF4444&lПрисоединение временно отключено."
   no_teleporting: "&#FFFFFFВы не можете войти в мир паркура телепортацией!"
   customize: "&#A0A0A0Настройте свой паркур, используя \"/parkour\""
+  leave_error: "&#FF4444&lОшибка при выходе из паркура."
+  bungee_kick: "Не удалось перенести вас на %s. Перезайдите."
+  menu_unavailable: "&#FF4444%s &#A0A0A0(%d рядов) — меню недоступно."
+  paged_menu_unavailable: "&#FF4444%s &#A0A0A0(%d рядов, %d пунктов) — меню недоступно."
+
+  back:
+    material: "red_dye"
+    name: "&#DE1F1F&lНазад"
+    lore: ""
+
+  next:
+    material: "lime_dye"
+    name: "&#0DCB07&lДалее"
+    lore: ""
 
   quit:
     material: "barrier"
@@ -279,22 +299,95 @@ modes:
     name: "&#00D4FF&lЭлитры"
     lore: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"
     start_hint: "&#A0A0A0Летите через кольца! Используйте фейерверки для ускорения."
+    ring_perfect: "&#55FF55Идеально! +%d"
+    ring_good: "&#55FF55Хорошо! +%d"
+    fell: "&#FF4444Падение: %s"
+    action_bar: "&#FFFF55Кольцо: %d/%d &#A0A0A0| &#55FF55Счёт: &#FFFFFF%d"
 
   race:
     material: "golden_boots"
     name: "&#FFD700&lГонка"
     lore: "&#A0A0A0Первым достигните целевого счёта!||&#A0A0A0Соревнуйтесь за лучшее время"
-    completed: "&#FFD700Финиш! Счёт: &#FFFFFF%s &#A0A0Aза &#FFFFFF%s"
+    completed: "&#FFD700Финиш! Счёт: &#FFFFFF%s &#A0A0A0за &#FFFFFF%s"
+    title: "&#FFD700&lГОНКА ЗАВЕРШЕНА!"
+    subtitle: "&#55FF55Время: &#FFFFFF%s"
+    action_bar: "%s &#FFFF55%d &#A0A0A0/ &#55FF55%d%s"
+    action_bar_left: " &#A0A0A0(&#FF4444%d &#A0A0A0осталось)"
+    action_bar_done: " &#FFD700&lГОТОВО!"
 
   coop:
     material: "player_head"
     name: "&#00FF00&lКооператив"
     lore: "&#A0A0A0Объединитесь с друзьями!||&#A0A0A0Общий счёт и прогресс"
-    player_joined: "&#00FF00%s &#A0A0Aприсоединился к кооперативной сессии!"
-    stats: "&#A0A0AКомандный счёт: &#FFFFFF%s &#A0A0A| Ваши блоки: &#FFFFFF%s &#A0A0A(&#FFFFFF%s%%&#A0A0A)"
+    player_joined: "&#00FF00%s &#A0A0A0присоединился к кооперативной сессии!"
+    stats: "&#A0A0A0Командный счёт: &#FFFFFF%s &#A0A0A0| Ваши блоки: &#FFFFFF%s &#A0A0A0(&#FFFFFF%s%%&#A0A0A0)"
+    milestone_title: "&#FFD700&lКоманда: &#FFFFFF%d"
+    milestone_subtitle: "&#55FF55Так держать!"
 
 admin:
-  cooldown: "<gray>Подождите немного перед повторным использованием."
+  cooldown: "&#A0A0A0Подождите перед повторным использованием."
+  force_join_everyone: "&#55FF55Все игроки принудительно вошли!"
+  force_join_player: "&#55FF55Игрок %s принудительно вошёл!"
+  force_leave_everyone: "&#55FF55Все игроки принудительно выгнаны!"
+  player_not_online: "&#FF4444Игрок не в сети!"
+  player_not_playing: "&#FF4444Игрок не в паркуре!"
+  reset_all: "&#55FF55Все рекорды сброшены."
+  reset_player: "&#55FF55Рекорд игрока %s сброшен."
+  recover_inventory: "&#55FF55Инвентарь %s восстановлен."
+  recover_inventory_missing: "&#FF4444Сохранённый инвентарь для %s не найден."
+
+commands:
+  too_many_args: "&#A0A0A0Слишком много аргументов. Попробуйте /parkour help"
+  error: "&#FF4444&lLoParkour: ошибка команды — см. консоль сервера."
+  unknown_player: "&#FF4444Неизвестный игрок."
+  not_playing: "&#FF4444Этот игрок не в паркуре."
+  reload: "&#A0A0A0Перезагрузка конфигов... (локали грузятся асинхронно)"
+  help:
+    header: "&#404040&m--------------- &#FF6464&lLoParkour &#404040&m---------------"
+    line_parkour: "&#A0A0A0/parkour &#404040- Главная команда"
+    line_join: "&#A0A0A0/parkour join [режим/игрок] &#404040- Войти в режим"
+    line_leave: "&#A0A0A0/parkour leave &#404040- Выйти"
+    line_menu: "&#A0A0A0/parkour menu &#404040- Открыть меню"
+    line_play: "&#A0A0A0/parkour play &#404040- Выбор режима"
+    line_leaderboard: "&#A0A0A0/parkour leaderboard [тип] &#404040- Таблица лидеров"
+    line_schematic: "&#A0A0A0/LoParkour schematic &#404040- Схематики"
+    line_reload: "&#A0A0A0/LoParkour reload &#404040- Перезагрузка конфигов"
+    line_reset: "&#A0A0A0/LoParkour reset <все/игрок> &#404040- Сброс рекордов"
+    line_force: "&#A0A0A0/LoParkour forcejoin/forceleave <цель> &#404040- Принудительный вход/выход"
+    line_recover: "&#A0A0A0/LoParkour recoverinventory <игрок> &#404040- Восстановить инвентарь"
+
+schematic:
+  wand:
+    material: "golden_axe"
+    name: "&#FF4444&lПалочка схем"
+    lore: "&#A0A0A0ЛКМ: позиция 1||&#A0A0A0ПКМ: позиция 2"
+  help:
+    header: "&#8B0000&lСхематики &#404040-----------"
+    line_wand: "&#FF4444/LoParkour schematic wand &#404040- &#A0A0A0Палочка выделения"
+    line_pos1: "&#FF4444/LoParkour schematic pos1 &#404040- &#A0A0A0Позиция 1"
+    line_pos2: "&#FF4444/LoParkour schematic pos2 &#404040- &#A0A0A0Позиция 2"
+    line_create: "&#FF4444/LoParkour create <сложность> &#404040- &#A0A0A0Сохранить в .schem + yml"
+    line_create_named: "&#FF4444/LoParkour schematic create <имя> <сложность> &#404040- &#A0A0A0С именем"
+    line_convert: "&#FF4444/LoParkour schematic convert &#404040- &#A0A0A0.lpschem → .schem"
+    line_paste: "&#FF4444/LoParkour schematic paste <имя> &#404040- &#A0A0A0Тестовая вставка"
+    line_list: "&#FF4444/LoParkour schematic list &#404040- &#A0A0A0Список"
+    line_reload: "&#FF4444/LoParkour schematic reload &#404040- &#A0A0A0Перезагрузка"
+    line_folder: "&#A0A0A0Папка: plugins/LoParkour/schematics/ (.nbt, .schem)"
+    line_docs: "&#A0A0A0Документация: plugins/LoParkour/docs/SCHEMATICS.md"
+  wand_given: "&#A0A0A0Палочка выдана. ЛКМ = pos1, ПКМ = pos2."
+  list_header: "&#A0A0A0Загруженные схемы:"
+  list_entry: "&#A0A0A0- &#FF4444%s &#404040(%s, %s)"
+  reloaded: "&#A0A0A0Перезагружено."
+  pos_set: "&#A0A0A0Позиция %s: %s"
+  invalid_name: "&#FF4444Недопустимое имя. Только буквы, цифры, дефис и подчёркивание."
+  invalid_difficulty: "&#FF4444Сложность: число от 0.0 до 1.0 (напр. 0.25, 0.5, 1.0)."
+  selection_incomplete: "&#FF4444Сначала выделите область (палочка или pos1/pos2)."
+  created: "&#A0A0A0Добавлено &#FF4444%s &#404040(сложн. %s) → &#FF4444%s"
+  create_failed: "&#FF4444Ошибка: %s"
+  convert_done: "&#A0A0A0Конвертировано: %s, ошибок: %s."
+  convert_truncated: "&#A0A0A0...ещё %s (см. консоль)."
+  not_found: "&#FF4444Схема '%s' не найдена."
+  pasted: "&#A0A0A0Вставлено: &#FF4444%s&#A0A0A0."
 
 ghost:
   saved: "&#00D4FFВаш призрак сохранён с результатом %s очков!"

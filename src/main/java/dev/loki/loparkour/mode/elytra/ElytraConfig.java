@@ -1,6 +1,6 @@
 package dev.loki.loparkour.mode.elytra;
 
-import dev.loki.loparkour.config.Config;
+import dev.loki.loparkour.config.core.Config;
 
 /**
  * Configuration for Elytra mode loaded from config.yml

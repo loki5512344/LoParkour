@@ -1,11 +1,11 @@
 package dev.loki.loparkour.menu.play;
 
-import dev.loki.loparkour.api.Registry;
-import dev.loki.loparkour.config.Config;
-import dev.loki.loparkour.config.Locales;
-import dev.loki.loparkour.menu.LPMenu;
-import dev.loki.loparkour.mode.Mode;
-import dev.loki.loparkour.player.ParkourUser;
+import dev.loki.loparkour.api.core.Registry;
+import dev.loki.loparkour.config.core.Config;
+import dev.loki.loparkour.config.locale.Locales;
+import dev.loki.loparkour.menu.core.LPMenu;
+import dev.loki.loparkour.mode.base.Mode;
+import dev.loki.loparkour.player.core.ParkourUser;
 import dev.lolib.gui.InventoryGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -81,12 +81,12 @@ public class SingleMenu extends LPMenu {
         // Add navigation buttons
         if (currentPage > 0) {
             // Previous page button
-            gui = gui.setItem(0, backItem(), e -> open(player, currentPage - 1));
+            gui = gui.setItem(0, backItem(player), e -> open(player, currentPage - 1));
         }
         
         if (currentPage < totalPages - 1) {
             // Next page button
-            gui = gui.setItem(8, nextItem(), e -> open(player, currentPage + 1));
+            gui = gui.setItem(8, nextItem(player), e -> open(player, currentPage + 1));
         }
 
         gui.open(player);

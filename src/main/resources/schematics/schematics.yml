@@ -1,7 +1,10 @@
-# -------- Add your schematics here --------
-# Add your schematic random code or custom name here, followed by the difficulty.
-# If your file is named parkour-d0f227d2, then you can either rename the file to parkour-4 ('4: 0.5') or
-# just add 'd0f227d2: 0.5'. Any questions? Join the Discord.
+# -------- Structure difficulty --------
+# plugins/LoParkour/schematics/
+#   .nbt  — structure block export
+#   .schem / .schematic — WorldEdit or /lp create
+#   .lpschem — legacy; run /lp schematic convert
+# In-game: /lp schematic wand → select → /lp create <difficulty>
+# Docs: plugins/LoParkour/docs/SCHEMATICS.md
 
 # -------- The difficulty of schematics --------
 # These are represented by a number below or equal to 1.0.

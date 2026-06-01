@@ -1,7 +1,7 @@
 package dev.loki.loparkour.player.data;
 
 import dev.loki.loparkour.LoParkour;
-import dev.loki.loparkour.config.Config;
+import dev.loki.loparkour.config.core.Config;
 import dev.lolib.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
