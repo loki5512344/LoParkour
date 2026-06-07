@@ -36,8 +36,8 @@ public class ParkourPlayer extends ParkourUser {
 
     public static final Map<String, PlayerSettingsManager.OptionContainer> PLAYER_COLUMNS = PlayerSettingsManager.getColumnMappings();
 
-    // Track scored blocks to prevent duplicate scoring
-    private final Set<Block> scoredBlocks = new HashSet<>();
+    // Track scored blocks to prevent duplicate scoring (String key = "x,y,z" to avoid Bukkit Block reference equality)
+    private final Set<String> scoredBlocks = new HashSet<>();
 
     public @Expose Double schematicDifficulty;
     public @Expose Integer blockLead;
@@ -115,18 +115,22 @@ public class ParkourPlayer extends ParkourUser {
         save(LoParkour.getPlugin().isEnabled());
     }
 
+    private static String blockKey(Block block) {
+        return block.getX() + "," + block.getY() + "," + block.getZ();
+    }
+
     /**
      * Check if player has already scored on this block.
      */
     public boolean hasScored(Block block) {
-        return scoredBlocks.contains(block);
+        return scoredBlocks.contains(blockKey(block));
     }
 
     /**
      * Mark block as scored to prevent duplicate scoring.
      */
     public void markScored(Block block) {
-        scoredBlocks.add(block);
+        scoredBlocks.add(blockKey(block));
     }
 
     /**

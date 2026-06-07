@@ -48,9 +48,9 @@ public class JumpCalculator {
         distance = Math.min(distance, constraints.maxDistance);
         
         // Clamp values to valid ranges
-        height = Math.max(-2, Math.min(1, height));
+        height = Math.max(-2, Math.min(2, height));
         distance = Math.max(1, Math.min(4, distance));
-        
+
         if (height > 0) distance = Math.max(distance - height, 1);
 
         // Calculate offset
@@ -102,7 +102,7 @@ public class JumpCalculator {
         double sd = java.util.Arrays.asList(generator.generatorOptions).contains(GeneratorOption.REDUCE_RANDOM_BLOCK_SELECTION_ANGLE) ? 0.5 : 1;
         int randomOffset = new JumpOffsetGenerator(height, distance).getRandomOffset(0, sd);
 
-        Vector offset = generator.state.heading.clone().multiply(distance + 1).setY(height);
+        Vector offset = generator.state.heading.clone().multiply(distance).setY(height);
         if (offset.getX() == 0) {
             offset.setX(randomOffset);
         } else {
@@ -133,17 +133,21 @@ public class JumpCalculator {
     
     private int getSpecialMaterialMaxHeight(@NotNull Material material) {
         return switch (material) {
-            case PACKED_ICE -> 1;  // Ice allows normal height
-            case LADDER -> 1;      // Ladder allows some height
-            default -> 0;          // Most special materials restrict height
+            case PACKED_ICE -> 1;    // Ice allows normal height
+            case BLUE_ICE -> 1;      // Blue ice same
+            case ICE -> 0;           // Regular ice melts, slippery
+            case LADDER -> 1;        // Ladder allows some height
+            default -> 0;            // Most special materials restrict height
         };
     }
-    
+
     private int getSpecialMaterialMaxDistance(@NotNull Material material) {
         return switch (material) {
-            case PACKED_ICE -> 3;  // Ice is slippery
-            case LADDER -> 2;      // Ladder is very restrictive
-            default -> 3;          // Default restriction
+            case PACKED_ICE -> 4;    // Ice — full distance, slippery
+            case BLUE_ICE -> 4;      // Blue ice — full distance
+            case ICE -> 3;           // Regular ice — reduced
+            case LADDER -> 2;        // Ladder is very restrictive
+            default -> 3;            // Default restriction
         };
     }
     

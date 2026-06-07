@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("io.github.goooler.shadow") version("8.1.8")
+    id("xyz.jpenilla.run-paper") version("3.0.2")
 }
 
 group = "dev.loki"
@@ -90,8 +91,8 @@ dependencies {
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.mysql:mysql-connector-j:8.3.0")
-    implementation("com.sk89q.worldedit:worldedit-core:7.3.6")
-    implementation("com.sk89q.worldedit:worldedit-bukkit:7.3.6")
+    compileOnly("com.sk89q.worldedit:worldedit-core:7.3.6")
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.3.6")
 
     // Provided dependencies (plugins)
     compileOnly("me.clip:placeholderapi:2.11.6")
@@ -119,8 +120,6 @@ tasks.shadowJar {
     relocate("io.papermc.lib", "dev.loki.loparkour.lib.paperlib")
     relocate("com.google.gson", "dev.loki.loparkour.lib.gson")
     relocate("org.bstats", "dev.loki.loparkour.lib.bstats")
-    relocate("com.sk89q.worldedit", "dev.loki.loparkour.lib.worldedit")
-    relocate("org.enginehub", "dev.loki.loparkour.lib.enginehub")
 
     // Don't minimize - causes issues with Caffeine's dynamically generated classes
     // minimize {
@@ -154,6 +153,19 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<Javadoc> {
     options.encoding = "UTF-8"
+}
+
+// Run paper server via gradlew runServer
+tasks {
+    runServer {
+        minecraftVersion("1.21.4")
+        jvmArgs("-Xms2G", "-Xmx2G")
+        runDirectory.set(layout.projectDirectory.dir("run"))
+
+        downloadPlugins {
+            modrinth("placeholderapi", "2.11.6")
+        }
+    }
 }
 
 // Default task

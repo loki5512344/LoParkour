@@ -5,7 +5,7 @@ import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.leaderboard.core.Leaderboard;
 import dev.loki.loparkour.leaderboard.model.Score;
 import dev.loki.loparkour.util.text.ColorUtil;
-import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -124,10 +124,13 @@ public class ScoreboardManager {
     }
 
     private String applyPlaceholderAPI(String text) {
-        try {
-            return PlaceholderAPI.setPlaceholders(player, text);
-        } catch (Exception e) {
-            return text;
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            try {
+                return me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, text);
+            } catch (Exception e) {
+                return text;
+            }
         }
+        return text;
     }
 }

@@ -121,6 +121,8 @@ public class GeneratorProfileManager {
         generator.state.specialChances.clear();
 
         try {
+            double difficulty = getDifficultyScore();
+
             for (String specialType : Config.GENERATION.getChildren("advanced.special")) {
                 String materialPath = "advanced.special." + specialType + ".material";
                 String chancePath = "advanced.special." + specialType + ".chance";
@@ -130,6 +132,17 @@ public class GeneratorProfileManager {
 
                 BlockData blockData = org.bukkit.Bukkit.createBlockData(materialName);
                 generator.state.specialChances.put(blockData, (double) chance);
+            }
+
+            // Add ice variants on higher difficulties
+            // difficulty >= ~1.0 = hard: packed ice, >= ~2.0 = expert: blue ice
+            if (difficulty >= 1.0) {
+                generator.state.specialChances.put(
+                    org.bukkit.Bukkit.createBlockData("minecraft:packed_ice"), 15.0);
+            }
+            if (difficulty >= 2.0) {
+                generator.state.specialChances.put(
+                    org.bukkit.Bukkit.createBlockData("minecraft:blue_ice"), 10.0);
             }
 
             normalizeMap(generator.state.specialChances);

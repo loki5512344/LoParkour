@@ -67,22 +67,36 @@ public class Leaderboard {
     // ── CRUD operations ───────────────────────────────────────────────────────
 
     /**
-     * Registers a new score, overriding the old one
+     * Registers a new score — only replaces the old one if it's strictly better
+     * (higher score, or same score with faster time).
      *
      * @param uuid  The player's uuid
      * @param score The {@link Score} instance associated with a player's run
-     * @return the previous score, if there was one
+     * @return the previous best score, if there was one
      */
     @Nullable
     public Score put(@NotNull UUID uuid, @NotNull Score score) {
         Score previous;
         synchronized (scores) {
-            previous = scores.put(uuid, score);
+            previous = scores.get(uuid);
+            if (previous != null && !isBetterThan(score, previous)) {
+                return previous; // keep the better score
+            }
+            scores.put(uuid, score);
         }
 
         sorter.sortInPlace(scores);
 
         return previous;
+    }
+
+    /** Returns true if {@code candidate} is strictly better than {@code existing}. */
+    private static boolean isBetterThan(@NotNull Score candidate, @NotNull Score existing) {
+        if (candidate.score() != existing.score()) {
+            return candidate.score() > existing.score();
+        }
+        // same score — faster time wins
+        return candidate.getTimeMillis() < existing.getTimeMillis();
     }
 
     /**

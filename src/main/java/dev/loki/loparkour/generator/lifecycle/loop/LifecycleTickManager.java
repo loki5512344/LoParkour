@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class LifecycleTickManager {
     
     private static final int TIME_UI_INTERVAL = 20; // 1 second — time display tick
-    private static final int GENERATION_LEAD = 5;
+    private static final int GENERATION_LEAD = 2;    // keep only 2 blocks ahead, generate more when player approaches end
     
     private final ParkourGenerator generator;
     private final GeneratorCleanup cleanup;
@@ -32,12 +32,10 @@ public class LifecycleTickManager {
      * Start the tick cycle.
      */
     public void startTick() {
-        if (generator.state.start == null) {
-            generator.state.start = java.time.Instant.now();
-        }
+        // Timer starts on first block jump, not here — see PlayerInteractionHandler.handleScore()
 
-        // Generate initial blocks (reduced from GENERATION_LEAD to avoid too far generation)
-        generator.generate(3);
+        // Generate initial blocks ahead of the player
+        generator.generate(2);
     }
     
     /**

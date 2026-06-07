@@ -11,6 +11,9 @@ import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.util.List;
+
 /**
  * Handles player interactions with parkour blocks.
  */
@@ -42,11 +45,29 @@ public class PlayerInteractionHandler {
             }
         }
     }
+
+    /** Compare two blocks by their world coordinates (Bukkit Block uses reference equality). */
+    private static boolean isSameBlock(@NotNull Block a, @NotNull Block b) {
+        return a.getX() == b.getX() && a.getY() == b.getY() && a.getZ() == b.getZ();
+    }
+
+    /** Check if history contains a block by coordinates, not reference. */
+    private static boolean historyContains(@NotNull List<Block> history, @NotNull Block block) {
+        for (Block b : history) {
+            if (isSameBlock(b, block)) return true;
+        }
+        return false;
+    }
     
     /**
      * Handle player scoring on a block.
      */
     public void handleScore() {
+        // Start the timer on the very first scored block
+        if (generator.state.start == null) {
+            generator.state.start = Instant.now();
+        }
+
         generator.state.score++;
         eventManager.handleScore();
 
@@ -91,8 +112,8 @@ public class PlayerInteractionHandler {
             handleSchematicEndBlock(block);
         }
         
-        // Check for scoring
-        if (generator.state.history.contains(block) && !player.hasScored(block)) {
+        // Check for scoring (compare by coordinates, not reference — Bukkit Block uses identity)
+        if (historyContains(generator.state.history, block) && !player.hasScored(block)) {
             player.markScored(block);
             handleScore();
         }
@@ -111,7 +132,7 @@ public class PlayerInteractionHandler {
     
     private boolean isSchematicEndBlock(@NotNull Block block) {
         return generator.state.schematicBlocks != null
-                && generator.state.schematicBlocks.contains(block);
+                && historyContains(generator.state.schematicBlocks, block);
     }
     
     /** Block directly under feet; {@code null} in air — scoring runs when landed. */

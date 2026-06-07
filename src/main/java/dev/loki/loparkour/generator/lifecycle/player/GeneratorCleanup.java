@@ -34,7 +34,7 @@ public class GeneratorCleanup {
         for (ParkourPlayer pp : generator.getPlayers()) {
             Block below = blockBelowPlayer(pp);
             if (below == null) continue;
-            int idx = history.indexOf(below);
+            int idx = indexOfBlock(history, below);
             if (idx >= 0) {
                 minStandingIndex = Math.min(minStandingIndex, idx);
             }
@@ -54,6 +54,17 @@ public class GeneratorCleanup {
             }
         }
         history.subList(0, removeCount).clear();
+    }
+
+    /** Find index of a block in history by coordinates, not reference. */
+    private static int indexOfBlock(@NotNull List<Block> list, @NotNull Block target) {
+        for (int i = 0; i < list.size(); i++) {
+            Block b = list.get(i);
+            if (b != null && b.getX() == target.getX() && b.getY() == target.getY() && b.getZ() == target.getZ()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static Block blockBelowPlayer(@NotNull ParkourPlayer pp) {

@@ -75,7 +75,12 @@ public class SessionStateManager {
 
         tickTask = Scheduler.get(LoParkour.getPlugin()).runTimer(() -> {
             if (session.generator != null) {
-                session.generator.tick();
+                try {
+                    session.generator.tick();
+                } catch (Throwable t) {
+                    session.generator.session.getPlayers().forEach(p ->
+                        p.player.sendMessage("§c[LoParkour] Tick error: " + t.getMessage()));
+                }
             }
         }, 0, 1); // Run every tick (1 = 50ms)
     }

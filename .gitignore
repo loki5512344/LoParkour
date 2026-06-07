@@ -52,7 +52,7 @@ build/
 gradle-app.setting
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+run/
 # OS files
 .DS_Store
 Thumbs.db

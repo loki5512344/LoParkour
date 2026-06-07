@@ -101,7 +101,8 @@ public class JumpDirector {
         if (recommendedHeading.lengthSquared() == 0) {
             return current;
         } else {
-            return recommendedHeading;
+            // Normalize so diagonal vectors don't multiply distance by √2
+            return recommendedHeading.normalize();
         }
     }
 

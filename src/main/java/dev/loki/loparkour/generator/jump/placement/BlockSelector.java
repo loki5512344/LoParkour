@@ -107,12 +107,14 @@ public class BlockSelector {
         return isSlabMaterial(material) ||
                material == Material.GLASS_PANE ||
                material == Material.PACKED_ICE ||
+               material == Material.BLUE_ICE ||
+               material == Material.ICE ||
                isFenceMaterial(material) ||
                isTrapdoorMaterial(material) ||
                material == Material.LADDER;
     }
     
-    private boolean isFenceMaterial(@NotNull Material material) {
+    public boolean isFenceMaterial(@NotNull Material material) {
         return material == Material.OAK_FENCE ||
                material == Material.BIRCH_FENCE ||
                material == Material.SPRUCE_FENCE ||
@@ -126,7 +128,7 @@ public class BlockSelector {
                material == Material.NETHER_BRICK_FENCE;
     }
     
-    private boolean isTrapdoorMaterial(@NotNull Material material) {
+    public boolean isTrapdoorMaterial(@NotNull Material material) {
         return material == Material.OAK_TRAPDOOR ||
                material == Material.BIRCH_TRAPDOOR ||
                material == Material.SPRUCE_TRAPDOOR ||

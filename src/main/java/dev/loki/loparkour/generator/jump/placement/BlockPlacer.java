@@ -9,6 +9,7 @@ import dev.loki.loparkour.schematic.core.ParkourSchematic;
 import dev.loki.loparkour.schematic.core.SchematicManager;
 import dev.loki.loparkour.util.misc.Probs;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -40,7 +41,7 @@ public class BlockPlacer {
     public void generate() {
         generate(1);
     }
-    
+
     /**
      * Generate specified amount of blocks.
      */
@@ -48,6 +49,27 @@ public class BlockPlacer {
         for (int i = 0; i < amount; i++) {
             generateSingleBlock();
         }
+    }
+
+    private boolean isTallMaterial(@NotNull Material mat) {
+        return blockSelector.isFenceMaterial(mat) || blockSelector.isTrapdoorMaterial(mat) || mat == Material.GLASS_PANE;
+    }
+
+    /**
+     * Select blocks with a forced height override for tall materials (fences, trapdoors).
+     */
+    @NotNull
+    private List<Block> selectBlocks(int forcedHeight) {
+        List<Block> blocks = new ArrayList<>();
+        if (generator.state.history.isEmpty()) {
+            return blocks;
+        }
+        Block current = generator.getLatest();
+        int distance = Probs.random(generator.state.distanceChances);
+        int height = forcedHeight != Integer.MIN_VALUE ? forcedHeight : Probs.random(generator.state.heightChances);
+        Block nextBlock = jumpCalculator.calculateNextBlock(current, distance, height);
+        blocks.add(nextBlock);
+        return blocks;
     }
     
     /**
@@ -92,30 +114,33 @@ public class BlockPlacer {
     }
     
     private void placeNormalBlock() {
-        List<Block> blocks = selectBlocks();
+        BlockData blockData = blockSelector.selectBlockData();
+        if (blockData == null) return;
+
+        Material mat = blockData.getMaterial();
+        boolean tall = isTallMaterial(mat);
+
+        List<Block> blocks = tall ? selectBlocks(-1) : selectBlocks();
         if (blocks.isEmpty()) return;
 
-        Block selectedBlock = blocks.get(0); // Use first block for simplicity
-        BlockData blockData = blockSelector.selectBlockData();
-        if (blockData == null) {
-            return; // Skip if no valid block data available
-        }
-
+        Block selectedBlock = blocks.get(0);
         placeBlockData(selectedBlock, blockData);
         generator.state.history.add(selectedBlock);
     }
-    
+
     private void placeSpecialBlock() {
-        // Select special block type based on probabilities
         BlockData specialBlockData = Probs.random(generator.state.specialChances);
         if (specialBlockData == null) {
             placeNormalBlock();
             return;
         }
-        
-        List<Block> blocks = selectBlocks();
+
+        Material mat = specialBlockData.getMaterial();
+        boolean tall = isTallMaterial(mat);
+
+        List<Block> blocks = tall ? selectBlocks(-1) : selectBlocks();
         if (blocks.isEmpty()) return;
-        
+
         Block selectedBlock = blocks.get(0);
         placeBlockData(selectedBlock, specialBlockData);
         generator.state.history.add(selectedBlock);
