@@ -80,30 +80,43 @@ public class JumpDirector {
         double tz = progress[2][0];
         double borderMarginZ = progress[2][1];
 
-        Vector recommendedHeading = new Vector(0, 0, 0);
-        // check border
+        // Determine per-axis corrections needed
+        boolean needX = false;
+        boolean needZ = false;
+        double dirX = 0;
+        double dirZ = 0;
+
         if (tx < borderMarginX) {
-            // x should increase
-            recommendedHeading = new Vector(1, 0, 1);
+            needX = true;
+            dirX = 1;
         } else if (tx > 1 - borderMarginX) {
-            // x should decrease
-            recommendedHeading = new Vector(-1, 0, -1);
+            needX = true;
+            dirX = -1;
         }
 
         if (tz < borderMarginZ) {
-            // z should increase
-            recommendedHeading = new Vector(1, 0, 1);
+            needZ = true;
+            dirZ = 1;
         } else if (tz > 1 - borderMarginZ) {
-            // z should decrease
-            recommendedHeading = new Vector(-1, 0, -1);
+            needZ = true;
+            dirZ = -1;
         }
 
-        if (recommendedHeading.lengthSquared() == 0) {
+        if (!needX && !needZ) {
             return current;
-        } else {
-            // Normalize so diagonal vectors don't multiply distance by √2
-            return recommendedHeading.normalize();
         }
+
+        if (needX && needZ) {
+            // Both axes need correction — return a diagonal
+            return new Vector(dirX, 0, dirZ).normalize();
+        }
+
+        if (needX) {
+            return new Vector(dirX, 0, 0);
+        }
+
+        // needZ is true
+        return new Vector(0, 0, dirZ);
     }
 
     /**

@@ -1,6 +1,5 @@
 package dev.loki.loparkour.generator.jump.calculation;
 
-import dev.loki.loparkour.config.options.Option;
 import dev.loki.loparkour.generator.core.model.GeneratorOption;
 import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.generator.jump.placement.BlockSelector;
@@ -100,7 +99,10 @@ public class JumpCalculator {
     @NotNull
     private Vector calculateJumpOffset(int distance, int height) {
         double sd = java.util.Arrays.asList(generator.generatorOptions).contains(GeneratorOption.REDUCE_RANDOM_BLOCK_SELECTION_ANGLE) ? 0.5 : 1;
-        int randomOffset = new JumpOffsetGenerator(height, distance).getRandomOffset(0, sd);
+        int randomOffset = Math.min(
+            new JumpOffsetGenerator(height, distance).getRandomOffset(0, sd),
+            (int) Math.floor(Math.sqrt(JumpValidator.MAX_HORIZONTAL_DISTANCE * JumpValidator.MAX_HORIZONTAL_DISTANCE - distance * distance))
+        );
 
         Vector offset = generator.state.heading.clone().multiply(distance).setY(height);
         if (offset.getX() == 0) {
@@ -109,7 +111,6 @@ public class JumpCalculator {
             offset.setZ(randomOffset);
         }
 
-        offset.rotateAroundY(angleInY(generator.state.heading, Option.HEADING.getDirection()));
         return offset;
     }
     
@@ -121,7 +122,7 @@ public class JumpCalculator {
         while (!validator.canJump(current.getLocation(), candidate.getLocation()) && attempts < 10) {
             // Reduce distance and height to make jump easier
             distance = Math.max(1, distance - 1);
-            height = Math.max(-1, height - 1);
+            height = Math.max(-2, height - 1);
             
             Vector offset = calculateJumpOffset(distance, height);
             candidate = current.getLocation().add(offset).getBlock();
@@ -150,11 +151,7 @@ public class JumpCalculator {
             default -> 3;            // Default restriction
         };
     }
-    
-    private double angleInY(@NotNull Vector a, @NotNull Vector b) {
-        return Math.atan2(b.getZ(), b.getX()) - Math.atan2(a.getZ(), a.getX());
-    }
-    
+
     /**
      * Represents jump constraints for a specific block type.
      */

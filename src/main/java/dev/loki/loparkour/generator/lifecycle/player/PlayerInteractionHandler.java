@@ -110,13 +110,22 @@ public class PlayerInteractionHandler {
         // Check if it's a schematic end block
         if (isSchematicEndBlock(block)) {
             handleSchematicEndBlock(block);
+        } else if (isOnSchematicBlock(block)) {
+            // Schematic block that is NOT the last — skip scoring
+            return;
         }
-        
+
         // Check for scoring (compare by coordinates, not reference — Bukkit Block uses identity)
         if (historyContains(generator.state.history, block) && !player.hasScored(block)) {
             player.markScored(block);
             handleScore();
         }
+    }
+
+    /** Check if block is any schematic block (not just the last one). */
+    private boolean isOnSchematicBlock(@NotNull Block block) {
+        return generator.state.schematicBlocks != null
+                && historyContains(generator.state.schematicBlocks, block);
     }
     
     private void handleSchematicEndBlock(@NotNull Block block) {
@@ -131,8 +140,13 @@ public class PlayerInteractionHandler {
     }
     
     private boolean isSchematicEndBlock(@NotNull Block block) {
-        return generator.state.schematicBlocks != null
-                && historyContains(generator.state.schematicBlocks, block);
+        List<Block> schematicBlocks = generator.state.schematicBlocks;
+        if (schematicBlocks == null || schematicBlocks.isEmpty()) {
+            return false;
+        }
+        // Only the LAST block of the schematic triggers completion
+        Block last = schematicBlocks.get(schematicBlocks.size() - 1);
+        return isSameBlock(block, last);
     }
     
     /** Block directly under feet; {@code null} in air — scoring runs when landed. */

@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class JumpValidator {
 
-    private static final double MAX_JUMP_DISTANCE = 4.5;
-    private static final double MAX_HORIZONTAL_DISTANCE = 4.1;
-    private static final double MAX_VERTICAL_UP = 1.25;
-    private static final double MAX_VERTICAL_DOWN = 3.0;
+    public static final double MAX_JUMP_DISTANCE = 4.5;
+    public static final double MAX_HORIZONTAL_DISTANCE = 4.1;
+    public static final double MAX_VERTICAL_UP = 1.25;
+    public static final double MAX_VERTICAL_DOWN = 3.0;
 
     private final double maxDistance;
     private final double maxHorizontal;
@@ -122,43 +122,7 @@ public class JumpValidator {
 
     // Check if jump is possible: sqrt(dx² + dy² + dz²) <= maxDistance
     public boolean canJump(@NotNull Vector from, @NotNull Vector to) {
-        // Null safety check
-        if (from == null || to == null) {
-            return false;
-        }
-        
-        double dx = to.getX() - from.getX();
-        double dy = to.getY() - from.getY();
-        double dz = to.getZ() - from.getZ();
-
-        // Check if same location (no jump)
-        double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
-        if (horizontalDistance < 0.01 && Math.abs(dy) < 0.01) {
-            return false; // Same location
-        }
-
-        // Check horizontal distance limit
-        if (horizontalDistance > maxHorizontal) {
-            return false;
-        }
-
-        // Check vertical limits
-        if (dy > maxVerticalUp || dy < -maxVerticalDown) {
-            return false;
-        }
-        
-        // For upward jumps, reduce max horizontal distance
-        // Player can't jump as far when jumping up
-        if (dy > 0) {
-            double adjustedMaxHorizontal = maxHorizontal - (dy * 0.5); // Reduce by 0.5 blocks per block up
-            if (horizontalDistance > adjustedMaxHorizontal) {
-                return false;
-            }
-        }
-
-        // Check total distance
-        double totalDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        return totalDistance <= maxDistance;
+        return canJumpWithAdjustment(from, to, 0.0);
     }
 
     public double calculateDistance(@NotNull Location from, @NotNull Location to) {
