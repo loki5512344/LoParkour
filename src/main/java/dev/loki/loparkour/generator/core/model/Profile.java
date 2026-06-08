@@ -45,16 +45,18 @@ public class Profile {
         }
 
         /**
-         * @return The value as a double.
+         * @return The value as a double. Returns 0.0 if the value is empty.
          */
         public double asDouble() {
+            if (value.isEmpty()) return 0.0;
             return Double.parseDouble(value);
         }
 
         /**
-         * @return The value as an int.
+         * @return The value as an int. Returns 0 if the value is empty.
          */
         public int asInt() {
+            if (value.isEmpty()) return 0;
             return Integer.parseInt(value);
         }
     }

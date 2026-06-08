@@ -82,8 +82,8 @@ public class PlayerInteractionHandler {
             }
         }
 
-        // Generate more blocks after scoring
-        generator.generate(1);
+        // Block generation is handled by LifecycleTickManager.maintainBlockLead()
+        // to avoid runaway generation in multiplayer (N players = N generates per tick otherwise).
     }
     
     /**

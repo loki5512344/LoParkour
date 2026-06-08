@@ -92,7 +92,8 @@ public class LifecycleTickManager {
         
         if (currentBlocks < targetBlocks) {
             int needed = targetBlocks - currentBlocks;
-            generator.generate(needed);
+            // Cap generation per tick to prevent runaway generation in multiplayer
+            generator.generate(Math.min(needed, 5));
         }
     }
 }
