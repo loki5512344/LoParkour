@@ -88,8 +88,10 @@ public class GeneratorCleanup {
             }
         }
         
-        // Remove from history
-        generator.state.history.subList(startIndex, endIndex).clear();
+        // Remove from history (synchronized to prevent concurrent index shift)
+        synchronized (generator.state.history) {
+            generator.state.history.subList(startIndex, endIndex).clear();
+        }
     }
     
     /**

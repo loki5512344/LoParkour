@@ -74,7 +74,7 @@ public class LifecycleTickManager {
         for (var player : generator.getPlayers()) {
             if (player.player.getLocation().getY() < fallThreshold) {
                 generator.fall();
-                break; // Only trigger once per tick
+                continue; // Don't break — keep checking remaining players
             }
         }
     }

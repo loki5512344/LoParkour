@@ -115,6 +115,13 @@ public class ParkourPlayer extends ParkourUser {
         save(LoParkour.getPlugin().isEnabled());
     }
 
+    /**
+     * Clear scored blocks set, typically on fall/respawn so same coordinates can be re-scored.
+     */
+    public void clearScoredBlocks() {
+        scoredBlocks.clear();
+    }
+
     private static String blockKey(Block block) {
         return block.getX() + "," + block.getY() + "," + block.getZ();
     }

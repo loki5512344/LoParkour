@@ -99,6 +99,8 @@ public class LifecycleEventManager {
             if (generator.state.playerSpawn != null) {
                 player.teleport(generator.state.playerSpawn);
             }
+            // Clear scored blocks so same coordinates can be re-scored after respawn
+            player.clearScoredBlocks();
         }
 
         // Reset generator state
