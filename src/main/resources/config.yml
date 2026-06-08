@@ -208,11 +208,8 @@ modes:
         amplifier: 1
         duration: 5
 
-  hardcore:
-    reset-rewards: true
-
   elytra:
-    enabled: true
+    enabled: false
     ring-distance-min: 20
     ring-distance-max: 40
     ring-size: 5

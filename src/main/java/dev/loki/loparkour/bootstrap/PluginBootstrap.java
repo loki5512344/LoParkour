@@ -17,7 +17,6 @@ import dev.loki.loparkour.mode.impl.CoopMode;
 import dev.loki.loparkour.mode.impl.DefaultMode;
 import dev.loki.loparkour.mode.impl.ElytraMode;
 import dev.loki.loparkour.mode.impl.GravityShiftMode;
-import dev.loki.loparkour.mode.impl.HardcoreMode;
 import dev.loki.loparkour.mode.impl.RaceMode;
 import dev.loki.loparkour.mode.impl.SpectatorMode;
 import dev.loki.loparkour.mode.impl.SpeedrunMode;
@@ -76,7 +75,6 @@ public final class PluginBootstrap {
         Registry.register(new RaceMode());
         Registry.register(new CoopMode());
         Registry.register(new GravityShiftMode());
-        Registry.register(new HardcoreMode());
         Modes.init();
     }
 

@@ -40,11 +40,6 @@ play:
       name: "&#00D4FF&lGravity Shift"
       lore: "&#404040Random potion effects||&#404040every few jumps"
 
-    hardcore:
-      material: "skeleton_skull"
-      name: "&#00D4FF&lHardcore"
-      lore: "&#404040Lose all rewards on fall||&#404040No second chances."
-
   spectator:
     name: "&#FFFFFFSpectator"
 

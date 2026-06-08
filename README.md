@@ -45,7 +45,7 @@ Output: `build/libs/LoParkour-1.3.0.jar`
 ## ✨ Features
 
 - **Infinite Generation** - Parkour generates endlessly as you play
-- **Multiple Game Modes** - Default, Speedrun, Hardcore, Gravity Shift, Elytra
+- **Multiple Game Modes** - Default, Speedrun, Gravity Shift, Elytra
 - **Ghost System** - Race against top player recordings
 - **Custom Schematics** - Create and use your own parkour structures
 - **Visual Themes** - Customize block styles and particle effects
@@ -57,7 +57,6 @@ Output: `build/libs/LoParkour-1.3.0.jar`
 
 - **Default** - Classic infinite parkour
 - **Speedrun** - Blocks disappear after a few seconds
-- **Hardcore** - Lose all rewards on fall
 - **Gravity Shift** - Random gravity effects (levitation, slow falling, jump boost)
 - **Elytra** - Fly through particle rings
 
