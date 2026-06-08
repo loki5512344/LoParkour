@@ -130,7 +130,12 @@ public class GeneratorProfileManager {
                 String materialName = Config.GENERATION.getString(materialPath);
                 int chance = Config.GENERATION.getInt(chancePath, 1);
 
-                BlockData blockData = org.bukkit.Bukkit.createBlockData(materialName);
+                BlockData blockData;
+                try {
+                    blockData = org.bukkit.Bukkit.createBlockData(materialName);
+                } catch (IllegalArgumentException e) {
+                    continue; // skip invalid material names
+                }
                 generator.state.specialChances.put(blockData, (double) chance);
             }
 

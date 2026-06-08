@@ -31,8 +31,9 @@ public class GeneratorState {
     // Time state
     public Instant start;
 
-    // Block history (sync list: all mutations occur on the main thread; avoids accidental CME if extended later)
-    public final List<Block> history = Collections.synchronizedList(new LinkedList<>());
+    // Block history — all access is main-thread-only (Bukkit scheduler runTimer), so no sync wrapper needed.
+    // Iteration is safe without external synchronization as all mutations happen on the same thread.
+    public final List<Block> history = new ArrayList<>();
     public int lastPositionIndexPlayer = -1;
 
     // Schematic state

@@ -9,6 +9,8 @@ import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * Handles selection of block types and materials for parkour generation.
  */
@@ -29,7 +31,11 @@ public class BlockSelector {
     public BlockData selectBlockData() {
         Style style = Registry.getStyle(generator.profile.get("style").value());
         if (style == null) {
-            generator.profile.set("style", Registry.getStyles().stream().findFirst().orElseThrow().getName());
+            List<Style> styles = Registry.getStyles();
+            if (styles.isEmpty()) {
+                return Material.STONE.createBlockData();
+            }
+            generator.profile.set("style", styles.stream().findFirst().orElseThrow().getName());
             return selectBlockData();
         }
         for (int i = 0; i < MAX_STYLE_PICKS; i++) {
