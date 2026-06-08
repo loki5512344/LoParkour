@@ -4,6 +4,7 @@ import dev.loki.loparkour.api.core.Registry;
 import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.generator.jump.calculation.JumpType;
 import dev.loki.loparkour.style.core.Style;
+import dev.loki.loparkour.util.misc.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
@@ -52,14 +53,10 @@ public class BlockSelector {
      * can NPE on high/void parkour worlds when adjacent chunks have no loaded state.
      */
     static boolean isUnsafeParkourMaterial(@NotNull Material m) {
-        if (m == Material.CARVED_PUMPKIN || m == Material.JACK_O_LANTERN || m == Material.PUMPKIN) {
+        if (m == Material.CARVED_PUMPKIN || m == Material.JACK_O_LANTERN) {
             return true;
         }
         if (m == Material.DRAGON_EGG) {
-            return true;
-        }
-        String n = m.name();
-        if (n.endsWith("_BED")) {
             return true;
         }
         return false;
@@ -76,15 +73,6 @@ public class BlockSelector {
     }
     
     /**
-     * Check if material is a slab type.
-     */
-    public boolean isSlabMaterial(@NotNull Material material) {
-        return material == Material.SMOOTH_QUARTZ_SLAB ||
-               material == Material.STONE_SLAB ||
-               material.name().endsWith("_SLAB");
-    }
-    
-    /**
      * Get a slab material from the current player's style.
      */
     @Nullable
@@ -96,7 +84,7 @@ public class BlockSelector {
             // Try to get a slab material from the style multiple times
             for (int i = 0; i < 20; i++) {
                 Material material = style.getNext();
-                if (isSlabMaterial(material)) {
+                if (MaterialUtil.isSlabMaterial(material)) {
                     return material;
                 }
             }
@@ -110,7 +98,7 @@ public class BlockSelector {
      * Check if material is a special block type that affects jump mechanics.
      */
     public boolean isSpecialMaterial(@NotNull Material material) {
-        return isSlabMaterial(material) ||
+        return MaterialUtil.isSlabMaterial(material) ||
                material == Material.GLASS_PANE ||
                material == Material.PACKED_ICE ||
                material == Material.BLUE_ICE ||

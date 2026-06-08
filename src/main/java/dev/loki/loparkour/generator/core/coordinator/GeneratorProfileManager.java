@@ -140,12 +140,12 @@ public class GeneratorProfileManager {
             }
 
             // Add ice variants on higher difficulties
-            // difficulty >= ~1.0 = hard: packed ice, >= ~2.0 = expert: blue ice
-            if (difficulty >= 1.0) {
+            // difficulty >= ~0.3 = hard: packed ice, >= ~0.6 = expert: blue ice
+            if (difficulty >= 0.3) {
                 generator.state.specialChances.put(
                     org.bukkit.Bukkit.createBlockData("minecraft:packed_ice"), 15.0);
             }
-            if (difficulty >= 2.0) {
+            if (difficulty >= 0.6) {
                 generator.state.specialChances.put(
                     org.bukkit.Bukkit.createBlockData("minecraft:blue_ice"), 10.0);
             }

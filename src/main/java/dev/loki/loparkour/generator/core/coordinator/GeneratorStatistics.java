@@ -7,8 +7,7 @@ import dev.loki.loparkour.mode.base.Mode;
 import dev.loki.loparkour.player.core.ParkourPlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Duration;
 
 /**
  * Manages generator statistics and time formatting.
@@ -85,13 +84,22 @@ public class GeneratorStatistics {
         if (generator.state.start == null) {
             return "00:00.000";
         }
-        
+
         long elapsed = java.time.Duration.between(generator.state.start, java.time.Instant.now()).toMillis();
-        Date date = new Date(elapsed);
-        
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-        
-        return formatter.format(date);
+        Duration d = Duration.ofMillis(elapsed);
+
+        if (format.equals("HH:mm:ss.SSS")) {
+            long hours = d.toHours();
+            long minutes = d.toMinutesPart();
+            long seconds = d.toSecondsPart();
+            long millis = d.toMillisPart();
+            return String.format("%d:%02d:%02d.%03d", hours, minutes, seconds, millis);
+        }
+
+        // Default: mm:ss.SSS
+        long totalMinutes = d.toMinutes();
+        long seconds = d.toSecondsPart();
+        long millis = d.toMillisPart();
+        return String.format("%d:%02d.%03d", totalMinutes, seconds, millis);
     }
 }

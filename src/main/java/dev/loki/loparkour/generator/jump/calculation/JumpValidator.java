@@ -1,5 +1,6 @@
 package dev.loki.loparkour.generator.jump.calculation;
 
+import dev.loki.loparkour.util.misc.MaterialUtil;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,7 @@ public class JumpValidator {
     private double getSlabHeightAdjustment(@NotNull Location location) {
         try {
             org.bukkit.block.Block block = location.getBlock();
-            if (block != null && isSlabMaterial(block.getType())) {
+            if (block != null && MaterialUtil.isSlabMaterial(block.getType())) {
                 org.bukkit.block.data.BlockData blockData = block.getBlockData();
                 if (blockData instanceof org.bukkit.block.data.type.Slab slab) {
                     if (slab.getType() == org.bukkit.block.data.type.Slab.Type.BOTTOM) {
@@ -59,15 +60,6 @@ public class JumpValidator {
             // In case of mock objects or other issues, fall back to default behavior
         }
         return 0.0; // No adjustment for full blocks
-    }
-    
-    /**
-     * Check if material is a slab type.
-     */
-    private boolean isSlabMaterial(org.bukkit.Material material) {
-        return material == org.bukkit.Material.SMOOTH_QUARTZ_SLAB ||
-               material == org.bukkit.Material.STONE_SLAB ||
-               material.name().endsWith("_SLAB");
     }
     
     private boolean canJumpWithAdjustment(@NotNull Vector from, @NotNull Vector to, double heightAdjustment) {
