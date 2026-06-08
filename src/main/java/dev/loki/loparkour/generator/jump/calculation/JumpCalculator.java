@@ -3,6 +3,7 @@ package dev.loki.loparkour.generator.jump.calculation;
 import dev.loki.loparkour.generator.core.model.GeneratorOption;
 import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.generator.jump.placement.BlockSelector;
+import dev.loki.loparkour.util.misc.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -72,7 +73,7 @@ public class JumpCalculator {
         int maxHeight = 1;
         int maxDistance = 4;
         
-        if (blockSelector.isSlabMaterial(material)) {
+        if (MaterialUtil.isSlabMaterial(material)) {
             if (blockData instanceof org.bukkit.block.data.type.Slab slab) {
                 if (slab.getType() == org.bukkit.block.data.type.Slab.Type.BOTTOM) {
                     maxHeight = -1;  // Bottom slab: reduced height capability
