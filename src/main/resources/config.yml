@@ -208,19 +208,8 @@ modes:
         amplifier: 1
         duration: 5
 
-  elytra:
-    enabled: false
-    ring-distance-min: 20
-    ring-distance-max: 40
-    ring-size: 5
-    ring-lead: 8
-    max-heading-change-horizontal: 30
-    max-heading-change-vertical: 15
-    max-height-above-spawn: 60
-    max-deviation: 25
-    boost-power: 1.5
-    firework-cooldown-ms: 3000
-    starting-fireworks: 64
+  invisible-barrier:
+    enabled: true
 
   race:
     enabled: true

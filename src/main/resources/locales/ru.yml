@@ -39,6 +39,11 @@ play:
       name: "&#00D4FF&lГравитационный сдвиг"
       lore: "&#404040Случайные эффекты зелий||&#404040каждые несколько прыжков"
 
+    invisible-barrier:
+      material: "barrier"
+      name: "&#FF44FF&lНевидимый барьер"
+      lore: "&#404040Невидимые блоки с||&#404040цветными контурами из частиц"
+
   spectator:
     name: "&#FFFFFFНаблюдатель"
 
@@ -283,22 +288,7 @@ other:
     name: "&#00D4FF&lЗакрыть"
     lore: ""
 
-  iep:
-    material: "elytra"
-    name: "&#00D4FF&lПолёт"
-    lore: "&#A0A0A0Паркур с элитрами!"
-
 modes:
-  elytra:
-    material: "elytra"
-    name: "&#00D4FF&lЭлитры"
-    lore: "&#A0A0A0Летайте через кольца!||&#A0A0A0Используйте фейерверки для ускорения"
-    start_hint: "&#A0A0A0Летите через кольца! Используйте фейерверки для ускорения."
-    ring_perfect: "&#55FF55Идеально! +%d"
-    ring_good: "&#55FF55Хорошо! +%d"
-    fell: "&#FF4444Падение: %s"
-    action_bar: "&#FFFF55Кольцо: %d/%d &#A0A0A0| &#55FF55Счёт: &#FFFFFF%d"
-
   race:
     material: "golden_boots"
     name: "&#FFD700&lГонка"

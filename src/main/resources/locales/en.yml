@@ -40,6 +40,11 @@ play:
       name: "&#00D4FF&lGravity Shift"
       lore: "&#404040Random potion effects||&#404040every few jumps"
 
+    invisible-barrier:
+      material: "barrier"
+      name: "&#FF44FF&lInvisible Barrier"
+      lore: "&#404040Invisible blocks with||&#404040colorful particle outlines"
+
   spectator:
     name: "&#FFFFFFSpectator"
 
@@ -284,22 +289,7 @@ other:
     name: "&#00D4FF&lClose"
     lore: ""
 
-  iep:
-    material: "elytra"
-    name: "&#00D4FF&lFlying"
-    lore: "&#A0A0A0Parkour with elytra!"
-
 modes:
-  elytra:
-    material: "elytra"
-    name: "&#00D4FF&lElytra"
-    lore: "&#A0A0A0Fly through rings!||&#A0A0A0Use fireworks to boost"
-    start_hint: "&#A0A0A0Fly through the rings! Use fireworks to boost."
-    ring_perfect: "&#55FF55Perfect! +%d"
-    ring_good: "&#55FF55Good! +%d"
-    fell: "&#FF4444Fell: %s"
-    action_bar: "&#FFFF55Ring: %d/%d &#A0A0A0| &#55FF55Score: &#FFFFFF%d"
-
   race:
     material: "golden_boots"
     name: "&#FFD700&lRace"

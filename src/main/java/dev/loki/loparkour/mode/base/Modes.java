@@ -8,7 +8,7 @@ public class Modes {
     public static DefaultMode DEFAULT;
     public static SpectatorMode SPECTATOR;
     public static SpeedrunMode SPEEDRUN;
-    public static ElytraMode ELYTRA;
+    public static InvisibleBarrierMode INVISIBLE_BARRIER;
     public static RaceMode RACE;
     public static CoopMode COOP;
     public static GravityShiftMode GRAVITY_SHIFT;
@@ -17,7 +17,7 @@ public class Modes {
         DEFAULT = (DefaultMode) Registry.getMode("default");
         SPECTATOR = (SpectatorMode) Registry.getMode("spectator");
         SPEEDRUN = (SpeedrunMode) Registry.getMode("speedrun");
-        ELYTRA = (ElytraMode) Registry.getMode("elytra");
+        INVISIBLE_BARRIER = (InvisibleBarrierMode) Registry.getMode("invisible-barrier");
         RACE = (RaceMode) Registry.getMode("race");
         COOP = (CoopMode) Registry.getMode("coop");
         GRAVITY_SHIFT = (GravityShiftMode) Registry.getMode("gravity-shift");
