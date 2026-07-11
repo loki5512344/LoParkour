@@ -68,3 +68,6 @@ api_docs/
 
 # Project documentation (local only)
 TODO.md
+
+# Compiled output
+bin/
