@@ -41,14 +41,16 @@ public class Profile {
          * @return true when the string value is "true", else "false".
          */
         public boolean asBoolean() {
-            return value.equals("true"); // save parsing
+            return "true".equals(value); // save parsing
         }
 
         /**
          * @return The value as a double. Returns 0.0 if the value is empty.
          */
         public double asDouble() {
-            if (value.isEmpty()) return 0.0;
+            if (value.isEmpty()) {
+                return 0.0;
+            }
             return Double.parseDouble(value);
         }
 
@@ -56,7 +58,9 @@ public class Profile {
          * @return The value as an int. Returns 0 if the value is empty.
          */
         public int asInt() {
-            if (value.isEmpty()) return 0;
+            if (value.isEmpty()) {
+                return 0;
+            }
             return Integer.parseInt(value);
         }
     }

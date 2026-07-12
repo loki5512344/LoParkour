@@ -79,7 +79,7 @@ public class RaceMode implements Mode {
         private final int targetScore;
         private boolean raceFinished = false;
 
-        public RaceGenerator(@NotNull Session session) {
+        RaceGenerator(@NotNull Session session) {
             super(session);
             this.targetScore = Config.CONFIG.getInt("modes.race.target-score");
         }

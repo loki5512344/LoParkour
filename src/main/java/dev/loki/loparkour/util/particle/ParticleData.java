@@ -1,7 +1,5 @@
 package dev.loki.loparkour.util.particle;
 
-import dev.loki.loparkour.util.particle.ParticleData;
-
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

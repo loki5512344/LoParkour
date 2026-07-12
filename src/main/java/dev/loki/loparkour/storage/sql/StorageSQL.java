@@ -17,8 +17,11 @@ import java.util.logging.Logger;
  * Coordinates connection management, query building, and data mapping.
  */
 public class StorageSQL {
-    
-    private static final Logger logger = Logger.getLogger(StorageSQL.class.getName());
+
+    private StorageSQL() {
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(StorageSQL.class.getName());
     private static SQLConnectionManager connectionManager;
     
     /**
@@ -43,7 +46,7 @@ public class StorageSQL {
         if (isConnected()) {
             callback.run();
         } else {
-            logger.warning("Database not connected, skipping operation");
+            LOGGER.warning("Database not connected, skipping operation");
         }
     }
     
@@ -67,9 +70,9 @@ public class StorageSQL {
             
             createTables(mode);
             
-            logger.info("Database initialized successfully for mode: " + mode);
+            LOGGER.info("Database initialized successfully for mode: " + mode);
         } catch (SQLException e) {
-            logger.severe("Failed to initialize database: " + e.getMessage());
+            LOGGER.severe("Failed to initialize database: " + e.getMessage());
         }
     }
     
@@ -92,7 +95,7 @@ public class StorageSQL {
             return SQLDataMapper.mapScores(rs);
             
         } catch (SQLException e) {
-            logger.severe("Failed to read scores for mode " + mode + ": " + e.getMessage());
+            LOGGER.severe("Failed to read scores for mode " + mode + ": " + e.getMessage());
             return Map.of();
         }
     }
@@ -117,10 +120,10 @@ public class StorageSQL {
             }
             
             stmt.executeBatch();
-            logger.info("Wrote " + scores.size() + " scores for mode: " + mode);
+            LOGGER.info("Wrote " + scores.size() + " scores for mode: " + mode);
             
         } catch (SQLException e) {
-            logger.severe("Failed to write scores for mode " + mode + ": " + e.getMessage());
+            LOGGER.severe("Failed to write scores for mode " + mode + ": " + e.getMessage());
         }
     }
     
@@ -147,7 +150,7 @@ public class StorageSQL {
             }
             
         } catch (SQLException e) {
-            logger.severe("Failed to read player data: " + e.getMessage());
+            LOGGER.severe("Failed to read player data: " + e.getMessage());
         }
     }
     
@@ -168,7 +171,7 @@ public class StorageSQL {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            logger.severe("Failed to write player data: " + e.getMessage());
+            LOGGER.severe("Failed to write player data: " + e.getMessage());
         }
     }
     

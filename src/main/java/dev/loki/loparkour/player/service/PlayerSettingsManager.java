@@ -15,7 +15,10 @@ import java.util.function.BiConsumer;
  *
  * @since 5.0.0
  */
-public class PlayerSettingsManager {
+public final class PlayerSettingsManager {
+
+    private PlayerSettingsManager() {
+    }
 
     private static final Map<String, OptionContainer> COLUMN_MAPPINGS = new HashMap<>();
 
@@ -41,7 +44,6 @@ public class PlayerSettingsManager {
             if ("true".equals(v) || "false".equals(v)) {
                 sanitized = Option.OPTIONS_DEFAULTS.getOrDefault(ParkourOption.LANG, "en");
             }
-            p._locale = sanitized;
             p.locale = sanitized;
         }));
         COLUMN_MAPPINGS.put("schematicDifficulty", new OptionContainer(ParkourOption.SCHEMATICS, (p, v) ->
@@ -73,7 +75,7 @@ public class PlayerSettingsManager {
     }
 
     private static boolean parseBoolean(String string) {
-        return string == null || string.equals("1") || string.equalsIgnoreCase("true");
+        return string == null || "1".equals(string) || "true".equalsIgnoreCase(string);
     }
 
     private static int defaultBlockLead() {

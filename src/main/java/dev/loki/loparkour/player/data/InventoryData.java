@@ -11,7 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -95,7 +98,9 @@ public class InventoryData {
             items = (Map<Integer, ItemStack>) stream.readObject();
             onFinish.accept(this);
         } catch (IOException | ClassNotFoundException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while reading inventory of %s from file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while reading inventory of %s from file %s".formatted(player.getName(), file.getName())
+                            + " - " + ex.getMessage());
             onFinish.accept(null);
         }
     }
@@ -132,7 +137,9 @@ public class InventoryData {
             file.getParentFile().mkdirs();
             file.createNewFile();
         } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while creating file to save inventory of %s to file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while creating file to save inventory of %s to file %s".formatted(player.getName(), file.getName())
+                            + " - " + ex.getMessage());
         }
 
         try {
@@ -143,7 +150,9 @@ public class InventoryData {
             }
             yaml.save(file);
         } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while saving inventory of %s to file %s".formatted(player.getName(), file.getName()) + " - " + ex.getMessage());
+            LoParkour.getPlugin().getLogger().severe(
+                    "Error while saving inventory of %s to file %s".formatted(player.getName(), file.getName())
+                            + " - " + ex.getMessage());
         }
     }
 }

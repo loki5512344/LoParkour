@@ -22,6 +22,9 @@ import java.util.UUID;
  */
 public class StorageDisk {
 
+    private StorageDisk() {
+    }
+
     public static @NotNull Map<UUID, Score> readScores(@NotNull String mode) {
         File file = getLeaderboardFile(mode);
 
@@ -43,7 +46,8 @@ public class StorageDisk {
 
             return scores;
         } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to read leaderboard file %s".formatted(mode) + " - " + ex.getMessage());
+                LoParkour.getPlugin().getLogger().severe(
+                        "Error while trying to read leaderboard file %s".formatted(mode) + " - " + ex.getMessage());
             return new HashMap<>();
         }
     }
@@ -82,7 +86,8 @@ public class StorageDisk {
             ParkourPlayer from = LoParkour.getGson().fromJson(reader, ParkourPlayer.class);
 
             if (from == null) {
-                LoParkour.getPlugin().getLogger().warning("Player data file for %s is empty or corrupted, using defaults".formatted(player.getName()));
+                LoParkour.getPlugin().getLogger().warning(
+                        "Player data file for %s is empty or corrupted, using defaults".formatted(player.getName()));
                 player.setSettings(new HashMap<>());
                 return;
             }
@@ -99,7 +104,7 @@ public class StorageDisk {
             settings.put("collectedRewards", from.collectedRewards);
 
             // Sanitize legacy Boolean locale values
-            String locale = from._locale;
+            String locale = from.locale;
             if (locale == null || "true".equals(locale) || "false".equals(locale) || "1".equals(locale) || "0".equals(locale)) {
                 locale = "en";
             }
@@ -109,7 +114,8 @@ public class StorageDisk {
 
             player.setSettings(settings);
         } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to read disk data of %s".formatted(player.getName()) + " - " + ex.getMessage());
+                LoParkour.getPlugin().getLogger().severe(
+                        "Error while trying to read disk data of %s".formatted(player.getName()) + " - " + ex.getMessage());
         }
     }
 
@@ -122,7 +128,9 @@ public class StorageDisk {
             LoParkour.getGson().toJson(player, writer);
             writer.flush();
         } catch (IOException ex) {
-            LoParkour.getPlugin().getLogger().severe("Error while trying to write disk data of %s to file %s".formatted(player.getName(), file) + " - " + ex.getMessage());
+                LoParkour.getPlugin().getLogger().severe(
+                        "Error while trying to write disk data of %s to file %s".formatted(player.getName(), file)
+                                + " - " + ex.getMessage());
         }
     }
 

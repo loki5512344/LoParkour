@@ -54,7 +54,9 @@ public class PlayerInteractionHandler {
     /** Check if history contains a block by coordinates, not reference. */
     private static boolean historyContains(@NotNull List<Block> history, @NotNull Block block) {
         for (Block b : history) {
-            if (isSameBlock(b, block)) return true;
+            if (isSameBlock(b, block)) {
+                return true;
+            }
         }
         return false;
     }

@@ -25,7 +25,9 @@ public class EffectManager {
      * Spawns particles around the given blocks based on the configured shape.
      */
     public void particles(List<Block> blocks) {
-        if (!generator.profile.get("particles").asBoolean()) return;
+        if (!generator.profile.get("particles").asBoolean()) {
+            return;
+        }
 
         List<Location> locations = blocks.stream().map(Block::getLocation).toList();
         Location max = locations.stream().reduce((a, b) -> {
@@ -41,7 +43,9 @@ public class EffectManager {
             return new Location(a.getWorld(), x, y, z);
         }).orElse(null);
 
-        if (max == null || min == null || max.getWorld() == null) return;
+        if (max == null || min == null || max.getWorld() == null) {
+            return;
+        }
 
         List<ParkourPlayer> viewers = generator.getPlayers();
 
@@ -64,6 +68,7 @@ public class EffectManager {
                 org.bukkit.util.BoundingBox.of(min, max), max.getWorld(), Option.PARTICLE_TYPE,
                 viewers.isEmpty() ? null : viewers.get(0).player, 0.3
             );
+            default -> {}
         }
     }
 
@@ -71,7 +76,9 @@ public class EffectManager {
      * Plays the configured sound at the first block's location.
      */
     public void sound(List<Block> blocks) {
-        if (!generator.profile.get("sound").asBoolean() || blocks.isEmpty()) return;
+        if (!generator.profile.get("sound").asBoolean() || blocks.isEmpty()) {
+            return;
+        }
 
         Location loc = blocks.get(0).getLocation();
         generator.getPlayers().forEach(p ->

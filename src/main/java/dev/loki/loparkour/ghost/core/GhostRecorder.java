@@ -36,8 +36,12 @@ public class GhostRecorder {
     }
 
     public void recordFrame(@NotNull Location currentLocation) {
-        if (!recording) return;
-        if (lastLocation.distance(currentLocation) < MIN_MOVEMENT) return;
+        if (!recording) {
+            return;
+        }
+        if (lastLocation.distance(currentLocation) < MIN_MOVEMENT) {
+            return;
+        }
 
         long timestamp = System.currentTimeMillis() - startTime;
         frames.add(new GhostFrame(timestamp, currentLocation.clone()));

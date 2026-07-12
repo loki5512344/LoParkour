@@ -32,7 +32,10 @@ import java.util.Map;
  */
 public class SchematicCommandHandler {
 
-    public static final Map<Player, Location[]> selections = new HashMap<>();
+    private SchematicCommandHandler() {
+    }
+
+    public static final Map<Player, Location[]> SELECTIONS = new HashMap<>();
     public static final NamespacedKey WAND_KEY = new NamespacedKey(LoParkour.getPlugin(), "schematic_wand");
 
     private static ItemStack cachedWand;
@@ -53,10 +56,10 @@ public class SchematicCommandHandler {
 
     @NotNull
     public static Location[] getSelection(@NotNull Player player) {
-        Location[] sel = selections.get(player);
+        Location[] sel = SELECTIONS.get(player);
         if (sel == null) {
             sel = new Location[]{null, null};
-            selections.put(player, sel);
+            SELECTIONS.put(player, sel);
         }
         return sel;
     }
@@ -64,7 +67,7 @@ public class SchematicCommandHandler {
     public static void setPos(@NotNull Player player, @NotNull Location loc, int index) {
         Location[] updated = getSelection(player).clone();
         updated[index] = loc.clone();
-        selections.put(player, updated);
+        SELECTIONS.put(player, updated);
     }
 
     public static void clearWandCache() {
@@ -161,7 +164,7 @@ public class SchematicCommandHandler {
             CommandSender sender,
             Player player
     ) {
-        Location[] sel = selections.get(player);
+        Location[] sel = SELECTIONS.get(player);
         if (sel == null || sel[0] == null || sel[1] == null) {
             send(player, LoParkour.PREFIX + Locales.getString(player, "schematic.selection_incomplete"));
             return;

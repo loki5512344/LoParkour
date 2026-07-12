@@ -1,7 +1,6 @@
 package dev.loki.loparkour.player.core;
 import dev.loki.loparkour.player.service.UserRegistry;
 import dev.loki.loparkour.player.service.ScoreboardManager;
-import dev.loki.loparkour.player.core.ParkourPlayer;
 
 import dev.loki.loparkour.config.locale.Locales;
 import dev.loki.loparkour.config.options.Option;
@@ -112,9 +111,17 @@ public abstract class ParkourUser {
         }
     }
 
-    public UUID getUUID() { return player.getUniqueId(); }
-    public Location getLocation() { return player.getLocation(); }
-    public String getName() { return player.getName(); }
+    public UUID getUUID() {
+        return player.getUniqueId();
+    }
+
+    public Location getLocation() {
+        return player.getLocation();
+    }
+
+    public String getName() {
+        return player.getName();
+    }
 
     public static boolean isBedrockPlayer(Player player) {
         return Bukkit.getPluginManager().isPluginEnabled("floodgate") && FloodgateHook.isBedrockPlayer(player);

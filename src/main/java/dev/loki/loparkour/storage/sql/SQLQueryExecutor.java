@@ -42,7 +42,9 @@ class SQLQueryExecutor {
         connectionManager.validateConnection();
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            if (stmt != null) stmt.executeUpdate();
+            if (stmt != null) {
+                stmt.executeUpdate();
+            }
         } catch (SQLException ex) {
             if (!suppressErrors) {
                 LoParkour.getPlugin().getLogger().severe(
@@ -62,7 +64,9 @@ class SQLQueryExecutor {
         connectionManager.validateConnection();
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            if (stmt == null) return;
+            if (stmt == null) {
+                return;
+            }
             bindParams(stmt, params);
             stmt.executeUpdate();
         } catch (SQLException ex) {

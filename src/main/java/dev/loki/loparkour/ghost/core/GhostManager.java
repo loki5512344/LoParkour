@@ -1,5 +1,4 @@
 package dev.loki.loparkour.ghost.core;
-import dev.loki.loparkour.ghost.core.GhostPlayer;
 import dev.loki.loparkour.ghost.model.GhostData;
 
 import dev.loki.loparkour.LoParkour;
@@ -11,7 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Loads, saves, and spawns ghost runs per mode.
@@ -46,10 +50,14 @@ public class GhostManager {
 
     public void loadGhosts(@NotNull String mode) {
         File modeFolder = new File(ghostFolder, sanitizeMode(mode));
-        if (!modeFolder.exists()) return;
+        if (!modeFolder.exists()) {
+            return;
+        }
 
         File[] files = modeFolder.listFiles((dir, name) -> name.endsWith(".ghost"));
-        if (files == null) return;
+        if (files == null) {
+            return;
+        }
 
         List<GhostData> ghosts = new ArrayList<>();
         for (File file : files) {
@@ -77,7 +85,9 @@ public class GhostManager {
 
     public void saveGhost(@NotNull String mode, @NotNull GhostData data) {
         File modeFolder = new File(ghostFolder, sanitizeMode(mode));
-        if (!modeFolder.exists()) modeFolder.mkdirs();
+        if (!modeFolder.exists()) {
+            modeFolder.mkdirs();
+        }
 
         List<GhostData> ghosts = new ArrayList<>(ghostsByMode.getOrDefault(mode, new ArrayList<>()));
         ghosts.add(data);
@@ -88,7 +98,9 @@ public class GhostManager {
             GhostData evicted = ghosts.remove(ghosts.size() - 1);
             // File is named by UUID — always finds the right file regardless of name changes
             File evictedFile = ghostFile(modeFolder, evicted);
-            if (evictedFile.exists()) evictedFile.delete();
+            if (evictedFile.exists()) {
+                evictedFile.delete();
+            }
         }
 
         ghostsByMode.put(mode, ghosts);
@@ -107,12 +119,16 @@ public class GhostManager {
 
     public void spawnGhosts(@NotNull String mode, @NotNull Location startLocation,
                             @NotNull World world) {
-        if (!Config.CONFIG.getBoolean("ghost-mode.enabled")) return;
+        if (!Config.CONFIG.getBoolean("ghost-mode.enabled")) {
+            return;
+        }
 
         stopAllGhosts();
 
         List<GhostData> ghosts = ghostsByMode.get(mode);
-        if (ghosts == null || ghosts.isEmpty()) return;
+        if (ghosts == null || ghosts.isEmpty()) {
+            return;
+        }
 
         int showTop = Math.min(Config.CONFIG.getInt("ghost-mode.show-top"), ghosts.size());
         for (int i = 0; i < showTop; i++) {
@@ -137,13 +153,17 @@ public class GhostManager {
 
     public List<GhostData> getTopGhosts(@NotNull String mode, int count) {
         List<GhostData> ghosts = ghostsByMode.get(mode);
-        if (ghosts == null || ghosts.isEmpty()) return Collections.emptyList();
+        if (ghosts == null || ghosts.isEmpty()) {
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableList(ghosts.subList(0, Math.min(count, ghosts.size())));
     }
 
     public boolean shouldRecordGhost(@NotNull String mode, int score) {
         List<GhostData> ghosts = ghostsByMode.get(mode);
-        if (ghosts == null || ghosts.size() < MAX_GHOSTS_PER_MODE) return true;
+        if (ghosts == null || ghosts.size() < MAX_GHOSTS_PER_MODE) {
+            return true;
+        }
         return score > ghosts.get(ghosts.size() - 1).getScore();
     }
 

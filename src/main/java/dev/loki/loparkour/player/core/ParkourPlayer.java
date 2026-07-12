@@ -3,11 +3,9 @@ package dev.loki.loparkour.player.core;
 import com.google.gson.annotations.Expose;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.core.Config;
-import dev.loki.loparkour.config.options.Option;
 import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.generator.core.model.Profile;
 import dev.loki.loparkour.menu.core.ParkourOption;
-import dev.loki.loparkour.config.locale.Locales;
 import dev.loki.loparkour.mode.base.MultiMode;
 import dev.loki.loparkour.player.data.PreviousData;
 import dev.loki.loparkour.player.service.ParkourHotbar;
@@ -24,7 +22,10 @@ import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -48,7 +49,7 @@ public class ParkourPlayer extends ParkourUser {
     public @Expose Boolean showScoreboard;
     public @Expose Integer selectedTime;
     public @Expose String style;
-    public @Expose String _locale;
+    public @Expose String locale;
     public @Expose List<String> collectedRewards;
     /**
      * Creates a new instance of a ParkourPlayer<br>
@@ -56,8 +57,6 @@ public class ParkourPlayer extends ParkourUser {
      */
     public ParkourPlayer(@NotNull Player player, @NotNull Session session, @Nullable PreviousData previousData) {
         super(player, session, previousData);
-
-        this._locale = locale;
 
         // generic player settings
         player.setFlying(false);

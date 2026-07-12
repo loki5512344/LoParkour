@@ -115,13 +115,17 @@ public class BlockPlacer {
     
     private void placeNormalBlock() {
         BlockData blockData = blockSelector.selectBlockData();
-        if (blockData == null) return;
+        if (blockData == null) {
+            return;
+        }
 
         Material mat = blockData.getMaterial();
         boolean tall = isTallMaterial(mat);
 
         List<Block> blocks = tall ? selectBlocks(-1) : selectBlocks();
-        if (blocks.isEmpty()) return;
+        if (blocks.isEmpty()) {
+            return;
+        }
 
         Block selectedBlock = blocks.get(0);
         placeBlockData(selectedBlock, blockData);
@@ -139,7 +143,9 @@ public class BlockPlacer {
         boolean tall = isTallMaterial(mat);
 
         List<Block> blocks = tall ? selectBlocks(-1) : selectBlocks();
-        if (blocks.isEmpty()) return;
+        if (blocks.isEmpty()) {
+            return;
+        }
 
         Block selectedBlock = blocks.get(0);
         placeBlockData(selectedBlock, specialBlockData);

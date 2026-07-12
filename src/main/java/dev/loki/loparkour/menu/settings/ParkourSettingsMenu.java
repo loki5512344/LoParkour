@@ -158,7 +158,10 @@ public class ParkourSettingsMenu extends LPMenu {
 
             ItemStack item = new ItemStack(style.getNext());
             ItemMeta meta = item.getItemMeta();
-            if (meta != null) { meta.setDisplayName(ColorUtil.color("&#A020F0" + name)); item.setItemMeta(meta); }
+            if (meta != null) {
+                meta.setDisplayName(ColorUtil.color("&#A020F0" + name));
+                item.setItemMeta(meta);
+            }
 
             final Style s = style;
             gui = gui.setItem(slot++, item, e -> {

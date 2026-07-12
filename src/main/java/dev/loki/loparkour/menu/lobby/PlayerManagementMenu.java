@@ -45,7 +45,10 @@ public class PlayerManagementMenu extends LPMenu {
             if (!ParkourUser.isBedrockPlayer(other.player)
                     && other.getName() != null && !other.getName().startsWith(".")) {
                 SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                if (meta != null) { meta.setOwningPlayer(other.player); skull.setItemMeta(meta); }
+                if (meta != null) {
+                    meta.setOwningPlayer(other.player);
+                    skull.setItemMeta(meta);
+                }
             }
 
             boolean muted = session.isMuted(other);

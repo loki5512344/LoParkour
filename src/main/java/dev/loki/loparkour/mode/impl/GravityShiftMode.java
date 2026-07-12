@@ -16,7 +16,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * Gravity Shift Mode — random potion effects applied every N jumps.
@@ -67,7 +72,7 @@ public class GravityShiftMode implements Mode {
         private final Random random;
         private final Map<UUID, Integer> jumpCounts;
 
-        public GravityShiftGenerator(@NotNull Session session) {
+        GravityShiftGenerator(@NotNull Session session) {
             super(session);
             this.random = new Random();
             this.jumpCounts = new HashMap<>();

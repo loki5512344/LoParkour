@@ -79,7 +79,9 @@ public class BlockSelector {
     public Material getSlabMaterialFromCurrentStyle() {
         try {
             Style style = Registry.getStyle(generator.profile.get("style").value());
-            if (style == null) return null;
+            if (style == null) {
+                return null;
+            }
             
             // Try to get a slab material from the style multiple times
             for (int i = 0; i < 20; i++) {

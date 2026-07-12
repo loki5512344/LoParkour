@@ -3,10 +3,21 @@ package dev.loki.loparkour.config.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -80,14 +91,19 @@ public class ConfigUpdater {
             }
 
             int colon = trimmed.indexOf(':');
-            if (colon == -1) { result.add(line); continue; }
+            if (colon == -1) {
+                result.add(line);
+                continue;
+            }
 
             String leaf = trimmed.substring(0, colon).trim();
             String after = trimmed.substring(colon + 1).trim();
             int indent = indentOf(line);
 
             while (prevIndent >= 0 && indent <= prevIndent) {
-                if (!stack.isEmpty()) stack.pop();
+                if (!stack.isEmpty()) {
+                    stack.pop();
+                }
                 prevIndent -= 2;
             }
 
@@ -120,17 +136,23 @@ public class ConfigUpdater {
 
         for (String line : lines) {
             String trimmed = line.trim();
-            if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("-")) continue;
+            if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("-")) {
+                continue;
+            }
 
             int colon = trimmed.indexOf(':');
-            if (colon == -1) continue;
+            if (colon == -1) {
+                continue;
+            }
 
             String leaf = trimmed.substring(0, colon).trim();
             String after = trimmed.substring(colon + 1).trim();
             int indent = indentOf(line);
 
             while (prevIndent >= 0 && indent <= prevIndent) {
-                if (!stack.isEmpty()) stack.pop();
+                if (!stack.isEmpty()) {
+                    stack.pop();
+                }
                 prevIndent -= 2;
             }
 
@@ -150,7 +172,9 @@ public class ConfigUpdater {
 
     private static int indentOf(@NotNull String line) {
         int i = 0;
-        while (i < line.length() && line.charAt(i) == ' ') i++;
+        while (i < line.length() && line.charAt(i) == ' ') {
+            i++;
+        }
         return i;
     }
 
@@ -181,16 +205,22 @@ public class ConfigUpdater {
 
     @NotNull
     private static Set<String> normalizeIgnored(@Nullable List<String> keys) {
-        if (keys == null) return Set.of();
+        if (keys == null) {
+            return Set.of();
+        }
         Set<String> s = new HashSet<>();
-        for (String k : keys) s.add(k.trim().toLowerCase());
+        for (String k : keys) {
+            s.add(k.trim().toLowerCase());
+        }
         return s;
     }
 
     private static boolean isIgnored(@NotNull String fullPath, @NotNull Set<String> ignored) {
         String lower = fullPath.toLowerCase();
         for (String ign : ignored) {
-            if (lower.equals(ign) || lower.startsWith(ign + ".")) return true;
+            if (lower.equals(ign) || lower.startsWith(ign + ".")) {
+                return true;
+            }
         }
         return false;
     }

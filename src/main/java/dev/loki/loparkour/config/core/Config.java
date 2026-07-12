@@ -52,7 +52,9 @@ public enum Config {
      * Load this configuration file from disk.
      */
     public void load() {
-        if (path == null) return;
+        if (path == null) {
+            return;
+        }
         
         this.fileConfiguration = ConfigLoader.loadConfig(path);
         this.accessor = new ConfigAccessor(fileConfiguration, fileName);

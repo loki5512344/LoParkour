@@ -16,7 +16,10 @@ import java.util.UUID;
  * Maps data between Java objects and SQL result sets.
  */
 public class SQLDataMapper {
-    
+
+    private SQLDataMapper() {
+    }
+
     /**
      * Map ResultSet to Score objects.
      */

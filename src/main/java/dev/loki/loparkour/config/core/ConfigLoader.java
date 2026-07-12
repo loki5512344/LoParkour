@@ -17,6 +17,9 @@ import java.util.logging.Logger;
  */
 public class ConfigLoader {
 
+    private ConfigLoader() {
+    }
+
     @NotNull
     public static FileConfiguration loadConfig(@NotNull File configFile) {
         return YamlConfiguration.loadConfiguration(configFile);

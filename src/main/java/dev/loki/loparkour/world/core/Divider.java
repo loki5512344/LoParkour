@@ -17,6 +17,9 @@ import java.util.stream.IntStream;
  */
 public class Divider {
 
+    private Divider() {
+    }
+
     /**
      * Map with all session ids map to the session instances.
      */

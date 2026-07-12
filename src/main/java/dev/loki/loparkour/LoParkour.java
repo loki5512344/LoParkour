@@ -29,7 +29,7 @@ public final class LoParkour extends LoPlugin {
     public static final String NAME = "&#FF6464&lLoParkour&r";
     public static final String PREFIX = NAME + " &#404040» &#A0A0A0";
 
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .excludeFieldsWithoutExposeAnnotation()
             .create();
@@ -41,7 +41,7 @@ public final class LoParkour extends LoPlugin {
     private static PAPIHook placeholderHook;
 
     public static Gson getGson() {
-        return gson;
+        return GSON;
     }
 
     public static void log(String message) {

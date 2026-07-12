@@ -1,7 +1,6 @@
 package dev.loki.loparkour.leaderboard.persistence;
 import dev.loki.loparkour.leaderboard.model.Score;
 import dev.loki.loparkour.leaderboard.core.LeaderboardSorter;
-import dev.loki.loparkour.leaderboard.core.Leaderboard;
 
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.core.Config;

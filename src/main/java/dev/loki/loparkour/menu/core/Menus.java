@@ -12,7 +12,10 @@ import dev.loki.loparkour.menu.settings.LangMenu;
 import dev.loki.loparkour.menu.settings.ParkourSettingsMenu;
 import dev.loki.loparkour.menu.settings.SettingsMenu;
 
-public class Menus {
+public final class Menus {
+
+    private Menus() {
+    }
 
     // main
     public static MainMenu MAIN = new MainMenu();

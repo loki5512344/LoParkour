@@ -18,6 +18,9 @@ import java.util.UUID;
  */
 public class Storage {
 
+    private Storage() {
+    }
+
     public static void init(String mode) {
         if (Option.SQL) {
             StorageSQL.init(mode);

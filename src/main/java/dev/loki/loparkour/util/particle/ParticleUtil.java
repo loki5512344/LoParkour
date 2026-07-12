@@ -12,6 +12,9 @@ import org.bukkit.util.BoundingBox;
  */
 public class ParticleUtil {
 
+    private ParticleUtil() {
+    }
+
     /**
      * Shows a box outline with particles
      *
@@ -89,7 +92,9 @@ public class ParticleUtil {
      * @param points   Number of points
      */
     public static void circle(Location center, Particle particle, int radius, int points) {
-        if (center.getWorld() == null) return;
+        if (center.getWorld() == null) {
+            return;
+        }
 
         for (int i = 0; i < points; i++) {
             double angle = 2 * Math.PI * i / points;

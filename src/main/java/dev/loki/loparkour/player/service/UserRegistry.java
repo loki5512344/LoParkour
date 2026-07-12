@@ -1,5 +1,4 @@
 package dev.loki.loparkour.player.service;
-import dev.loki.loparkour.player.spectator.ParkourSpectator;
 import dev.loki.loparkour.player.core.ParkourUser;
 import dev.loki.loparkour.player.core.ParkourPlayer;
 
@@ -25,7 +24,10 @@ import java.util.stream.Collectors;
  *
  * @since 5.0.0
  */
-public class UserRegistry {
+public final class UserRegistry {
+
+    private UserRegistry() {
+    }
 
     private static int joinCount = 0;
 

@@ -9,6 +9,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Probs {
 
+    private Probs() {
+    }
+
     /**
      * Selects a random key from a map based on weighted probabilities
      *

@@ -58,9 +58,9 @@ public class PreviousData {
     public void apply(Player player, boolean urgent) {
         var to = Config.CONFIG.getBoolean("bungeecord.go-back-enabled") ? Option.GO_BACK_LOC : location;
 
-        if (!urgent)
+        if (!urgent) {
             PaperLib.teleportAsync(player, to).thenRun(() -> apply(player));
-        else {
+        } else {
             player.teleport(to);
 
             apply(player);

@@ -79,11 +79,15 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
                 admin.handle(a1, a2, sender, p);
                 return;
             }
+            default -> {
+            }
         }
 
-        if (p == null) return;
+        if (p == null) {
+            return;
+        }
 
-        if (a1.equalsIgnoreCase("create") && p.hasPermission(ParkourOption.ADMIN.permission)) {
+        if ("create".equalsIgnoreCase(a1) && p.hasPermission(ParkourOption.ADMIN.permission)) {
             SchematicCommandHandler.handleCreateDifficultyOnly(a2, sender, p, player);
             return;
         }
@@ -98,17 +102,23 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
                 }
                 SchematicCommandHandler.handleSubcommand(a2, sender, p, player);
             }
+            default -> {
+            }
         }
     }
 
     // ── 3-arg routing ──────────────────────────────────────────────────────────
 
     private void handle3(String a1, String a2, String a3, CommandSender sender, @Nullable Player p) {
-        if (p == null) return;
-        if (!p.hasPermission(ParkourOption.ADMIN.permission)) return;
+        if (p == null) {
+            return;
+        }
+        if (!p.hasPermission(ParkourOption.ADMIN.permission)) {
+            return;
+        }
 
-        if (a1.equalsIgnoreCase("schematic")) {
-            if (a2.equalsIgnoreCase("create")) {
+        if ("schematic".equalsIgnoreCase(a1)) {
+            if ("create".equalsIgnoreCase(a2)) {
                 SchematicCommandHandler.handleCreateDifficultyOnly(a3, sender, p, player);
                 return;
             }
@@ -117,29 +127,48 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handle4(String a1, String a2, String a3, String a4, CommandSender sender, @Nullable Player p) {
-        if (p == null) return;
-        if (!p.hasPermission(ParkourOption.ADMIN.permission)) return;
-        if (!a1.equalsIgnoreCase("schematic") || !a2.equalsIgnoreCase("create")) return;
+        if (p == null) {
+            return;
+        }
+        if (!p.hasPermission(ParkourOption.ADMIN.permission)) {
+            return;
+        }
+        if (!"schematic".equalsIgnoreCase(a1) || !"create".equalsIgnoreCase(a2)) {
+            return;
+        }
         SchematicCommandHandler.handleCreateWithDifficulty(a3, a4, sender, p, player);
     }
 
     // ── join logic ─────────────────────────────────────────────────────────────
 
     private void handleJoin(String arg, CommandSender sender, Player p) {
-        if (!player.cooldown(sender, "join", 2500) || !ParkourOption.JOIN.mayPerform(p)) return;
+        if (!player.cooldown(sender, "join", 2500) || !ParkourOption.JOIN.mayPerform(p)) {
+            return;
+        }
 
         Mode mode = Registry.getMode(arg);
-        if (mode != null) { mode.create(p); return; }
+        if (mode != null) {
+            mode.create(p);
+            return;
+        }
 
         Player other = Bukkit.getPlayer(arg);
-        if (other == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "commands.unknown_player")); return; }
+        if (other == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "commands.unknown_player"));
+            return;
+        }
 
         ParkourPlayer pp = ParkourPlayer.getPlayer(other);
-        if (pp == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "commands.not_playing")); return; }
+        if (pp == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "commands.not_playing"));
+            return;
+        }
 
         ParkourUser user = ParkourUser.getUser(p);
         Session session = pp.session;
-        if (user != null && user.session == session) return;
+        if (user != null && user.session == session) {
+            return;
+        }
 
         if (session.isAcceptingPlayers()) {
             Mode sessionMode = session.generator.getMode();

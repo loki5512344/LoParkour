@@ -3,7 +3,10 @@ package dev.loki.loparkour.config.locale;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -28,9 +31,13 @@ public class LocaleCache {
     public synchronized <T> T cachedValue(@NotNull String locale,
                                           @NotNull Function<FileConfiguration, T> extractor,
                                           @NotNull T defaultValue) {
-        if (locales.isEmpty()) return defaultValue;
+        if (locales.isEmpty()) {
+            return defaultValue;
+        }
         FileConfiguration config = locales.get(locale);
-        if (config == null) return defaultValue;
+        if (config == null) {
+            return defaultValue;
+        }
         try {
             T result = extractor.apply(config);
             return result != null ? result : defaultValue;

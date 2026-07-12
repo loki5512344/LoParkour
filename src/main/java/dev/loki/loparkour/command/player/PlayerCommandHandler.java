@@ -37,29 +37,43 @@ public class PlayerCommandHandler {
         switch (arg.toLowerCase()) {
             case "help"   -> sendHelp(sender);
             case "reload" -> handleReload(sender, player);
+            default -> {
+            }
         }
 
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         switch (arg.toLowerCase()) {
             case "join" -> {
-                if (!cooldown(sender, "join", 2500)) return;
+                if (!cooldown(sender, "join", 2500)) {
+                    return;
+                }
                 if (!ParkourOption.JOIN.mayPerform(player)) {
                     send(sender, Locales.getString(player, "other.no_do"));
                     return;
                 }
-                if (ParkourUser.getUser(player) != null) return;
+                if (ParkourUser.getUser(player) != null) {
+                    return;
+                }
                 Modes.DEFAULT.create(player);
             }
             case "leave" -> {
-                if (!cooldown(sender, "leave", 2500)) return;
+                if (!cooldown(sender, "leave", 2500)) {
+                    return;
+                }
                 ParkourUser.leave(player);
             }
             case "play" -> {
-                if (ParkourOption.PLAY.mayPerform(player)) Menus.PLAY.open(player);
+                if (ParkourOption.PLAY.mayPerform(player)) {
+                    Menus.PLAY.open(player);
+                }
             }
             case "menu", "main" -> {
-                if (ParkourOption.MAIN.mayPerform(player)) Menus.MAIN.open(player);
+                if (ParkourOption.MAIN.mayPerform(player)) {
+                    Menus.MAIN.open(player);
+                }
             }
             case "leaderboard" -> {
                 if (!ParkourOption.LEADERBOARDS.mayPerform(player)) {
@@ -75,11 +89,15 @@ public class PlayerCommandHandler {
                 }
                 SchematicCommandHandler.sendHelp(player);
             }
+            default -> {
+            }
         }
     }
 
     private void handleReload(@NotNull CommandSender sender, @Nullable Player player) {
-        if (!cooldown(sender, "reload", 2500)) return;
+        if (!cooldown(sender, "reload", 2500)) {
+            return;
+        }
         if (!sender.hasPermission(ParkourOption.ADMIN.permission)) {
             send(sender, Locales.getString(sender, "other.no_do"));
             return;

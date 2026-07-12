@@ -13,7 +13,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,14 +26,14 @@ import java.util.regex.Pattern;
  */
 public class Locales {
 
-    private static final LocaleCache cache = new LocaleCache();
+    private static final LocaleCache CACHE = new LocaleCache();
     private static final Pattern REPLACEMENT_PATTERN = Pattern.compile("%[a-z]");
 
     // ── Initialization ────────────────────────────────────────────────────────
 
     public static void init() {
         Map<String, FileConfiguration> loaded = LocaleLoader.loadAll();
-        cache.setLocales(loaded);
+        CACHE.setLocales(loaded);
         dev.loki.loparkour.command.schematic.SchematicCommandHandler.clearWandCache();
         LoParkour.log("Locales loaded successfully (" + loaded.size() + " locales)");
     }
@@ -61,7 +64,7 @@ public class Locales {
 
     @NotNull
     public static String getString(@NotNull String locale, @NotNull String path) {
-        return cache.cachedValue(locale, c -> c.getString(path), "");
+        return CACHE.cachedValue(locale, c -> c.getString(path), "");
     }
 
     /**
@@ -84,16 +87,16 @@ public class Locales {
 
     @NotNull
     public static List<String> getStringList(@NotNull String locale, @NotNull String path) {
-        return cache.cachedValue(locale, c -> c.getStringList(path), Collections.emptyList());
+        return CACHE.cachedValue(locale, c -> c.getStringList(path), Collections.emptyList());
     }
 
     public static int getLocaleCount() {
-        return cache.getLocaleCount();
+        return CACHE.getLocaleCount();
     }
 
     @NotNull
     public static Set<String> getLocaleKeys() {
-        return cache.getLocaleKeys();
+        return CACHE.getLocaleKeys();
     }
 
     @NotNull
@@ -103,14 +106,14 @@ public class Locales {
 
     @NotNull
     public static Item getItem(@NotNull String locale, @NotNull String path, String... replace) {
-        if (cache.isEmpty()) {
+        if (CACHE.isEmpty()) {
             LoParkour.getPlugin().getLogger().warning("Locales are empty! Returning STONE item for path: " + path);
             return new Item(Material.STONE, "");
         }
-        FileConfiguration config = cache.getLocale(locale);
+        FileConfiguration config = CACHE.getLocale(locale);
         if (config == null) {
             LoParkour.getPlugin().getLogger().warning(
-                "Locale '" + locale + "' not found! Available: " + cache.getLocaleKeys() + ". Returning STONE for path: " + path);
+                "Locale '" + locale + "' not found! Available: " + CACHE.getLocaleKeys() + ". Returning STONE for path: " + path);
             return new Item(Material.STONE, "");
         }
         return buildItem(config, path, replace);
@@ -147,7 +150,9 @@ public class Locales {
 
     @NotNull
     private static String applyReplacements(@NotNull String text, String... replacements) {
-        if (replacements.length == 0) return text;
+        if (replacements.length == 0) {
+            return text;
+        }
         String result = text;
         int idx = 0;
         Matcher matcher = REPLACEMENT_PATTERN.matcher(result);

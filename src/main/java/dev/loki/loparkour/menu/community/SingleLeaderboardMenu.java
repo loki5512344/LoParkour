@@ -51,7 +51,10 @@ public class SingleLeaderboardMenu extends LPMenu {
                 OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(entry.getKey());
                 if (op.getName() != null && !op.getName().startsWith(".")) {
                     SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                    if (meta != null) { meta.setOwningPlayer(op); skull.setItemMeta(meta); }
+                    if (meta != null) {
+                        meta.setOwningPlayer(op);
+                        skull.setItemMeta(meta);
+                    }
                 }
             }
 

@@ -72,7 +72,7 @@ public class InvisibleBarrierMode implements Mode {
         private final Map<Location, Particle.DustOptions> blockColors = new HashMap<>();
         private int particleTick = 0;
 
-        public BarrierGenerator(@NotNull Session session) {
+        BarrierGenerator(@NotNull Session session) {
             super(session);
         }
 
@@ -114,13 +114,17 @@ public class InvisibleBarrierMode implements Mode {
         }
 
         private void convertLastBlockToBarrier() {
-            if (state.history.isEmpty()) return;
+            if (state.history.isEmpty()) {
+                return;
+            }
             convertBlockToBarrier(state.history.get(state.history.size() - 1));
         }
 
         private void convertBlockToBarrier(@NotNull Block block) {
             Location loc = block.getLocation();
-            if (block.getType() == Material.BARRIER) return;
+            if (block.getType() == Material.BARRIER) {
+                return;
+            }
             block.setType(Material.BARRIER, false);
             activeBarriers.add(loc);
             Color color = Color.fromRGB(random.nextInt(256), random.nextInt(256), random.nextInt(256));
@@ -128,7 +132,9 @@ public class InvisibleBarrierMode implements Mode {
         }
 
         private void renderOutlines() {
-            if (activeBarriers.isEmpty()) return;
+            if (activeBarriers.isEmpty()) {
+                return;
+            }
 
             // Self-clean invalid entries
             Iterator<Map.Entry<Location, Particle.DustOptions>> it = blockColors.entrySet().iterator();
@@ -145,53 +151,70 @@ public class InvisibleBarrierMode implements Mode {
                 Location playerLoc = player.getLocation();
 
                 for (Location loc : activeBarriers) {
-                    if (loc.getWorld() != playerLoc.getWorld()) continue;
-                    if (loc.distanceSquared(playerLoc) > RENDER_DISTANCE * RENDER_DISTANCE) continue;
+                    if (loc.getWorld() != playerLoc.getWorld()) {
+                        continue;
+                    }
+                    if (loc.distanceSquared(playerLoc) > RENDER_DISTANCE * RENDER_DISTANCE) {
+                        continue;
+                    }
 
                     Particle.DustOptions options = blockColors.get(loc);
-                    if (options == null) continue;
+                    if (options == null) {
+                        continue;
+                    }
 
                     drawBlockOutline(player, loc, options);
                 }
             }
         }
 
+        private record Point(double x, double y, double z) {}
+
         private void drawBlockOutline(@NotNull Player player, @NotNull Location loc, @NotNull Particle.DustOptions options) {
             double x = loc.getX();
             double y = loc.getY();
             double z = loc.getZ();
+            Point p = new Point(x, y, z);
+            Point q = new Point(x + 1, y, z);
+            Point r = new Point(x + 1, y, z + 1);
+            Point s = new Point(x, y, z + 1);
 
             // Bottom edges (y offset = 0)
-            drawEdge(player, x, y, z, x + 1, y, z, options);
-            drawEdge(player, x + 1, y, z, x + 1, y, z + 1, options);
-            drawEdge(player, x + 1, y, z + 1, x, y, z + 1, options);
-            drawEdge(player, x, y, z + 1, x, y, z, options);
+            drawEdge(player, p, q, options);
+            drawEdge(player, q, r, options);
+            drawEdge(player, r, s, options);
+            drawEdge(player, s, p, options);
 
             // Top edges (y offset = 1)
-            drawEdge(player, x, y + 1, z, x + 1, y + 1, z, options);
-            drawEdge(player, x + 1, y + 1, z, x + 1, y + 1, z + 1, options);
-            drawEdge(player, x + 1, y + 1, z + 1, x, y + 1, z + 1, options);
-            drawEdge(player, x, y + 1, z + 1, x, y + 1, z, options);
+            Point pt = new Point(x, y + 1, z);
+            Point qt = new Point(x + 1, y + 1, z);
+            Point rt = new Point(x + 1, y + 1, z + 1);
+            Point st = new Point(x, y + 1, z + 1);
+            drawEdge(player, pt, qt, options);
+            drawEdge(player, qt, rt, options);
+            drawEdge(player, rt, st, options);
+            drawEdge(player, st, pt, options);
 
             // Vertical edges
-            drawEdge(player, x, y, z, x, y + 1, z, options);
-            drawEdge(player, x + 1, y, z, x + 1, y + 1, z, options);
-            drawEdge(player, x + 1, y, z + 1, x + 1, y + 1, z + 1, options);
-            drawEdge(player, x, y, z + 1, x, y + 1, z + 1, options);
+            drawEdge(player, p, pt, options);
+            drawEdge(player, q, qt, options);
+            drawEdge(player, r, rt, options);
+            drawEdge(player, s, st, options);
         }
 
-        private void drawEdge(@NotNull Player player, double x1, double y1, double z1, double x2, double y2, double z2, @NotNull Particle.DustOptions options) {
-            double dx = x2 - x1;
-            double dy = y2 - y1;
-            double dz = z2 - z1;
+        private void drawEdge(@NotNull Player player, @NotNull Point start, @NotNull Point end,
+                              @NotNull Particle.DustOptions options) {
+            double dx = end.x - start.x;
+            double dy = end.y - start.y;
+            double dz = end.z - start.z;
             double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
             int steps = Math.max(1, (int) (length / PARTICLE_STEP));
 
             for (int i = 0; i <= steps; i++) {
                 double t = (double) i / steps;
-                double px = x1 + dx * t;
-                double py = y1 + dy * t;
-                double pz = z1 + dz * t;
+                double px = start.x + dx * t;
+                double py = start.y + dy * t;
+                double pz = start.z + dz * t;
                 player.spawnParticle(Particle.REDSTONE, px, py, pz, 1, options);
             }
         }

@@ -84,7 +84,7 @@ public class SpeedrunMode implements Mode {
         /** Tracks scheduled tasks per block. Key = block, value = [warningTask, removalTask]. */
         private final Map<Block, ScheduledTask[]> scheduledTasks = new HashMap<>();
 
-        public SpeedrunGenerator(@NotNull Session session) {
+        SpeedrunGenerator(@NotNull Session session) {
             super(session);
         }
 
@@ -100,11 +100,17 @@ public class SpeedrunMode implements Mode {
             // The block the player just landed on is the previous-to-last in history
             // (history.size()-1 is the leading block, size()-2 is where player stands)
             int histSize = state.history.size();
-            if (histSize < 2) return;
+            if (histSize < 2) {
+                return;
+            }
 
             Block stepped = state.history.get(histSize - 2);
-            if (stepped.getType() == Material.AIR) return;
-            if (scheduledTasks.containsKey(stepped)) return; // already scheduled
+            if (stepped.getType() == Material.AIR) {
+                return;
+            }
+            if (scheduledTasks.containsKey(stepped)) {
+                return;
+            }
 
             scheduleBlockRemoval(stepped);
         }
@@ -144,7 +150,9 @@ public class SpeedrunMode implements Mode {
             // Cancel every pending warning and removal task
             scheduledTasks.values().forEach(tasks -> {
                 for (ScheduledTask t : tasks) {
-                    if (t != null) t.cancel();
+                    if (t != null) {
+                        t.cancel();
+                    }
                 }
             });
             scheduledTasks.clear();

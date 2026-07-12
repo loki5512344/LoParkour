@@ -28,12 +28,16 @@ public class GeneratorCleanup {
      */
     public void cleanupDistantBlocks() {
         List<Block> history = generator.state.history;
-        if (history.isEmpty()) return;
+        if (history.isEmpty()) {
+            return;
+        }
 
         int minStandingIndex = Integer.MAX_VALUE;
         for (ParkourPlayer pp : generator.getPlayers()) {
             Block below = blockBelowPlayer(pp);
-            if (below == null) continue;
+            if (below == null) {
+                continue;
+            }
             int idx = indexOfBlock(history, below);
             if (idx >= 0) {
                 minStandingIndex = Math.min(minStandingIndex, idx);
@@ -45,7 +49,9 @@ public class GeneratorCleanup {
 
         int keepBehind = Math.max(0, Option.TRAIL_KEEP_BEHIND);
         int removeCount = minStandingIndex - keepBehind;
-        if (removeCount <= 0) return;
+        if (removeCount <= 0) {
+            return;
+        }
 
         List<Block> head = new ArrayList<>(history.subList(0, removeCount));
         for (Block block : head) {
@@ -77,7 +83,9 @@ public class GeneratorCleanup {
      * Remove trail blocks behind player at specified index.
      */
     public void removeTrailBlocks(int startIndex) {
-        if (startIndex < 0 || startIndex >= generator.state.history.size()) return;
+        if (startIndex < 0 || startIndex >= generator.state.history.size()) {
+            return;
+        }
         
         int endIndex = Math.min(startIndex + Option.BLOCK_CLEANUP_DISTANCE, generator.state.history.size());
         
@@ -133,6 +141,7 @@ public class GeneratorCleanup {
                     case SOUTH -> blockSpawn.add(0, 0, 6);
                     case WEST  -> blockSpawn.add(-6, 0, 0);
                     case EAST  -> blockSpawn.add(6, 0, 0);
+                    default -> {}
                 }
 
                 generator.generateFirst(spawn, blockSpawn);

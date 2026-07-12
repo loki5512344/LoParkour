@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
  */
 public class ColorUtil {
 
+    private ColorUtil() {
+    }
+
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
     /** Legacy fallback for old strings; do not use in new code. */
     private static final Pattern MINIMESSAGE_HEX_PATTERN = Pattern.compile("<#([A-Fa-f0-9]{6})>");

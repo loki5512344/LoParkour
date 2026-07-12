@@ -6,7 +6,10 @@ import org.jetbrains.annotations.NotNull;
  * Builds SQL queries for parkour storage operations.
  */
 public class SQLQueryBuilder {
-    
+
+    private SQLQueryBuilder() {
+    }
+
     /**
      * Build CREATE TABLE query for scores.
      */

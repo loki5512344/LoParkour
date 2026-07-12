@@ -93,7 +93,9 @@ public class CoopMode implements MultiMode {
             return;
         }
 
-        if (session.generator == null) return;
+        if (session.generator == null) {
+            return;
+        }
 
         // Register the joining player into the existing session
         ParkourPlayer pp = ParkourUser.register(joiningPlayer, session);
@@ -132,7 +134,7 @@ public class CoopMode implements MultiMode {
         /** Individual block contributions per player UUID. */
         private final Map<UUID, Integer> contributions = new HashMap<>();
 
-        public CoopGenerator(@NotNull Session session) {
+        CoopGenerator(@NotNull Session session) {
             super(session);
             session.getPlayers().forEach(pp -> contributions.put(pp.getUUID(), 0));
         }

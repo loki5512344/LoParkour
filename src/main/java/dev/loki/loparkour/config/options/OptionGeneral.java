@@ -8,7 +8,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * General configuration options (heading, border, leads, go-back location, parkour options).
@@ -125,7 +129,9 @@ public class OptionGeneral {
                 throw new IllegalArgumentException("Expected 4 values (x,y,z,world), got " + values.length);
             }
             World world = Bukkit.getWorld(values[3]);
-            if (world == null) world = Bukkit.getWorlds().get(0);
+            if (world == null) {
+                world = Bukkit.getWorlds().get(0);
+            }
             return new Location(world, Double.parseDouble(values[0]),
                     Double.parseDouble(values[1]), Double.parseDouble(values[2]));
         } catch (Exception ex) {

@@ -12,7 +12,10 @@ import org.bukkit.plugin.messaging.ChannelNotRegisteredException;
  *
  * @since 5.0.0
  */
-class BungeeUtil {
+final class BungeeUtil {
+
+    private BungeeUtil() {
+    }
 
     public static void sendPlayerToServer(Player player, String server) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();

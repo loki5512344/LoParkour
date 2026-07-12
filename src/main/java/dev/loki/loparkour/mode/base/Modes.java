@@ -1,9 +1,18 @@
 package dev.loki.loparkour.mode.base;
 
 import dev.loki.loparkour.api.core.Registry;
-import dev.loki.loparkour.mode.impl.*;
+import dev.loki.loparkour.mode.impl.CoopMode;
+import dev.loki.loparkour.mode.impl.DefaultMode;
+import dev.loki.loparkour.mode.impl.GravityShiftMode;
+import dev.loki.loparkour.mode.impl.InvisibleBarrierMode;
+import dev.loki.loparkour.mode.impl.RaceMode;
+import dev.loki.loparkour.mode.impl.SpectatorMode;
+import dev.loki.loparkour.mode.impl.SpeedrunMode;
 
-public class Modes {
+public final class Modes {
+
+    private Modes() {
+    }
 
     public static DefaultMode DEFAULT;
     public static SpectatorMode SPECTATOR;

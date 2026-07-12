@@ -174,7 +174,7 @@ checkstyle {
     configFile = file("config/checkstyle/checkstyle.xml")
     isIgnoreFailures = true
     maxErrors = 0
-    maxWarnings = 400
+    maxWarnings = 200
 }
 
 tasks.withType<Checkstyle>().configureEach {

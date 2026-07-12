@@ -3,7 +3,11 @@ package dev.loki.loparkour.world.core;
 import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.core.Config;
 import dev.lolib.worlds.VoidGenerator;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
+import org.bukkit.GameRule;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +17,9 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class World {
+
+    private World() {
+    }
 
     private static String name;
     private static org.bukkit.World world;
@@ -35,7 +42,9 @@ public class World {
         }
 
         if (world != null) {
-            LoParkour.getPlugin().getLogger().warning("Crash detected! The parkour world loading twice is not usual behaviour. This only happens after a server crash.");
+            LoParkour.getPlugin().getLogger().warning(
+                    "Crash detected! The parkour world loading twice is not usual behaviour. " +
+                    "This only happens after a server crash.");
             World.world = world; // ensure static field is populated
         }
 

@@ -7,7 +7,10 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.util.Vector;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Holds all state data for parkour generation.

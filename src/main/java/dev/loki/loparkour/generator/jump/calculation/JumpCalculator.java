@@ -51,7 +51,9 @@ public class JumpCalculator {
         height = Math.max(-2, Math.min(2, height));
         distance = Math.max(1, Math.min(4, distance));
 
-        if (height > 0) distance = Math.max(distance - height, 1);
+        if (height > 0) {
+            distance = Math.max(distance - height, 1);
+        }
 
         // Calculate offset
         Vector offset = calculateJumpOffset(distance, height);

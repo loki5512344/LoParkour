@@ -11,6 +11,9 @@ import java.io.File;
  */
 public class Schematics {
 
+    private Schematics() {
+    }
+
     private static final File FOLDER = LoParkour.getInFolder("schematics");
 
     public static void init() {

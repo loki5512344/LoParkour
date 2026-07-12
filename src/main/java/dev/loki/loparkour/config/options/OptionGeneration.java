@@ -12,11 +12,23 @@ import java.util.Map;
 public class OptionGeneration {
 
     // ── Block generation probabilities ────────────────────────────────────────
-    public static double TYPE_NORMAL, TYPE_SPECIAL, TYPE_SCHEMATICS;
-    public static double SPECIAL_ICE, SPECIAL_SLAB, SPECIAL_PANE, SPECIAL_FENCE;
-    public static double NORMAL_DISTANCE_1, NORMAL_DISTANCE_2, NORMAL_DISTANCE_3, NORMAL_DISTANCE_4;
-    public static double NORMAL_HEIGHT_1, NORMAL_HEIGHT_0, NORMAL_HEIGHT_NEG1, NORMAL_HEIGHT_NEG2;
-    public static int    MAX_Y, MIN_Y;
+    public static double TYPE_NORMAL;
+    public static double TYPE_SPECIAL;
+    public static double TYPE_SCHEMATICS;
+    public static double SPECIAL_ICE;
+    public static double SPECIAL_SLAB;
+    public static double SPECIAL_PANE;
+    public static double SPECIAL_FENCE;
+    public static double NORMAL_DISTANCE_1;
+    public static double NORMAL_DISTANCE_2;
+    public static double NORMAL_DISTANCE_3;
+    public static double NORMAL_DISTANCE_4;
+    public static double NORMAL_HEIGHT_1;
+    public static double NORMAL_HEIGHT_0;
+    public static double NORMAL_HEIGHT_NEG1;
+    public static double NORMAL_HEIGHT_NEG2;
+    public static int MAX_Y;
+    public static int MIN_Y;
 
     // ── Memory / cleanup ──────────────────────────────────────────────────────
     public static int BLOCK_CLEANUP_DISTANCE;

@@ -27,7 +27,6 @@ import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Wires plugin subsystems during {@link LoParkour#enable()} and {@link LoParkour#disable()}.

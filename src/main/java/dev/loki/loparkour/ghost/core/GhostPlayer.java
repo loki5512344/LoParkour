@@ -36,7 +36,9 @@ public class GhostPlayer {
     }
 
     public void spawn(@NotNull Location startLocation) {
-        if (data.getFrames().isEmpty()) return;
+        if (data.getFrames().isEmpty()) {
+            return;
+        }
 
         entity = (ArmorStand) world.spawnEntity(startLocation, EntityType.ARMOR_STAND);
         entity.setVisible(false);
@@ -61,17 +63,27 @@ public class GhostPlayer {
 
         while (currentFrame < data.getFrames().size()) {
             GhostFrame frame = data.getFrames().get(currentFrame);
-            if (frame.getTimestamp() > elapsed) break;
+            if (frame.getTimestamp() > elapsed) {
+                break;
+            }
             entity.teleport(frame.toLocation(world));
             currentFrame++;
         }
 
-        if (currentFrame >= data.getFrames().size()) stop();
+        if (currentFrame >= data.getFrames().size()) {
+            stop();
+        }
     }
 
     public void stop() {
-        if (task != null)   { task.cancel();    task   = null; }
-        if (entity != null) { entity.remove();  entity = null; }
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+        if (entity != null) {
+            entity.remove();
+            entity = null;
+        }
     }
 
     public boolean isActive()     { return entity != null && entity.isValid(); }

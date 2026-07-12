@@ -94,6 +94,7 @@ public class Item {
     }
     
     @Override
+    @SuppressWarnings("NoClone")
     public Item clone() {
         Item cloned = new Item(item.getType(), "");
         cloned.item.setItemMeta(item.getItemMeta());

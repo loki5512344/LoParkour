@@ -4,7 +4,6 @@ import dev.loki.loparkour.config.locale.Locales;
 import dev.loki.loparkour.generator.core.coordinator.ParkourGenerator;
 import dev.loki.loparkour.mode.base.Mode;
 import dev.loki.loparkour.mode.base.ModeMessages;
-import dev.loki.loparkour.util.item.Item;
 import dev.loki.loparkour.leaderboard.core.Leaderboard;
 import dev.loki.loparkour.player.core.ParkourPlayer;
 import dev.loki.loparkour.session.core.Session;

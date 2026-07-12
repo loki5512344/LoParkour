@@ -61,7 +61,8 @@ public class ParkourSpectator extends ParkourUser {
                 }
 
                 closest = session.getPlayers().stream()
-                        .min(Comparator.comparing(other -> other.getLocation().distanceSquared(player.getLocation()))) // x or x^2 doesn't matter in getting smallest
+                        .min(Comparator.comparing(
+                                other -> other.getLocation().distanceSquared(player.getLocation()))) // x or x^2 doesn't matter in getting smallest
                         .orElse(closest);
             }, 1, 10);
     }
@@ -71,7 +72,8 @@ public class ParkourSpectator extends ParkourUser {
      */
     @SuppressWarnings("deprecation") // Spigot Chat API: action bar via TextComponent
     public void update() {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ColorUtil.color(Locales.getString(player, "play.spectator.action_bar"))));
+        String actionBar = ColorUtil.color(Locales.getString(player, "play.spectator.action_bar"));
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(actionBar));
         player.setGameMode(GameMode.SPECTATOR);
         updateScoreboard(session.generator);
 

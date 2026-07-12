@@ -38,18 +38,24 @@ public class AdminCommandHandler {
     public void handle(@NotNull String arg1, @NotNull String arg2,
                        @NotNull CommandSender sender, @Nullable Player player) {
 
-        if (!sender.hasPermission(ParkourOption.ADMIN.permission)) return;
+        if (!sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            return;
+        }
 
         switch (arg1.toLowerCase()) {
             case "forcejoin"  -> handleForceJoin(arg2, sender);
             case "forceleave" -> handleForceLeave(arg2, sender);
             case "reset"      -> handleReset(arg2, sender);
             case "recoverinventory" -> handleRecoverInventory(arg2, sender);
+            default -> {
+            }
         }
 
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
-        if (arg1.equals("schematic")) {
+        if ("schematic".equals(arg1)) {
             SchematicCommandHandler.handleSubcommand(arg2, sender, player, base);
         }
     }
@@ -57,52 +63,72 @@ public class AdminCommandHandler {
     // ── forcejoin ──────────────────────────────────────────────────────────────
 
     private void handleForceJoin(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "forcejoin", 2500, Locales.getString(sender, "admin.cooldown"))) return;
+        if (!base.cooldown(sender, "forcejoin", 2500, Locales.getString(sender, "admin.cooldown"))) {
+            return;
+        }
 
-        if (target.equalsIgnoreCase("everyone")) {
+        if ("everyone".equalsIgnoreCase(target)) {
             Bukkit.getOnlinePlayers().forEach(p -> Modes.DEFAULT.create(p));
             send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.force_join_everyone"));
             return;
         }
-        if (target.equalsIgnoreCase("nearest")) {
+        if ("nearest".equalsIgnoreCase(target)) {
             Player closest = findNearest(sender);
-            if (closest == null) return;
+            if (closest == null) {
+                return;
+            }
             Modes.DEFAULT.create(closest);
             send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.force_join_player").formatted(closest.getName()));
             return;
         }
         Player other = Bukkit.getPlayer(target);
-        if (other == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online")); return; }
+        if (other == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online"));
+            return;
+        }
         Modes.DEFAULT.create(other);
     }
 
     // ── forceleave ─────────────────────────────────────────────────────────────
 
     private void handleForceLeave(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "forceleave", 2500, Locales.getString(sender, "admin.cooldown"))) return;
+        if (!base.cooldown(sender, "forceleave", 2500, Locales.getString(sender, "admin.cooldown"))) {
+            return;
+        }
 
-        if (target.equalsIgnoreCase("everyone")) {
+        if ("everyone".equalsIgnoreCase(target)) {
             ParkourPlayer.getPlayers().forEach(ParkourUser::leave);
             send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.force_leave_everyone"));
             return;
         }
         Player other = Bukkit.getPlayer(target);
-        if (other == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online")); return; }
+        if (other == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online"));
+            return;
+        }
         ParkourUser user = ParkourUser.getUser(other);
-        if (user == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_playing")); return; }
+        if (user == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_playing"));
+            return;
+        }
         ParkourUser.leave(user);
     }
 
     // ── reset ──────────────────────────────────────────────────────────────────
 
     private void handleReset(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "reset", 2500, Locales.getString(sender, "admin.cooldown"))) return;
+        if (!base.cooldown(sender, "reset", 2500, Locales.getString(sender, "admin.cooldown"))) {
+            return;
+        }
 
-        if (target.equalsIgnoreCase("everyone")) {
+        if ("everyone".equalsIgnoreCase(target)) {
             Registry.getModes().stream()
                 .map(Mode::getLeaderboard)
                 .filter(lb -> lb != null)
-                .forEach(lb -> { lb.resetAll(); lb.write(true); });
+                .forEach(lb -> {
+                    lb.resetAll();
+                    lb.write(true);
+                });
             send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.reset_all"));
             return;
         }
@@ -113,7 +139,10 @@ public class AdminCommandHandler {
         Registry.getModes().stream()
             .map(Mode::getLeaderboard)
             .filter(lb -> lb != null)
-            .forEach(lb -> { lb.remove(uuid); lb.write(true); });
+            .forEach(lb -> {
+                lb.remove(uuid);
+                lb.write(true);
+            });
 
         send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.reset_player").formatted(name));
     }
@@ -121,9 +150,14 @@ public class AdminCommandHandler {
     // ── recoverinventory ───────────────────────────────────────────────────────
 
     private void handleRecoverInventory(String target, CommandSender sender) {
-        if (!base.cooldown(sender, "recoverinventory", 2500, Locales.getString(sender, "admin.cooldown"))) return;
+        if (!base.cooldown(sender, "recoverinventory", 2500, Locales.getString(sender, "admin.cooldown"))) {
+            return;
+        }
         Player other = Bukkit.getPlayer(target);
-        if (other == null) { send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online")); return; }
+        if (other == null) {
+            send(sender, LoParkour.PREFIX + Locales.getString(sender, "admin.player_not_online"));
+            return;
+        }
 
         new InventoryData(other).load(result -> {
             if (result != null) {
@@ -140,7 +174,9 @@ public class AdminCommandHandler {
         Location from = sender instanceof Player p ? p.getLocation()
                 : sender instanceof BlockCommandSender b ? b.getBlock().getLocation()
                 : null;
-        if (from == null || from.getWorld() == null) return null;
+        if (from == null || from.getWorld() == null) {
+            return null;
+        }
 
         return from.getWorld().getPlayers().stream()
             .min((a, b) -> Double.compare(a.getLocation().distance(from), b.getLocation().distance(from)))
@@ -150,7 +186,9 @@ public class AdminCommandHandler {
     @SuppressWarnings("deprecation") // Bukkit: name-based OfflinePlayer lookup (admin-only)
     private UUID resolveUUID(String input) {
         Player online = Bukkit.getPlayerExact(input);
-        if (online != null) return online.getUniqueId();
+        if (online != null) {
+            return online.getUniqueId();
+        }
         if (input.contains("-")) {
             try {
                 return UUID.fromString(input);
@@ -163,7 +201,9 @@ public class AdminCommandHandler {
 
     private String resolvePlayerName(String input, UUID uuid) {
         Player online = Bukkit.getPlayerExact(input);
-        if (online != null) return online.getName();
+        if (online != null) {
+            return online.getName();
+        }
         OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
         return op.getName() != null ? op.getName() : input;
     }

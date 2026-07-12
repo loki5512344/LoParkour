@@ -15,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
  *
  * Real LoLib API:
  *   InventoryGUI.create().title(String).rows(n).fill(item).setItem(slot, item, Consumer<InventoryClickEvent>).open(player)
- *   ScrollableGUI.create().title(String).rows(n).addItem(item, Consumer<InventoryClickEvent>).scrollUpButton(item,slot).scrollDownButton(item,slot).open(player)
+ *   ScrollableGUI.create().title(String).rows(n).addItem(item, Consumer&lt;InventoryClickEvent&gt;)
+ *       .scrollUpButton(item,slot).scrollDownButton(item,slot).open(player)
  *
  *   cancelAllClicks = true by default — items cannot be taken out automatically.
  *   Handlers receive Consumer<InventoryClickEvent>, event is already cancelled before handler runs.
@@ -81,7 +82,9 @@ public abstract class LPMenu {
 
     protected int[] distributeEvenly(int count, int start, int end) {
         int[] result = new int[count];
-        if (count == 0) return result;
+        if (count == 0) {
+            return result;
+        }
         for (int i = 0; i < count; i++) {
             result[i] = start + Math.round((float) i * (end - start) / Math.max(count - 1, 1));
         }

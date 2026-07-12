@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AdaptiveConfig {
 
-    private static final ConcurrentHashMap<String, Object> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Object> CACHE = new ConcurrentHashMap<>();
     private static volatile boolean initialized = false;
 
     // Configuration keys
@@ -39,12 +39,12 @@ public class AdaptiveConfig {
             return;
         }
 
-        cache.put(KEY_ENABLED, Config.CONFIG.getBoolean(KEY_ENABLED, DEFAULT_ENABLED));
-        cache.put(KEY_MIN_SESSIONS, Config.CONFIG.getInt(KEY_MIN_SESSIONS, DEFAULT_MIN_SESSIONS));
-        cache.put(KEY_UPDATE_INTERVAL, Config.CONFIG.getInt(KEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL));
-        cache.put(KEY_RATING_WEIGHT, configDouble(KEY_RATING_WEIGHT, DEFAULT_RATING_WEIGHT));
-        cache.put(KEY_CONFIDENCE_THRESHOLD, configDouble(KEY_CONFIDENCE_THRESHOLD, DEFAULT_CONFIDENCE_THRESHOLD));
-        cache.put(KEY_NEAR_MISS_DISTANCE, configDouble(KEY_NEAR_MISS_DISTANCE, DEFAULT_NEAR_MISS_DISTANCE));
+        CACHE.put(KEY_ENABLED, Config.CONFIG.getBoolean(KEY_ENABLED, DEFAULT_ENABLED));
+        CACHE.put(KEY_MIN_SESSIONS, Config.CONFIG.getInt(KEY_MIN_SESSIONS, DEFAULT_MIN_SESSIONS));
+        CACHE.put(KEY_UPDATE_INTERVAL, Config.CONFIG.getInt(KEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL));
+        CACHE.put(KEY_RATING_WEIGHT, configDouble(KEY_RATING_WEIGHT, DEFAULT_RATING_WEIGHT));
+        CACHE.put(KEY_CONFIDENCE_THRESHOLD, configDouble(KEY_CONFIDENCE_THRESHOLD, DEFAULT_CONFIDENCE_THRESHOLD));
+        CACHE.put(KEY_NEAR_MISS_DISTANCE, configDouble(KEY_NEAR_MISS_DISTANCE, DEFAULT_NEAR_MISS_DISTANCE));
 
         initialized = true;
     }
@@ -55,7 +55,7 @@ public class AdaptiveConfig {
      */
     public static void reload() {
         initialized = false;
-        cache.clear();
+        CACHE.clear();
         init();
     }
 
@@ -66,7 +66,7 @@ public class AdaptiveConfig {
      */
     public static boolean isEnabled() {
         ensureInitialized();
-        return (boolean) cache.getOrDefault(KEY_ENABLED, DEFAULT_ENABLED);
+        return (boolean) CACHE.getOrDefault(KEY_ENABLED, DEFAULT_ENABLED);
     }
 
     /**
@@ -76,7 +76,7 @@ public class AdaptiveConfig {
      */
     public static int getMinSessions() {
         ensureInitialized();
-        return (int) cache.getOrDefault(KEY_MIN_SESSIONS, DEFAULT_MIN_SESSIONS);
+        return (int) CACHE.getOrDefault(KEY_MIN_SESSIONS, DEFAULT_MIN_SESSIONS);
     }
 
     /**
@@ -86,7 +86,7 @@ public class AdaptiveConfig {
      */
     public static int getUpdateInterval() {
         ensureInitialized();
-        return (int) cache.getOrDefault(KEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+        return (int) CACHE.getOrDefault(KEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
     }
 
     /**
@@ -96,7 +96,7 @@ public class AdaptiveConfig {
      */
     public static double getRatingWeight() {
         ensureInitialized();
-        Object value = cache.get(KEY_RATING_WEIGHT);
+        Object value = CACHE.get(KEY_RATING_WEIGHT);
         if (value instanceof Double) {
             return (double) value;
         }
@@ -110,7 +110,7 @@ public class AdaptiveConfig {
      */
     public static double getConfidenceThreshold() {
         ensureInitialized();
-        Object value = cache.get(KEY_CONFIDENCE_THRESHOLD);
+        Object value = CACHE.get(KEY_CONFIDENCE_THRESHOLD);
         if (value instanceof Double) {
             return (double) value;
         }
@@ -124,7 +124,7 @@ public class AdaptiveConfig {
      */
     public static double getNearMissDistance() {
         ensureInitialized();
-        Object value = cache.get(KEY_NEAR_MISS_DISTANCE);
+        Object value = CACHE.get(KEY_NEAR_MISS_DISTANCE);
         if (value instanceof Double) {
             return (double) value;
         }
@@ -152,7 +152,7 @@ public class AdaptiveConfig {
     public static <T> T get(@NotNull String key, @NotNull T defaultValue) {
         ensureInitialized();
         @SuppressWarnings("unchecked")
-        T value = (T) cache.get(key);
+        T value = (T) CACHE.get(key);
         return value != null ? value : defaultValue;
     }
 }

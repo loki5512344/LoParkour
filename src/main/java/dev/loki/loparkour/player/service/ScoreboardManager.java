@@ -53,13 +53,17 @@ public class ScoreboardManager {
     }
 
     private Score getTopScore(Leaderboard leaderboard) {
-        if (leaderboard == null) return createDefaultScore();
+        if (leaderboard == null) {
+            return createDefaultScore();
+        }
         Score score = leaderboard.getScoreAtRank(1);
         return score != null ? score : createDefaultScore();
     }
 
     private Score getHighScore(Leaderboard leaderboard) {
-        if (leaderboard == null) return createDefaultScore();
+        if (leaderboard == null) {
+            return createDefaultScore();
+        }
         Score score = leaderboard.get(playerUUID);
         return score != null ? score : createDefaultScore();
     }
@@ -83,7 +87,9 @@ public class ScoreboardManager {
 
     private void updateLines(Score top, Score high, ParkourGenerator generator) {
         Objective obj = board.getObjective("lp_sidebar");
-        if (obj == null) return;
+        if (obj == null) {
+            return;
+        }
 
         List<String> lines = Locales.getStringList(locale, "scoreboard.lines").stream()
                 .map(line -> replacePlaceholders(line, top, high, generator))

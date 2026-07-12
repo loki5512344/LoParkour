@@ -12,6 +12,9 @@ import java.util.Map;
  */
 public class Rewards {
 
+    private Rewards() {
+    }
+
     public static boolean REWARDS_ENABLED;
 
     /**
@@ -71,13 +74,17 @@ public class Rewards {
                 int value = Integer.parseInt(score);
 
                 if (value < 1) {
-                    LoParkour.getPlugin().getLogger().severe("Error while trying to read rewards - check the rewards file for incorrect numbers - " + value + " is not a valid score");
+                    LoParkour.getPlugin().getLogger().severe(
+                            "Error while trying to read rewards - check the rewards file for incorrect numbers - "
+                                    + value + " is not a valid score");
                     continue;
                 }
 
                 rewardMap.put(value, rewardStrings);
             } catch (NumberFormatException ex) {
-                LoParkour.getPlugin().getLogger().severe("Error while trying to read rewards - check the rewards file for incorrect numbers - " + ex.getMessage());
+                LoParkour.getPlugin().getLogger().severe(
+                        "Error while trying to read rewards - check the rewards file for incorrect numbers - "
+                                + ex.getMessage());
             }
         }
 

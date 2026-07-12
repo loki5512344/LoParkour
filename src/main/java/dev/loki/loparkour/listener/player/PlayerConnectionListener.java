@@ -34,7 +34,9 @@ public class PlayerConnectionListener implements Listener {
             return;
         }
 
-        if (!player.getWorld().equals(World.getWorld())) return;
+        if (!player.getWorld().equals(World.getWorld())) {
+            return;
+        }
 
         org.bukkit.World fallback = Bukkit.getWorld(Config.CONFIG.getString("world.fall-back"));
         if (fallback != null) {
@@ -52,7 +54,9 @@ public class PlayerConnectionListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         ParkourUser user = ParkourUser.getUser(event.getPlayer());
-        if (user == null) return;
+        if (user == null) {
+            return;
+        }
         ParkourUser.unregister(user, true, false, true);
     }
 

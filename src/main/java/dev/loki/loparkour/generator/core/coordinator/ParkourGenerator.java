@@ -127,7 +127,9 @@ public class ParkourGenerator {
     
     /** Last generated block, or {@code null} if history is empty. */
     public @Nullable Block getLatest() {
-        if (state.history.isEmpty()) return null;
+        if (state.history.isEmpty()) {
+            return null;
+        }
         return state.history.get(state.history.size() - 1);
     }
 

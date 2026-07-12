@@ -7,6 +7,9 @@ import org.bukkit.Location;
  */
 public class Locations {
 
+    private Locations() {
+    }
+
     /**
      * Gets the maximum location from two locations (highest x, y, z)
      *

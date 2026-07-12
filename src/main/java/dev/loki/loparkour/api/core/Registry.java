@@ -16,8 +16,11 @@ import java.util.List;
  */
 public final class Registry {
 
-    private static final LinkedList<Mode> modes = new LinkedList<>();
-    private static final LinkedList<Style> styles = new LinkedList<>();
+    private Registry() {
+    }
+
+    private static final LinkedList<Mode> MODES = new LinkedList<>();
+    private static final LinkedList<Style> STYLES = new LinkedList<>();
 
     /**
      * Registers a {@link Mode}.
@@ -25,11 +28,11 @@ public final class Registry {
      * @param mode The mode.
      */
     public static void register(@NotNull Mode mode) {
-        modes.add(mode);
+        MODES.add(mode);
     }
 
     public static void register(@NotNull Style style) {
-        styles.add(style);
+        STYLES.add(style);
     }
 
     /**
@@ -38,7 +41,7 @@ public final class Registry {
      */
     @Nullable
     public static Mode getMode(@NotNull String name) {
-        return modes.stream()
+        return MODES.stream()
                 .filter(mode -> mode.getName().equals(name))
                 .findFirst()
                 .orElse(null);
@@ -46,17 +49,17 @@ public final class Registry {
 
     @Nullable
     public static Style getStyle(@NotNull String name) {
-        return styles.stream()
+        return STYLES.stream()
                 .filter(style -> style.getName().equals(name))
                 .findFirst()
                 .orElse(null);
     }
 
     public static List<Style> getStyles() {
-        return styles;
+        return STYLES;
     }
 
     public static List<Mode> getModes() {
-        return modes;
+        return MODES;
     }
 }

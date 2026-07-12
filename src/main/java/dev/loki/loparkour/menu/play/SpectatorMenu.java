@@ -45,7 +45,10 @@ public class SpectatorMenu extends LPMenu {
             if (!ParkourUser.isBedrockPlayer(player)
                     && pp.getName() != null && !pp.getName().startsWith(".")) {
                 SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                if (meta != null) { meta.setOwningPlayer(pp.player); skull.setItemMeta(meta); }
+                if (meta != null) {
+                    meta.setOwningPlayer(pp.player);
+                    skull.setItemMeta(meta);
+                }
             }
             sessions.add(session);
             items.add(skull);

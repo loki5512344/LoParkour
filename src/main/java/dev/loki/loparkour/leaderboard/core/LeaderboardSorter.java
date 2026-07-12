@@ -3,7 +3,11 @@ import dev.loki.loparkour.leaderboard.model.Score;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Sorting logic for leaderboard scores.
@@ -60,9 +64,15 @@ public class LeaderboardSorter {
                             String diff2 = two.getValue().difficulty();
 
                             // Handle "?" as lowest difficulty
-                            if ("?".equals(diff1) && "?".equals(diff2)) return 0;
-                            if ("?".equals(diff1)) return 1;
-                            if ("?".equals(diff2)) return -1;
+                            if ("?".equals(diff1) && "?".equals(diff2)) {
+                                return 0;
+                            }
+                            if ("?".equals(diff1)) {
+                                return 1;
+                            }
+                            if ("?".equals(diff2)) {
+                                return -1;
+                            }
 
                             try {
                                 return (int) Math.signum(Double.parseDouble(diff2) - Double.parseDouble(diff1));

@@ -2,7 +2,6 @@ package dev.loki.loparkour.mode.impl;
 import dev.loki.loparkour.mode.base.ModeMessages;
 import dev.loki.loparkour.mode.base.Mode;
 
-import dev.loki.loparkour.config.core.Config;
 import dev.loki.loparkour.config.locale.Locales;
 import dev.loki.loparkour.leaderboard.core.Leaderboard;
 import dev.loki.loparkour.menu.core.Menus;
