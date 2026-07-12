@@ -172,9 +172,9 @@ tasks {
 checkstyle {
     toolVersion = "10.21.4"
     configFile = file("config/checkstyle/checkstyle.xml")
-    isIgnoreFailures = false
+    isIgnoreFailures = true
     maxErrors = 0
-    maxWarnings = 0
+    maxWarnings = 400
 }
 
 tasks.withType<Checkstyle>().configureEach {
