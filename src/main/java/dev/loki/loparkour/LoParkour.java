@@ -89,7 +89,7 @@ public final class LoParkour extends LoPlugin {
     /** Called from {@link PluginBootstrap} on shutdown. */
     public void runShutdownSequence() {
         try {
-            new ArrayList<>(Divider.sections.keySet()).forEach(session -> {
+            new ArrayList<>(Divider.SECTIONS.keySet()).forEach(session -> {
                 try {
                     session.onAllPlayersLeft();
                 } catch (Exception e) {
@@ -97,7 +97,7 @@ public final class LoParkour extends LoPlugin {
                 }
             });
 
-            new ArrayList<>(Divider.sections.keySet()).forEach(Divider::remove);
+            new ArrayList<>(Divider.SECTIONS.keySet()).forEach(Divider::remove);
 
             for (ParkourUser user : ParkourUser.getUsers()) {
                 ParkourUser.leave(user);

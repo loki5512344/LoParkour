@@ -6,7 +6,6 @@ import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.options.Option;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

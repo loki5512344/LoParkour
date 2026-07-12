@@ -17,6 +17,9 @@ import java.util.function.BiFunction;
  */
 public class OptionStyles {
 
+    private OptionStyles() {
+    }
+
     public static Set<Style> initStyles(String path, FileConfiguration config,
                                         BiFunction<String, List<Material>, Style> fn) {
         var styles = new HashSet<Style>();

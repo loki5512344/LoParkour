@@ -15,7 +15,11 @@ public class CommunityMenu extends LPMenu {
 
         baseGui(title, 3)
                 .setItem(13, localeItem(player, "community.leaderboards.item"),
-                        e -> { if (ParkourOption.LEADERBOARDS.mayPerform(player)) Menus.LEADERBOARDS.open(player); })
+                        e -> {
+                            if (ParkourOption.LEADERBOARDS.mayPerform(player)) {
+                                Menus.LEADERBOARDS.open(player);
+                            }
+                        })
                 .setItem(22, closeButton(player), e -> player.closeInventory())
                 .open(player);
     }

@@ -18,14 +18,18 @@ import java.util.List;
 public class LangMenu extends LPMenu {
 
     public void open(@NotNull ParkourPlayer user) {
-        if (user == null) return;
+        if (user == null) {
+            return;
+        }
         open(user.player);
     }
 
     @Override
     public void open(@NotNull Player player) {
         ParkourPlayer pp = ParkourPlayer.getPlayer(player);
-        if (pp == null) return;
+        if (pp == null) {
+            return;
+        }
 
         String locale = pp.locale;
         String title = Locales.getString(locale, "settings.lang.name");
@@ -44,7 +48,6 @@ public class LangMenu extends LPMenu {
                 item.setItemMeta(meta);
             }
             gui = gui.setItem(10 + i, item, e -> {
-                pp.locale = lang;
                 pp.locale = lang;
                 pp.updateHotbar(); // Update hotbar with new language
                 Menus.SETTINGS.open(player);

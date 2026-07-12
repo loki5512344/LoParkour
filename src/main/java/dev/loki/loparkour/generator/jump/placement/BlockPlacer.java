@@ -105,6 +105,7 @@ public class BlockPlacer {
                     placeNormalBlock(); // Fallback to normal block
                 }
             }
+            default -> {}
         }
     }
     

@@ -15,9 +15,17 @@ public class PlayMenu extends LPMenu {
 
         baseGui(title, 3)
                 .setItem(11, localeItem(player, "play.single.item"),
-                        e -> { if (ParkourOption.SINGLE.mayPerform(player)) Menus.SINGLE.open(player); })
+                        e -> {
+                            if (ParkourOption.SINGLE.mayPerform(player)) {
+                                Menus.SINGLE.open(player);
+                            }
+                        })
                 .setItem(15, localeItem(player, "play.spectator.item"),
-                        e -> { if (ParkourOption.SPECTATOR.mayPerform(player)) Menus.SPECTATOR.open(player); })
+                        e -> {
+                            if (ParkourOption.SPECTATOR.mayPerform(player)) {
+                                Menus.SPECTATOR.open(player);
+                            }
+                        })
                 .setItem(22, closeButton(player), e -> player.closeInventory())
                 .open(player);
     }

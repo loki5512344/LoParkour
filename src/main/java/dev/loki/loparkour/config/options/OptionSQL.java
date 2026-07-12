@@ -1,12 +1,14 @@
 package dev.loki.loparkour.config.options;
 
-import dev.loki.loparkour.LoParkour;
 import dev.loki.loparkour.config.core.Config;
 
 /**
  * SQL database configuration options.
  */
 public class OptionSQL {
+
+    private OptionSQL() {
+    }
 
     public static boolean SQL;
     public static String  SQL_URL;

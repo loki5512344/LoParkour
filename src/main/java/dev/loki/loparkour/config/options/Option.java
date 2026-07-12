@@ -24,6 +24,9 @@ import java.util.function.BiFunction;
  */
 public class Option {
 
+    private Option() {
+    }
+
     // ── Initialization ────────────────────────────────────────────────────────
 
     public static void init(boolean firstLoad) {

@@ -35,10 +35,16 @@ public class SpectatorMenu extends LPMenu {
         List<Session> sessions = new ArrayList<>();
         List<ItemStack> items = new ArrayList<>();
 
-        for (Session session : Divider.sections.keySet()) {
-            if (!session.isAcceptingSpectators()) continue;
-            if (user != null && session == user.session) continue;
-            if (session.getPlayers().isEmpty()) continue;
+        for (Session session : Divider.SECTIONS.keySet()) {
+            if (!session.isAcceptingSpectators()) {
+                continue;
+            }
+            if (user != null && session == user.session) {
+                continue;
+            }
+            if (session.getPlayers().isEmpty()) {
+                continue;
+            }
 
             var pp = session.getPlayers().get(0);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);

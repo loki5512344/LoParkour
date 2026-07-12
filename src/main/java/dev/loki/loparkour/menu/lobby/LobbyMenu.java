@@ -21,7 +21,9 @@ public class LobbyMenu extends LPMenu {
     @Override
     public void open(@NotNull Player player) {
         ParkourUser user = ParkourUser.getUser(player);
-        if (user == null) return;
+        if (user == null) {
+            return;
+        }
 
         String locale = user.locale;
         String title = Locales.getString(locale, "lobby.name");

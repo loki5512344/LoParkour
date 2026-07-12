@@ -92,7 +92,7 @@ public final class UserRegistry {
     }
 
     public static Set<ParkourUser> getUsers() {
-        return Divider.sections.keySet().stream()
+        return Divider.SECTIONS.keySet().stream()
                 .flatMap(session -> session.getUsers().stream())
                 .collect(Collectors.toSet());
     }

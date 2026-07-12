@@ -26,6 +26,9 @@ import java.util.regex.Pattern;
  */
 public class Locales {
 
+    private Locales() {
+    }
+
     private static final LocaleCache CACHE = new LocaleCache();
     private static final Pattern REPLACEMENT_PATTERN = Pattern.compile("%[a-z]");
 
@@ -144,7 +147,9 @@ public class Locales {
         }
 
         Item item = new Item(mat, name);
-        if (!lore.isEmpty()) item.lore(lore.split("\\|\\|"));
+        if (!lore.isEmpty()) {
+            item.lore(lore.split("\\|\\|"));
+        }
         return item;
     }
 

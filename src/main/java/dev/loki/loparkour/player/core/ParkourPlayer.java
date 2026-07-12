@@ -82,7 +82,7 @@ public class ParkourPlayer extends ParkourUser {
      */
     public static @Nullable ParkourPlayer getPlayer(@NotNull Player player) {
         // Optimized: search directly in sessions without creating intermediate list
-        return Divider.sections.keySet().stream()
+        return Divider.SECTIONS.keySet().stream()
                 .flatMap(session -> session.getPlayers().stream())
                 .filter(other -> other.getUUID().equals(player.getUniqueId()))
                 .findAny()
@@ -93,7 +93,7 @@ public class ParkourPlayer extends ParkourUser {
      * @return List with all players.
      */
     public static List<ParkourPlayer> getPlayers() {
-        return Divider.sections.keySet().stream()
+        return Divider.SECTIONS.keySet().stream()
                 .flatMap(session -> session.getPlayers().stream())
                 .toList();
     }

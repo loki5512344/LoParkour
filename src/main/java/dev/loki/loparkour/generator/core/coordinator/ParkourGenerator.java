@@ -70,15 +70,34 @@ public class ParkourGenerator {
     
     
     // Core generation methods
-    public void generate() { placer.generate(); }
-    public void generate(int amount) { placer.generate(amount); }
-    public void generateFirst(Location spawn, Location block) { placer.generateFirst(spawn, block); }
-    
+    public void generate() {
+        placer.generate();
+    }
+
+    public void generate(int amount) {
+        placer.generate(amount);
+    }
+
+    public void generateFirst(Location spawn, Location block) {
+        placer.generateFirst(spawn, block);
+    }
+
     // Lifecycle methods
-    public void startTick() { lifecycle.startTick(); }
-    public void tick() { lifecycle.tick(); }
-    public void fall() { lifecycle.fall(); }
-    protected void score() { lifecycle.score(); }
+    public void startTick() {
+        lifecycle.startTick();
+    }
+
+    public void tick() {
+        lifecycle.tick();
+    }
+
+    public void fall() {
+        lifecycle.fall();
+    }
+
+    protected void score() {
+        lifecycle.score();
+    }
     
     public void reset(boolean regenerate) {
         lifecycle.reset(regenerate);

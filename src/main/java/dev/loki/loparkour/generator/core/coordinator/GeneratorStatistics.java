@@ -88,7 +88,7 @@ public class GeneratorStatistics {
         long elapsed = java.time.Duration.between(generator.state.start, java.time.Instant.now()).toMillis();
         Duration d = Duration.ofMillis(elapsed);
 
-        if (format.equals("HH:mm:ss.SSS")) {
+        if ("HH:mm:ss.SSS".equals(format)) {
             long hours = d.toHours();
             long minutes = d.toMinutesPart();
             long seconds = d.toSecondsPart();

@@ -180,7 +180,9 @@ public class ConfigUpdater {
 
     @Nullable
     private File createBackup(@NotNull File file) {
-        if (!file.exists()) return null;
+        if (!file.exists()) {
+            return null;
+        }
         try {
             File bak = new File(file.getParent(), file.getName() + ".bak");
             Files.copy(file.toPath(), bak.toPath(), StandardCopyOption.REPLACE_EXISTING);

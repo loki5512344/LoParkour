@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -29,7 +31,10 @@ public abstract class DynamicMenu {
      */
     // Stub: migrate to LoLib GUI when dynamic rows are wired up.
     /*
-    public void registerMainItem(int row, int id, BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.gui.MenuItem> item, Predicate<Player> shouldDisplay) {
+    public void registerMainItem(
+            int row, int id,
+            BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.gui.MenuItem> item,
+            Predicate<Player> shouldDisplay) {
         if (id < 0 || row < 0 || row > 4) {
             return;
         }
@@ -75,6 +80,9 @@ public abstract class DynamicMenu {
     /**
      * Data class for registered items
      */
-    protected record ItemContainer(int id, BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.gui.MenuItem> item,
-                                   Predicate<Player> predicate) {}
+    protected record ItemContainer(
+            int id,
+            BiFunction<@NotNull Player, @Nullable ParkourUser, dev.loki.loparkour.util.gui.MenuItem> item,
+            Predicate<Player> predicate
+    ) {}
 }

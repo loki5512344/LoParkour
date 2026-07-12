@@ -5,6 +5,8 @@ import org.geysermc.floodgate.api.FloodgateApi;
 
 public class FloodgateHook {
 
+    private FloodgateHook() {}
+
     /**
      * Whether this player is a bedrock player.
      *

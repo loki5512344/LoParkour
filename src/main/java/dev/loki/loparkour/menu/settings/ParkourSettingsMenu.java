@@ -22,14 +22,18 @@ import java.util.List;
 public class ParkourSettingsMenu extends LPMenu {
 
     public void open(@NotNull ParkourPlayer user) {
-        if (user == null) return;
+        if (user == null) {
+            return;
+        }
         open(user.player);
     }
 
     @Override
     public void open(@NotNull Player player) {
         ParkourPlayer pp = ParkourPlayer.getPlayer(player);
-        if (pp == null) return;
+        if (pp == null) {
+            return;
+        }
 
         String locale = pp.locale;
         String title = Locales.getString(locale, "settings.name");
@@ -151,10 +155,14 @@ public class ParkourSettingsMenu extends LPMenu {
 
         int slot = 10;
         for (Style style : Registry.getStyles()) {
-            if (slot > 16) break;
+            if (slot > 16) {
+                break;
+            }
             String name = style.getName();
             String perm = ParkourOption.STYLES.permission + "." + name.toLowerCase().replace(" ", ".");
-            if (Config.CONFIG.getBoolean("permissions.per-style") && !player.hasPermission(perm)) continue;
+            if (Config.CONFIG.getBoolean("permissions.per-style") && !player.hasPermission(perm)) {
+                continue;
+            }
 
             ItemStack item = new ItemStack(style.getNext());
             ItemMeta meta = item.getItemMeta();

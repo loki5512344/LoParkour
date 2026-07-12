@@ -33,17 +33,25 @@ public class SingleMenu extends LPMenu {
 
         for (Mode mode : Registry.getModes()) {
             // Skip spectator mode in single menu
-            if (mode.getName().equals("spectator")) continue;
-            
+            if ("spectator".equals(mode.getName())) {
+                continue;
+            }
+
             // Check if mode is enabled in config
-            if (!Config.CONFIG.getBoolean("modes." + mode.getName() + ".enabled", true)) continue;
-            
+            if (!Config.CONFIG.getBoolean("modes." + mode.getName() + ".enabled", true)) {
+                continue;
+            }
+
             boolean blocked = Config.CONFIG.getBoolean("permissions.enabled")
                     && !player.hasPermission("LoParkour.gamemode." + mode.getName());
-            if (blocked) continue;
-            
+            if (blocked) {
+                continue;
+            }
+
             var item = mode.getItem(locale);
-            if (item == null) continue;
+            if (item == null) {
+                continue;
+            }
             
             availableModes.add(mode);
             items.add(item.build());

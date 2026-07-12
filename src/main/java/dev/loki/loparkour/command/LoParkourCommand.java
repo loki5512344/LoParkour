@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -200,15 +199,25 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
     // ── tab complete ───────────────────────────────────────────────────────────
 
     @Override
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-                                      @NotNull String alias, @NotNull String[] args) {
+                                       @NotNull String alias, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            if (ParkourOption.JOIN.mayPerform(sender))   { completions.add("join"); completions.add("leave"); }
-            if (ParkourOption.MAIN.mayPerform(sender))    completions.add("menu");
-            if (ParkourOption.PLAY.mayPerform(sender))    completions.add("play");
-            if (ParkourOption.LEADERBOARDS.mayPerform(sender)) completions.add("leaderboard");
+            if (ParkourOption.JOIN.mayPerform(sender)) {
+                completions.add("join");
+                completions.add("leave");
+            }
+            if (ParkourOption.MAIN.mayPerform(sender)) {
+                completions.add("menu");
+            }
+            if (ParkourOption.PLAY.mayPerform(sender)) {
+                completions.add("play");
+            }
+            if (ParkourOption.LEADERBOARDS.mayPerform(sender)) {
+                completions.add("leaderboard");
+            }
             if (sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.addAll(List.of("schematic", "create", "reload", "forcejoin", "forceleave", "reset", "recoverinventory"));
             }
@@ -217,23 +226,25 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2) {
             String a1 = args[0].toLowerCase();
-            if (a1.equals("reset") && sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            if ("reset".equals(a1) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.add("everyone");
                 ParkourPlayer.getPlayers().forEach(pp -> completions.add(pp.getName()));
-            } else if (a1.equals("join") && ParkourOption.JOIN.mayPerform(sender)) {
+            } else if ("join".equals(a1) && ParkourOption.JOIN.mayPerform(sender)) {
                 Registry.getModes().forEach(m -> completions.add(m.getName()));
                 ParkourPlayer.getPlayers().forEach(pp -> completions.add(pp.getName()));
-            } else if (a1.equals("leaderboard") && ParkourOption.LEADERBOARDS.mayPerform(sender)) {
+            } else if ("leaderboard".equals(a1) && ParkourOption.LEADERBOARDS.mayPerform(sender)) {
                 Registry.getModes().forEach(m -> completions.add(m.getName()));
-            } else if (a1.equals("schematic") && sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            } else if ("schematic".equals(a1) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.addAll(SCHEMATIC_SUBCOMMANDS);
-            } else if (a1.equals("create") && sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            } else if ("create".equals(a1) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.addAll(SCHEMATIC_DIFFICULTIES);
-            } else if ((a1.equals("forcejoin") || a1.equals("forceleave")) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            } else if (("forcejoin".equals(a1) || "forceleave".equals(a1)) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 completions.add("everyone");
-                if (a1.equals("forcejoin")) completions.add("nearest");
+                if ("forcejoin".equals(a1)) {
+                    completions.add("nearest");
+                }
                 Bukkit.getOnlinePlayers().forEach(pl -> completions.add(pl.getName()));
-            } else if (a1.equals("recoverinventory") && sender.hasPermission(ParkourOption.ADMIN.permission)) {
+            } else if ("recoverinventory".equals(a1) && sender.hasPermission(ParkourOption.ADMIN.permission)) {
                 Bukkit.getOnlinePlayers().forEach(pl -> completions.add(pl.getName()));
             }
             return filter(args[1], completions);
@@ -242,10 +253,10 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
         if (args.length == 3 && sender.hasPermission(ParkourOption.ADMIN.permission)) {
             String a1 = args[0].toLowerCase();
             String a2 = args[1].toLowerCase();
-            if (a1.equals("schematic")) {
-                if (a2.equals("paste")) {
+            if ("schematic".equals(a1)) {
+                if ("paste".equals(a2)) {
                     addLoadedSchematicIds(completions);
-                } else if (a2.equals("create")) {
+                } else if ("create".equals(a2)) {
                     completions.addAll(SCHEMATIC_DIFFICULTIES);
                 }
             }
@@ -255,7 +266,7 @@ public class LoParkourCommand implements CommandExecutor, TabCompleter {
         if (args.length == 4 && sender.hasPermission(ParkourOption.ADMIN.permission)) {
             String a1 = args[0].toLowerCase();
             String a2 = args[1].toLowerCase();
-            if (a1.equals("schematic") && a2.equals("create")) {
+            if ("schematic".equals(a1) && "create".equals(a2)) {
                 completions.addAll(SCHEMATIC_DIFFICULTIES);
             }
             return filter(args[3], completions);

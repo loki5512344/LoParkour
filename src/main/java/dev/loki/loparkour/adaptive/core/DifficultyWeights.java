@@ -8,6 +8,9 @@ package dev.loki.loparkour.adaptive.core;
  */
 class DifficultyWeights {
 
+    private DifficultyWeights() {
+    }
+
     /**
      * Calculates distance weight distribution for given difficulty.
      *

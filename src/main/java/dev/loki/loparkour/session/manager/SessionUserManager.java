@@ -6,7 +6,11 @@ import dev.loki.loparkour.player.core.ParkourPlayer;
 import dev.loki.loparkour.player.spectator.ParkourSpectator;
 import dev.loki.loparkour.player.core.ParkourUser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Manages users (players and spectators) within a session.
@@ -19,7 +23,7 @@ class SessionUserManager {
     private final List<ParkourUser> muted = new ArrayList<>();
     private final Session session;
 
-    public SessionUserManager(Session session) {
+    SessionUserManager(Session session) {
         this.session = session;
     }
 

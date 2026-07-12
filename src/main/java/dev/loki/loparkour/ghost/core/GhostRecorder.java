@@ -62,6 +62,11 @@ public class GhostRecorder {
         return new GhostData(playerUuid, playerName, score, frames);
     }
 
-    public boolean isRecording() { return recording; }
-    public int getFrameCount()   { return frames.size(); }
+    public boolean isRecording() {
+        return recording;
+    }
+
+    public int getFrameCount() {
+        return frames.size();
+    }
 }

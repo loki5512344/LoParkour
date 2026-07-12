@@ -11,6 +11,9 @@ import java.util.Map;
  */
 public class OptionGeneration {
 
+    private OptionGeneration() {
+    }
+
     // ── Block generation probabilities ────────────────────────────────────────
     public static double TYPE_NORMAL;
     public static double TYPE_SPECIAL;

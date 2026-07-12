@@ -114,7 +114,9 @@ public class CoopMode implements MultiMode {
     @Override
     public void leave(Player player, Session session) {
         ParkourPlayer pp = ParkourPlayer.getPlayer(player);
-        if (pp == null) return;
+        if (pp == null) {
+            return;
+        }
         ParkourUser.leave(pp);
     }
 

@@ -25,6 +25,9 @@ import java.util.stream.Stream;
  */
 public class LocaleLoader {
 
+    private LocaleLoader() {
+    }
+
     /**
      * Load all locale files from the locales/ folder.
      * Returns a map of locale name → FileConfiguration.
@@ -68,7 +71,9 @@ public class LocaleLoader {
     }
 
     private static void ensureFolder(@NotNull File folder) {
-        if (!folder.exists()) folder.mkdirs();
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
         String[] files = folder.list();
         if (files == null || files.length == 0) {
             Plugin plugin = LoParkour.getPlugin();

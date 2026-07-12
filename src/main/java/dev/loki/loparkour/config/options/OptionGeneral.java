@@ -19,6 +19,9 @@ import java.util.Map;
  */
 public class OptionGeneral {
 
+    private OptionGeneral() {
+    }
+
     public static double BORDER_SIZE;
     public static List<Integer> POSSIBLE_LEADS;
     public static BlockFace HEADING;

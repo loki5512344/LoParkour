@@ -22,7 +22,9 @@ public class SettingsMenu extends LPMenu {
         if (ParkourOption.PARKOUR_SETTINGS.mayPerform(player) && ParkourPlayer.isPlayer(player)) {
             gui = gui.setItem(11, localeItem(player, "settings.parkour_settings.item"), e -> {
                 ParkourPlayer pp = ParkourPlayer.getPlayer(player);
-                if (pp != null) pp.session.generator.menu(pp);
+                if (pp != null) {
+                    pp.session.generator.menu(pp);
+                }
             });
         }
 
@@ -30,7 +32,9 @@ public class SettingsMenu extends LPMenu {
             String langName = Locales.getString(locale, "name");
             gui = gui.setItem(13, localeItem(locale, "settings.lang.item", langName), e -> {
                 ParkourPlayer pp = ParkourPlayer.getPlayer(player);
-                if (pp != null) Menus.LANG.open(pp);
+                if (pp != null) {
+                    Menus.LANG.open(pp);
+                }
             });
         }
 

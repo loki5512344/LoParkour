@@ -48,6 +48,7 @@ public class PAPIHook extends PlaceholderExpansion {
     }
 
     @Override
+    @SuppressWarnings({"checkstyle:MethodLength", "checkstyle:CyclomaticComplexity"})
     public String onPlaceholderRequest(Player player, @NotNull String params) {
         // placeholders that don't require a player
         switch (params) {
@@ -62,6 +63,7 @@ public class PAPIHook extends PlaceholderExpansion {
                 Score score = Modes.DEFAULT.getLeaderboard().getScoreAtRank(1);
                 return score != null ? Integer.toString(score.score()) : "?";
             }
+            default -> {}
         }
 
         if (params.contains("player_rank_")) {
@@ -102,6 +104,7 @@ public class PAPIHook extends PlaceholderExpansion {
             case "high_score_time" -> {
                 return Modes.DEFAULT.getLeaderboard().get(player.getUniqueId()).time();
             }
+            default -> {}
         }
 
         ParkourUser user = ParkourUser.getUser(player);

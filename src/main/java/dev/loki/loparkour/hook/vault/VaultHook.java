@@ -8,6 +8,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class VaultHook {
 
+    private VaultHook() {}
+
     private static Economy economy;
 
     /**

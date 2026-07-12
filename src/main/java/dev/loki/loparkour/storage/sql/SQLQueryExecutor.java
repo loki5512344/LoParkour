@@ -18,7 +18,7 @@ class SQLQueryExecutor {
 
     private final SQLConnectionManager connectionManager;
 
-    public SQLQueryExecutor(SQLConnectionManager connectionManager) {
+    SQLQueryExecutor(SQLConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
 

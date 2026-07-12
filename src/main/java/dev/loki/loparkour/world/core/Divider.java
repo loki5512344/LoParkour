@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
- * <p>Divides the parkour world in sections, each with an active session.</p>
+ * <p>Divides the parkour world in SECTIONS, each with an active session.</p>
  * <p>Iteration 2.</p>
  *
  * @author loki
@@ -23,7 +23,7 @@ public class Divider {
     /**
      * Map with all session ids map to the session instances.
      */
-    public static final Map<Session, Integer> sections = new HashMap<>();
+    public static final Map<Session, Integer> SECTIONS = new HashMap<>();
 
     /**
      * Associates a session to a specific section.
@@ -32,12 +32,12 @@ public class Divider {
      */
     public static synchronized Location add(Session session) {
         // attempts to get the closest available section to the center
-        var missing = IntStream.range(0, sections.size() + 1)
-                .filter(i -> !sections.containsValue(i))
+        var missing = IntStream.range(0, SECTIONS.size() + 1)
+                .filter(i -> !SECTIONS.containsValue(i))
                 .findFirst()
                 .orElseThrow();
 
-        sections.put(session, missing);
+        SECTIONS.put(session, missing);
 
         var location = toLocation(session);
 
@@ -50,7 +50,7 @@ public class Divider {
      * @param session The session.
      */
     public static void remove(Session session) {
-        sections.remove(session);
+        SECTIONS.remove(session);
     }
 
     /**
@@ -58,7 +58,7 @@ public class Divider {
      * @return The location at the center of section n.
      */
     private static Location toLocation(Session session) {
-        int[] xz = spiralAt(sections.get(session));
+        int[] xz = spiralAt(SECTIONS.get(session));
 
         return new Location(World.getWorld(),
                 xz[0] * Option.BORDER_SIZE,

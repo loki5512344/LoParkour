@@ -86,7 +86,15 @@ public class GhostPlayer {
         }
     }
 
-    public boolean isActive()     { return entity != null && entity.isValid(); }
-    public String getPlayerName() { return data.getPlayerName(); }
-    public int getScore()         { return data.getScore(); }
+    public boolean isActive() {
+        return entity != null && entity.isValid();
+    }
+
+    public String getPlayerName() {
+        return data.getPlayerName();
+    }
+
+    public int getScore() {
+        return data.getScore();
+    }
 }

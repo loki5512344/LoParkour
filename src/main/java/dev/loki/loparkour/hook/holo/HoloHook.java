@@ -9,6 +9,8 @@ import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
 
 public class HoloHook {
 
+    private HoloHook() {}
+
     /**
      * Initializes this hook.
      */

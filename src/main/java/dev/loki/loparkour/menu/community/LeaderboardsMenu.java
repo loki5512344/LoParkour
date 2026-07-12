@@ -34,9 +34,13 @@ public class LeaderboardsMenu extends LPMenu {
         List<ItemStack> items = new ArrayList<>();
 
         for (Mode mode : Registry.getModes()) {
-            if (mode.getLeaderboard() == null) continue;
+            if (mode.getLeaderboard() == null) {
+                continue;
+            }
             var item = mode.getItem(locale);
-            if (item == null) continue;
+            if (item == null) {
+                continue;
+            }
             modes.add(mode);
             items.add(item.build());
         }

@@ -11,6 +11,9 @@ import org.bukkit.Sound;
  */
 public class OptionParticles {
 
+    private OptionParticles() {
+    }
+
     public static Option.ParticleShape PARTICLE_SHAPE;
     public static Sound                SOUND_TYPE;
     public static int                  SOUND_PITCH;
@@ -30,12 +33,16 @@ public class OptionParticles {
 
     private static Sound resolveSound(String name) {
         if (name != null && !name.isEmpty()) {
-            try { return Sound.valueOf(name.toUpperCase()); }
-            catch (IllegalArgumentException ignored) {}
+            try {
+                return Sound.valueOf(name.toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         for (String fb : new String[]{"BLOCK_NOTE_BLOCK_GUITAR", "BLOCK_NOTE_BLOCK_PLING", "BLOCK_NOTE_PLING"}) {
-            try { return Sound.valueOf(fb); }
-            catch (IllegalArgumentException ignored) {}
+            try {
+                return Sound.valueOf(fb);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         LoParkour.getPlugin().getLogger().warning("Could not resolve any sound, using first available.");
         return Sound.values()[0];
@@ -43,12 +50,16 @@ public class OptionParticles {
 
     private static Particle resolveParticle(String name) {
         if (name != null && !name.isEmpty()) {
-            try { return Particle.valueOf(name.toUpperCase()); }
-            catch (IllegalArgumentException ignored) {}
+            try {
+                return Particle.valueOf(name.toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         for (String fb : new String[]{"INSTANT_EFFECT", "SPELL_INSTANT", "CRIT"}) {
-            try { return Particle.valueOf(fb); }
-            catch (IllegalArgumentException ignored) {}
+            try {
+                return Particle.valueOf(fb);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         LoParkour.getPlugin().getLogger().warning("Could not resolve any particle, using first available.");
         return Particle.values()[0];
@@ -56,8 +67,10 @@ public class OptionParticles {
 
     private static Option.ParticleShape resolveShape(String name) {
         if (name != null && !name.isEmpty()) {
-            try { return Option.ParticleShape.valueOf(name.toUpperCase()); }
-            catch (IllegalArgumentException ignored) {}
+            try {
+                return Option.ParticleShape.valueOf(name.toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         return Option.ParticleShape.BOX;
     }

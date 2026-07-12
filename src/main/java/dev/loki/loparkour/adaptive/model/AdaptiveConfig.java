@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AdaptiveConfig {
 
+    private AdaptiveConfig() {
+    }
+
     private static final ConcurrentHashMap<String, Object> CACHE = new ConcurrentHashMap<>();
     private static volatile boolean initialized = false;
 

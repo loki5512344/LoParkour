@@ -49,7 +49,7 @@ public final class LPSchematicLegacy {
         }
 
         SchematicData data = GSON.fromJson(json.toString(), SchematicData.class);
-        if (data == null || data.format_version != FORMAT_VERSION) {
+        if (data == null || data.formatVersion != FORMAT_VERSION) {
             throw new IOException("Unsupported .lpschem format in " + file.getName());
         }
 
@@ -77,7 +77,7 @@ public final class LPSchematicLegacy {
     }
 
     private static class SchematicData {
-        int format_version;
+        int formatVersion;
         SchematicMetadata metadata;
         SchematicDimensions dimensions;
         List<String> palette;

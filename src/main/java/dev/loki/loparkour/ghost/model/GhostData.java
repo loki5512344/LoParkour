@@ -47,10 +47,21 @@ public class GhostData {
 
     // ── Getters ───────────────────────────────────────────────────────────────
 
-    public UUID getPlayerUuid()   { return playerUuid; }
-    public String getPlayerName() { return playerName; }
-    public int getScore()         { return score;      }
-    public List<GhostFrame> getFrames() { return frames; }
+    public UUID getPlayerUuid() {
+        return playerUuid;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public List<GhostFrame> getFrames() {
+        return frames;
+    }
 
     // ── Serialisation ─────────────────────────────────────────────────────────
 

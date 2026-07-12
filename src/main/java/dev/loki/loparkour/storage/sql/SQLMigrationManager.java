@@ -11,7 +11,7 @@ class SQLMigrationManager {
 
     private final SQLQueryExecutor queryExecutor;
 
-    public SQLMigrationManager(SQLQueryExecutor queryExecutor) {
+    SQLMigrationManager(SQLQueryExecutor queryExecutor) {
         this.queryExecutor = queryExecutor;
     }
 

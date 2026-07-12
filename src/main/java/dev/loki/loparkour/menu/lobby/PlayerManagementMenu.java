@@ -24,7 +24,9 @@ public class PlayerManagementMenu extends LPMenu {
     @Override
     public void open(@NotNull Player player) {
         ParkourPlayer viewer = ParkourPlayer.getPlayer(player);
-        if (viewer == null) return;
+        if (viewer == null) {
+            return;
+        }
 
         var session = viewer.session;
         String locale = viewer.locale;

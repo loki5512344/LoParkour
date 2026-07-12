@@ -33,7 +33,9 @@ public class SingleLeaderboardMenu extends LPMenu {
     public void open(@NotNull Player player, @NotNull Mode mode, @NotNull Leaderboard.Sort sort, int page) {
         this.currentPage = page;
         Leaderboard leaderboard = mode.getLeaderboard();
-        if (leaderboard == null) return;
+        if (leaderboard == null) {
+            return;
+        }
 
         String locale = locale(player);
         String title = Locales.getString(locale, ParkourOption.LEADERBOARDS.path + ".name");
@@ -44,7 +46,9 @@ public class SingleLeaderboardMenu extends LPMenu {
         for (Map.Entry<UUID, Score> entry : leaderboard.sort(sort).entrySet()) {
             rank++;
             Score score = entry.getValue();
-            if (score == null) continue;
+            if (score == null) {
+                continue;
+            }
 
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             if (rank <= 20 && !ParkourUser.isBedrockPlayer(player)) {
@@ -71,7 +75,9 @@ public class SingleLeaderboardMenu extends LPMenu {
                     .replace("%t", score.time())
                     .replace("%d", score.difficulty()));
             ItemMeta built = base.build().getItemMeta();
-            if (built != null) skull.setItemMeta(built);
+            if (built != null) {
+                skull.setItemMeta(built);
+            }
 
             items.add(skull);
         }
@@ -104,5 +110,7 @@ public class SingleLeaderboardMenu extends LPMenu {
     }
 
     @Override
-    public void open(@NotNull Player player) { /* use open(player, mode, sort) */ }
+    public void open(@NotNull Player player) {
+        /* use open(player, mode, sort) */
+    }
 }
